@@ -30,6 +30,10 @@ public class GameStateManager
     private Chip lastMovedChip;
     private int lastMovedFromCell;
     private int lastMovedToCell;
+    private Player gameWinner;
+    
+    // Phase transition validation table
+    private Dictionary<GamePhase, HashSet<GamePhase>> allowedTransitions;
     
     // Events
     public event Action<GamePhase> OnPhaseChanged;
@@ -44,6 +48,7 @@ public class GameStateManager
     public int[] LastDiceRoll => lastDiceRoll;
     public int TurnNumber => turnNumber;
     public bool CanRollAgain => canRollAgain;
+    public Player GameWinner => gameWinner;
     
     /// <summary>
     /// Initialize the game state manager with two players.
@@ -72,6 +77,40 @@ public class GameStateManager
         lastMovedChip = null;
         lastMovedFromCell = -1;
         lastMovedToCell = -1;
+        gameWinner = null;
+        
+        // Initialize phase transition validation table
+        InitializePhaseTransitions();
+    }
+    
+    /// <summary>
+    /// Initialize the valid phase transitions for the state machine.
+    /// </summary>
+    private void InitializePhaseTransitions()
+    {
+        allowedTransitions = new Dictionary<GamePhase, HashSet<GamePhase>>
+        {
+            // Setup → Rolling (start game)
+            { GamePhase.Setup, new HashSet<GamePhase> { GamePhase.Rolling } },
+            
+            // Rolling → Placing, EndTurn, or GameWon
+            { GamePhase.Rolling, new HashSet<GamePhase> { GamePhase.Placing, GamePhase.EndTurn, GamePhase.GameWon } },
+            
+            // Placing → Bumping or EndTurn
+            { GamePhase.Placing, new HashSet<GamePhase> { GamePhase.Bumping, GamePhase.EndTurn, GamePhase.GameWon } },
+            
+            // Bumping → EndTurn
+            { GamePhase.Bumping, new HashSet<GamePhase> { GamePhase.EndTurn, GamePhase.GameWon } },
+            
+            // EndTurn → Rolling, GameWon, or GameOver
+            { GamePhase.EndTurn, new HashSet<GamePhase> { GamePhase.Rolling, GamePhase.GameWon, GamePhase.GameOver } },
+            
+            // GameWon → GameOver
+            { GamePhase.GameWon, new HashSet<GamePhase> { GamePhase.GameOver } },
+            
+            // GameOver (terminal state)
+            { GamePhase.GameOver, new HashSet<GamePhase>() }
+        };
     }
     
     /// <summary>
@@ -320,11 +359,18 @@ public class GameStateManager
     }
     
     /// <summary>
-    /// Transition to a new game phase and fire event.
+    /// Transition to a new game phase after validating the transition.
     /// </summary>
     /// <param name="newPhase">Target phase</param>
     private void TransitionPhase(GamePhase newPhase)
     {
+        // Validate transition
+        if (!IsValidTransition(currentPhase, newPhase))
+        {
+            OnInvalidAction?.Invoke($"Invalid transition: {currentPhase} → {newPhase}");
+            return;
+        }
+        
         currentPhase = newPhase;
         OnPhaseChanged?.Invoke(newPhase);
         
@@ -333,11 +379,26 @@ public class GameStateManager
         {
             if (HasWon(currentPlayer))
             {
+                gameWinner = currentPlayer;
                 OnGameWon?.Invoke(currentPlayer);
                 currentPhase = GamePhase.GameWon;
                 OnPhaseChanged?.Invoke(GamePhase.GameWon);
             }
         }
+    }
+    
+    /// <summary>
+    /// Check if a phase transition is valid.
+    /// </summary>
+    /// <param name="fromPhase">Current phase</param>
+    /// <param name="toPhase">Target phase</param>
+    /// <returns>True if transition is allowed</returns>
+    private bool IsValidTransition(GamePhase fromPhase, GamePhase toPhase)
+    {
+        if (allowedTransitions == null || !allowedTransitions.ContainsKey(fromPhase))
+            return false;
+        
+        return allowedTransitions[fromPhase].Contains(toPhase);
     }
     
     /// <summary>
