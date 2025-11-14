@@ -11,7 +11,7 @@
 
 ### For New Agents (First Time)
 1. Read: **AGENT_ONBOARDING.md** (20 min)
-2. Read: **QUICK_REFERENCE.md** (2 min)
+2. Read: **README.md** - Quick Start section (2 min)
 3. Bookmark: **CODING_STANDARDS.md** (daily reference)
 
 ### For Active Sprint Work
@@ -20,21 +20,19 @@
 3. Check: **SPRINT_STATUS.md** (real-time)
 
 ### For Project Overview
-1. Read: **README.md** (5 min)
-2. Read: **QUICK_REFERENCE.md** (2 min)
-3. Check: **PROJECT_PLAN.md** (timeline & milestones)
+1. Read: **README.md** (10 min, all sections)
+2. Check: **PROJECT_PLAN.md** (timeline & milestones)
 
 ---
 
-## 📚 Active Documentation (22 Essential Files)
+## 📚 Active Documentation (21 Essential Files)
 
 ### TIER 1: Read First (All Agents)
 
 | File | Purpose | Audience | Update Frequency |
 |------|---------|----------|------------------|
 | **AGENT_ONBOARDING.md** | 13-step agent orientation | All agents | Per-project |
-| **QUICK_REFERENCE.md** | 2-minute project overview | All | Rarely |
-| **README.md** | Project description & setup | All | Rarely |
+| **README.md** | Project overview, quick start, code structure (unified) | All | Rarely |
 
 ### TIER 2: Framework & Standards (Daily Reference)
 
@@ -75,9 +73,8 @@
 | File | Purpose | Audience | Update Frequency |
 |------|---------|----------|------------------|
 | **DOCUMENTATION_INDEX.md** | This file - navigation guide | All | Per-cleanup |
-| **FINAL_DOCUMENTATION_COMPLETE.md** | Nov 14 completion summary | All | Historical |
 | **EXEC_SUMMARY_NOV14.md** | Executive summary | Leadership | Historical |
-| **DOCUMENTATION_CLEANUP_FINAL.md** | Cleanup completion summary | All | Historical |
+| **DOCUMENTATION_CLEANUP_FINAL.md** | Cleanup & consolidation summary | All | Historical |
 
 ---
 
@@ -98,8 +95,7 @@
 ├── SUBAGENT_TEAMS.md
 │
 ├── Project Overview
-├── README.md
-├── QUICK_REFERENCE.md
+├── README.md (unified: quick start + full overview + code structure)
 │
 ├── Project Tracking (Update regularly)
 ├── PROJECT_PLAN.md (master timeline)
@@ -115,11 +111,11 @@
 │
 ├── Reference
 ├── DOCUMENTATION_INDEX.md (you are here)
-├── FINAL_DOCUMENTATION_COMPLETE.md (Nov 14 summary)
 ├── EXEC_SUMMARY_NOV14.md (executive summary)
+├── DOCUMENTATION_CLEANUP_FINAL.md (what changed)
 │
 └── ARCHIVE/ (historical - don't use)
-    └── (50+ archived docs from previous sessions)
+    └── (37+ archived docs from previous sessions, Nov 14 cleanup)
 ```
 
 ---
@@ -273,9 +269,9 @@ CODING_STANDARDS.md (How to code)
 | **Sprint 4-5** | 2 | 100% | ✅ Ready |
 | **Reference** | 4 | 100% | ✅ Complete |
 
-**Total Active Documents**: 21 files (final count)  
-**Total Archived (Historical)**: 34 files in ARCHIVE/  
-**Consolidation Status**: ✅ Clean, organized, zero duplication
+**Total Active Documents**: 20 files (Nov 14 consolidation complete)  
+**Total Archived (Historical)**: 37 files in ARCHIVE/ (includes Nov 14 cleanup + consolidation)  
+**Consolidation Status**: ✅ Clean, organized, zero duplication, all tiers merged
 
 ---
 
@@ -373,7 +369,7 @@ CODING_STANDARDS.md (How to code)
 - ⭐ MANAGING_ENGINEER_OPERATIONS.md - Operations (reference)
 
 ### For One-Time Reference
-- QUICK_REFERENCE.md - Project overview (once)
+- README.md - Project overview (Quick Start section)
 - AGENT_ONBOARDING.md - Agent orientation (once)
 - ARCHITECTURE.md - System design (reference as needed)
 

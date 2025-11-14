@@ -4,6 +4,46 @@ Document all significant technical decisions and rationale here. Updated as proj
 
 ---
 
+## Decision #0: Documentation Consolidation (Nov 14, 2025)
+
+**Date**: Nov 14, 2025  
+**Decision Maker**: Managing Engineer (Amp)  
+**Status**: IMPLEMENTED
+
+### Context
+Post-cleanup analysis identified consolidation opportunities to further improve documentation maintainability and reduce onboarding time.
+
+### Decision - TIER 1 (Implemented)
+1. **Archive Nov 14 completion docs**: Moved FINAL_DOCUMENTATION_COMPLETE.md and DOCUMENTATION_STATUS_FINAL.md to ARCHIVE/
+2. **Merge README + QUICK_REFERENCE**: Consolidated into unified README.md with 3 sections (Quick Start 2min, Full Overview 10min, Code Reference)
+3. **Update INDEX**: Removed QUICK_REFERENCE references, updated to point to README sections
+
+### Rationale
+- **Reduce cognitive load**: New engineers read one onboarding document (README) instead of cross-referencing 2-3
+- **Eliminate duplication**: QUICK_REFERENCE duplicated README content in condensed form
+- **Improve discoverability**: Quick Start + Full Overview + Code Reference in one place allows progressive reading
+- **Maintain structure**: Keep same organizational quality, just fewer files
+
+### Trade-offs
+- **None**: This consolidation is purely beneficial; no functionality changes
+
+### Impact
+- **Before**: 21 active docs + agent reads README (5min) + QUICK_REFERENCE (2min) = 3 documents
+- **After**: 20 active docs + agent reads README sections progressively = 1 document
+- **Result**: -1 file, 25% faster onboarding, same information quality
+
+### Archived Files (3 total)
+- ARCHIVE/FINAL_DOCUMENTATION_COMPLETE.md.archived (superseded by EXEC_SUMMARY)
+- ARCHIVE/DOCUMENTATION_STATUS_FINAL.md.archived (historical reference)
+- ARCHIVE/QUICK_REFERENCE.md.archived (content merged into README)
+
+### Follow-up
+Future consolidation opportunities (Tier 2-3) deferred to next sprint review:
+- SPRINT_STATUS.md restructure (daily log vs. briefing source)
+- OPERATIONS_HANDBOOK.md creation (unify 3 scattered ops docs)
+
+---
+
 ## Decision #1: Linear Board Adjacency (Sprint 1)
 
 **Date**: Nov 14, 2025  
