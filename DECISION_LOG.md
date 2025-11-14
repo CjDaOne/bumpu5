@@ -210,5 +210,54 @@ If successful, multiplayer can be added in v2.
 
 ---
 
+## Decision #9: Documentation Consolidation & Cleanup (Nov 14)
+
+**Date**: Nov 14, 2025  
+**Decision Maker**: Managing Engineer (Amp)  
+**Status**: ACCEPTED
+
+### Context
+Multiple documentation files were addressing the same topics, creating confusion about which document was the "source of truth."
+
+### Decision
+- Archive superseded docs (move to ARCHIVE/ folder)
+- Establish single source of truth per topic:
+  - MANAGING_ENGINEER_OPERATIONS.md = Master operations framework
+  - SPRINT_X_EXECUTION_PLAN.md = Primary sprint source
+  - PROJECT_QUALITY_GATES.md = Code review standards
+  - CODING_STANDARDS.md = Code style reference
+  - DECISION_LOG.md = Decision history (this document)
+- Remove duplicate briefing documents (SPRINT_2_KICKOFF_BRIEF.md, SPRINT_2_COMPREHENSIVE_SUMMARY.md, etc.)
+- Update DOCUMENTATION_INDEX.md as master navigation
+
+### Rationale
+- Reduces cognitive load for agents (one place to look)
+- Prevents conflicting information
+- Easier to maintain (no duplicate updates)
+- Aligns with professional documentation standards
+- Sets precedent for future sprints
+
+### Archived Documents (Nov 14)
+- ENGINEERING_MANAGER.md (use MANAGING_ENGINEER_OPERATIONS.md)
+- MANAGING_ENGINEER_DASHBOARD.md (superseded by operations framework)
+- MANAGING_ENGINEER_ACCELERATION_BRIEFING.md (one-time briefing)
+- SPRINT_2_KICKOFF_BRIEF.md (use SPRINT_2_EXECUTION_PLAN.md)
+- SPRINT_2_COMPREHENSIVE_SUMMARY.md (use SPRINT_2_EXECUTION_PLAN.md)
+- SPRINT_2_CODE_REVIEW_CHECKLIST.md (use PROJECT_QUALITY_GATES.md)
+- SPRINT_2_TEAM_DASHBOARD.md (use SPRINT_STATUS.md)
+- SPRINT_2_STATUS_DAY4.md (archive completed sprint days)
+
+### Trade-offs
+- Existing links to archived docs need updating
+- Agents need to reference new master docs instead
+- Requires discipline to avoid creating new duplicates
+
+### Follow-up
+- Maintain single-source discipline for all future sprints
+- Review documentation quarterly for drift/duplication
+- Include cleanup checklist in end-of-sprint retro
+
+---
+
 **Last Updated**: Nov 14, 2025  
-**Total Decisions**: 8 (2 Accepted, 2 Proposed)
+**Total Decisions**: 9 (8 Accepted, 1 Proposed)
