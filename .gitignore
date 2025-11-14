@@ -1,0 +1,30 @@
+# Unity
+Library/
+Logs/
+Temp/
+UserSettings/
+obj/
+Builds/
+*.csproj
+*.sln
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.exe
+*.dll
+*.pdb
+
+# Keep project files
+!DECISION_LOG.md
+!ENGINEERING_MANAGER.md
+!PROJECT_PLAN.md
