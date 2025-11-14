@@ -1,299 +1,275 @@
 # Sprint 2 Quick Reference Card
-**For**: Gameplay Engineer Agent  
-**Use During**: Implementation (Nov 21-28)
+
+**Sprint**: Sprint 2 - State Machine & Game Flow Control  
+**Lead**: Gameplay Engineer  
+**Managing Engineer**: Amp  
+**Duration**: Nov 14-19, 2025 (5 days, no date constraints)  
 
 ---
 
-## The 5 Classes At a Glance
+## Your Mission (1 Sentence)
 
-### 1️⃣ GamePhase.cs
-**What**: Enum with 9 phases  
-**Lines**: ~20  
-**Complexity**: Low
-
-```csharp
-public enum GamePhase
-{
-    Setup, Rolling, DiceResult, Placing, 
-    BumpDecision, Bumping, EndTurn, WinScreen, GameOver
-}
-```
+Build GameStateManager—the state machine that orchestrates all gameplay phases and validates every game action.
 
 ---
 
-### 2️⃣ GameState.cs
-**What**: Game state snapshot  
-**Lines**: ~60  
-**Complexity**: Low
+## Deliverables at a Glance
 
-**Properties needed**:
-- `int GameModeID`, `string GameModeName`
-- `Player[] Players`, `BoardModel Board`
-- `GamePhase CurrentPhase`, `int CurrentPlayerIndex`, `int[] LastDiceRoll`
-- `int TurnNumber`, `bool CanRollAgain`, `bool MustBump`
-- `int? PendingBumpCell`, `Chip LastMovedChip`
-- `Reset()`, `Serialize()`, `Deserialize(json)` methods
+| Component | Est. LOC | Tests | File |
+|-----------|----------|-------|------|
+| GamePhase enum | 40 | 8 | `Assets/Scripts/Game/GamePhase.cs` |
+| GameStateManager | 600+ | 30+ | `Assets/Scripts/Managers/GameStateManager.cs` |
+| Integration tests | 400 | 25+ | `Assets/Scripts/Tests/GameStateManagerIntegrationTests.cs` |
+| Unit tests | 100 | 8 | `Assets/Scripts/Tests/GamePhaseTests.cs` |
+| **TOTAL** | **~1,400** | **78+** | - |
 
----
-
-### 3️⃣ GameStateManager.cs ⭐
-**What**: Core orchestrator  
-**Lines**: ~300+  
-**Complexity**: HIGH
-
-**Key Pattern**: Validate → Execute → Fire Events → Transition
-
-**Public Methods**:
-- `void InitializeGame(IGameMode, Player[])`
-- `void RollDice()`
-- `void MoveChip(int, int)`
-- `void DeclareBump(int)`
-- `void EndTurn()`
-- `void DeclareWin()`
-- `GamePhase GetCurrentPhase()`
-- `Player GetCurrentPlayer()`
-- `bool IsValidMove(int, int)`
-- `bool CanBumpTarget(int)`
-- `bool HasWon(Player)`
-- `List<int> GetValidMoves(int)`
-
-**Events** (must declare):
-- `event Action<GamePhase> OnPhaseChanged`
-- `event Action<Player> OnPlayerChanged`
-- `event Action<int[]> OnDiceRolled`
-- `event Action<int, int> OnChipMoved`
-- `event Action<Player> OnGameWon`
-- `event Action<string> OnInvalidActionAttempted`
-
-**Helper Methods**:
-- `private void ValidatePhaseForAction(GamePhase)`
-- `private void TransitionToPhase(GamePhase)`
-- `private void CheckWinCondition()`
+**Success = All merged + approved**
 
 ---
 
-### 4️⃣ TurnPhaseController.cs
-**What**: Phase coordinator (delegates to GameStateManager)  
-**Lines**: ~150  
-**Complexity**: Medium
+## 5-Day Plan (One Line Per Day)
 
-**Public Methods**:
-- `void StartRollingPhase(Player)`
-- `int[] CompleteRoll(int[])`
-- `void StartPlacingPhase()`
-- `bool ExecuteMove(int, int)` ← calls GameStateManager.MoveChip()
-- `void CompleteMove()`
-- `void StartBumpDecisionPhase()`
-- `bool AttemptBump(int)` ← calls GameStateManager.DeclareBump()
-- `void SkipBump()`
-- `void CompleteTurn()` ← calls GameStateManager.EndTurn()
-- `Player GetNextPlayer()`
+| Day | Focus | Output | Hours |
+|-----|-------|--------|-------|
+| 1 | Enum + scaffold | Compiling code | 2h |
+| 2 | Phase logic | 5 phases working | 6h |
+| 3 | Win & end game | Full game loop | 6h |
+| 4 | Tests + integration | 78+ passing tests | 6h |
+| 5 | Code review + docs | Approved & merged | 4h |
 
 ---
 
-### 5️⃣ TurnManager.cs (Enhancement)
-**What**: Add turn tracking to existing class  
-**Lines**: Add ~80 lines  
-**Complexity**: Low
+## Core Architecture (One Picture)
 
-**New Fields**:
-```csharp
-private int turnsCompleted;
-private bool canRollAgain;
-private bool justBumped;
-private int consecutiveDoublesCount;
 ```
-
-**New Methods**:
-- `void StartNewTurn()` - reset turn state
-- `void CompleteTurn()` - increment counter, advance player
-- `void RecordDouble()` - track doubles, handle triple-double
-- `void ResetDoubleCount()` - clear double count
-- `void RecordBump()` - mark bump occurred
-
----
-
-## Critical Edge Cases
-
-### ✅ Doubles
-```
-Rolling matching pair → CanRollAgain = true
-3+ consecutive doubles → Lose turn immediately
-```
-
-### ✅ Bumping
-```
-Only opponent chips (not own)
-Only adjacent cells
-Only after just moving
-Not off-board
-```
-
-### ✅ Winning
-```
-Check AFTER every move
-Check AFTER every bump
-Use IGameMode.CheckWin() (delegate)
-Not hardcoded to 5-in-a-row
-```
-
-### ✅ Invalid Actions
-```
-Wrong phase → OnInvalidActionAttempted
-Empty cell → OnInvalidActionAttempted
-Non-adjacent move → OnInvalidActionAttempted
-Own chip bump → OnInvalidActionAttempted
+GameStateManager (Orchestrator)
+├─ Events (PhaseChanged, PlayerChanged, DiceRolled, GameWon, InvalidAction)
+├─ Phase Transitions (validated)
+│  ├─ Idle → RollDice
+│  ├─ RollDice → MoveChip
+│  ├─ MoveChip → BumpOpponent
+│  ├─ BumpOpponent → EndTurn
+│  ├─ EndTurn → RollDice (next player)
+│  └─ Any Phase → GameWon → GameOver
+├─ State Machine (no invalid transitions)
+└─ Dependencies (TurnManager, DiceManager, BoardModel, IGameMode)
 ```
 
 ---
 
-## Testing Checklist
+## Key Files You Need
 
-### GameStateManagerTests.cs (10+ tests)
-- [ ] InitializeGame_SetsupPlayers_ReturnsTrue
-- [ ] RollDice_TransitionsToPlacingPhase
-- [ ] MoveChip_WithValidMove_TransitionsCorrectly
-- [ ] MoveChip_WithInvalidMove_FiresErrorEvent
-- [ ] DeclareBump_RemovesChip_AwardsPoints
-- [ ] DeclareBump_WithInvalidTarget_Fails
-- [ ] EndTurn_RotatesToNextPlayer
-- [ ] EndTurn_WithDouble_AllowsRollAgain
-- [ ] HasWon_ChecksGameModeWinCondition
-- [ ] InvalidAction_InWrongPhase_FiresErrorEvent
+**Reference These**:
+- 📋 `SPRINT_2_EXECUTION_PLAN.md` - Full task breakdown
+- 📋 `SPRINT_2_TEAM_DISPATCH.md` - Your assignment (read first)
+- 📋 `CODING_STANDARDS.md` - Style guide (compliance required)
+- 📋 `ARCHITECTURE.md` - System design context
+- 📋 `DECISION_LOG.md` - Why past decisions were made
 
-### TurnPhaseControllerTests.cs (7+ tests)
-- [ ] StartRollingPhase_SetsCurrentPhase
-- [ ] CompleteRoll_TransitionsToPlacing
-- [ ] ExecuteMove_WithValidMove_ReturnsTrue
-- [ ] ExecuteMove_WithInvalidMove_ReturnsFalse
-- [ ] StartBumpDecisionPhase_HighlightsBumpableCells
-- [ ] AttemptBump_RemovesChip
-- [ ] CompleteTurn_RotatesPlayer
-
-### TurnManagerEnhancedTests.cs (5+ tests)
-- [ ] StartNewTurn_ResetsState
-- [ ] CompleteTurn_IncrementsTurnCounter
-- [ ] RecordDouble_IncreasesDoubleCount
-- [ ] RecordDouble_TripleDouble_LosesTurn
-- [ ] ResetDoubleCount_ClearsCount
+**Update as You Go**:
+- 📋 `SPRINT_2_DAILY_STANDUP_LOG.md` - Daily standup notes
+- 📋 Git commit messages (clear, descriptive)
 
 ---
 
-## Code Standards Checklist
+## Testing Strategy (Checklist)
 
-### Before Submitting Each Class
-- [ ] PascalCase class names
-- [ ] camelCase private fields
-- [ ] PascalCase public properties
-- [ ] All public methods have `/// <summary>` docs
-- [ ] All parameters documented with `/// <param>`
-- [ ] All return types documented with `/// <returns>`
-- [ ] No magic numbers (use constants or enums)
-- [ ] No circular dependencies
+**For Each Phase Handler**:
+- [ ] Unit test: Works in correct phase
+- [ ] Unit test: Fails in wrong phase
+- [ ] Unit test: Validates inputs
+- [ ] Unit test: Fires correct event
+- [ ] Unit test: Updates state correctly
 
-### Before Final Submission
-- [ ] All 5 classes created
-- [ ] All 22+ tests passing
-- [ ] No console errors/warnings
-- [ ] Integration with Sprint 1 verified
-- [ ] Events properly declared and firing
-- [ ] Edge cases tested
-- [ ] Ready for code review
+**Integration Tests**:
+- [ ] Full game flow: Roll → Place → Bump → EndTurn → NextPlayer
+- [ ] Skip bump: PlaceChip → SkipBump → EndTurn
+- [ ] Win detection: EndTurn with win condition → GameWon
+- [ ] Invalid moves: Rejected with error event
+- [ ] Event ordering: Correct sequence on transitions
+
+**Coverage Target**: ≥ 85%
 
 ---
 
-## Daily Standup Template
+## Code Quality Checklist
 
-Copy/paste each day:
-
-```
-✅ Completed since last standup:
-- [List completed items]
-
-🔄 In progress:
-- [List current work]
-
-🚫 Blockers:
-- [Any blockers or None]
-
-Notes:
-- [Any other notes]
-```
+**Every day before pushing**:
+- [ ] Zero compiler errors
+- [ ] Zero compiler warnings
+- [ ] All tests passing (100% green)
+- [ ] Coverage ≥ 85%
+- [ ] Methods < 30 lines
+- [ ] No hardcoded values
+- [ ] Comments on complex logic
+- [ ] Public methods documented (/// comments)
 
 ---
 
-## Quick Command Reference
+## Daily Standup Template (Copy-Paste)
 
-### Run All Tests
 ```
-Window → TextTest Runner → Run All Tests
+## [DATE] - Day [#] Standup - Gameplay Engineering
+
+### ✅ Completed Since Last Standup
+- [List what you shipped]
+
+### 🔄 In Progress Today
+- [Current focus]
+- Expected completion: [Time estimate]
+
+### 🚫 Blockers
+- [None / List if any]
+
+### 📊 Metrics
+- Tests: X/Y passing
+- Coverage: Z%
+- LOC: N
+
+### 📝 Notes
+- [Anything important for ME to know]
 ```
 
-### Expected Results
+**Post in**: Amp thread (this project's communication channel)
+
+---
+
+## When You Hit a Blocker
+
+**Format**:
 ```
-79 tests total (57 Sprint 1 + 22 Sprint 2)
-100% pass rate required
+BLOCKER: [Clear description]
+- Impact: [What's blocked]
+- Options:
+  A) [Option with tradeoff]
+  B) [Option with tradeoff]
+- Recommendation: [Your best guess]
 ```
 
-### Push to GitHub
+**I (Amp) will respond < 4 hours with decision**
+
+---
+
+## Git Workflow (Do This)
+
 ```bash
-git add Assets/Scripts/
-git commit -m "[Sprint 2] Description of what was added/fixed"
-git push origin main
+# Create feature branch
+git checkout -b feat/gamestate-manager
+
+# Commit frequently (don't wait for day end)
+git commit -m "feat: Add GamePhase enum for state machine"
+
+# Push to trigger early review
+git push origin feat/gamestate-manager
+
+# Submit PR with:
+# - What changed & why
+# - Tests passing (number of tests)
+# - Coverage % if available
+```
+
+**Push Early**. Don't wait until end of day. Get feedback fast.
+
+---
+
+## Code Review Expectations
+
+**I (ME) will**:
+- ✅ Review within 4 hours of submission
+- ✅ Give clear feedback (not vague)
+- ✅ Approve or request changes (no middling)
+- ✅ Be available for questions
+
+**You will**:
+- ✅ Address feedback same day if possible
+- ✅ Ask questions if feedback unclear
+- ✅ Update code & resubmit
+
+**Typical feedback reasons**:
+- Code style (violated CODING_STANDARDS.md)
+- Missing tests (coverage < 85%)
+- Validation missing (security/correctness)
+- Documentation incomplete
+- Performance issue (avoid O(n²) patterns)
+
+---
+
+## Success Looks Like (Day 5)
+
+```
+All 78 tests passing ✅
+Coverage: 87% ✅
+Code review: APPROVED ✅
+Documentation: Complete ✅
+Compiler: 0 errors, 0 warnings ✅
+Merged to develop ✅
+Ready for Sprint 3 ✅
 ```
 
 ---
 
-## Key Files to Reference
+## Escalation Hotline
 
-| File | Purpose | When to Read |
-|------|---------|--------------|
-| SPRINT_2_BRIEFING.md | Detailed requirements | During implementation |
-| SPRINT_2_LAUNCH.md | Team briefing | At kickoff |
-| CODING_STANDARDS.md | Code formatting | Before submitting code |
-| SPRINT_1_REVIEW.md | What was approved | Reference for patterns |
-| SPRINT_2_KICKOFF.md | Architecture | When designing |
+**Need help?** Message me directly.
 
----
+**What I can do**:
+- ✅ Answer architecture questions
+- ✅ Resolve ambiguity in requirements
+- ✅ Unblock you on dependencies
+- ✅ Make design decisions
+- ✅ Review code & provide feedback
 
-## Success = Done
-
-When you can answer YES to all:
-- ✅ All 5 classes created?
-- ✅ All 22+ tests passing?
-- ✅ No console errors?
-- ✅ CODING_STANDARDS.md compliant?
-- ✅ Integration with Sprint 1 verified?
-- ✅ Code ready for review?
-
-**If YES to all** → Sprint 2 complete!
+**Response time**: < 4 hours (aim for < 1 hour)
 
 ---
 
-## Escalation Path
+## Red Flags (Alert ME Immediately)
 
-**If stuck**:
-1. Review error message carefully
-2. Check SPRINT_2_BRIEFING.md for specification
-3. Check SPRINT_2_LAUNCH.md for edge cases
-4. Report in daily standup with specific issue
-5. Managing Engineer (Amp) will help resolve
+🚨 **If you see any of these**:
+- Tests failing that you didn't break
+- Compiler warnings you can't fix
+- Code taking way longer than estimated
+- Requirements contradictory or unclear
+- Dependency (TurnManager, BoardModel) missing
+- Design decision needed (event vs. direct call)
 
----
-
-## Timeline
-
-| Date | What |
-|------|------|
-| Nov 21 | Kickoff, read docs |
-| Nov 22-23 | GamePhase, GameState |
-| Nov 24-25 | GameStateManager (core) |
-| Nov 26 | TurnPhaseController, TurnManager |
-| Nov 27 | Testing & debugging |
-| Nov 28 | Final review & approval |
+**Don't waste time**. **Escalate immediately**.
 
 ---
 
-**Last Updated**: Nov 14, 2025  
-**Use During**: Sprint 2 (Nov 21-28, 2025)  
-**Print This Out!** It's your quick reference during implementation.
+## Links & References
+
+| Document | Purpose |
+|----------|---------|
+| SPRINT_2_EXECUTION_PLAN.md | Full spec, task breakdown |
+| SPRINT_2_TEAM_DISPATCH.md | Your mission briefing |
+| CODING_STANDARDS.md | Code style compliance |
+| ARCHITECTURE.md | System design |
+| DECISION_LOG.md | Why decisions were made |
+| ME_SPRINT2_OPERATIONS.md | ME's checklist |
+| SPRINT_2_DAILY_STANDUP_LOG.md | Standup tracking |
+
+---
+
+## Remember
+
+- **Speed ≠ Quality**: Better to deliver clean code than to rush
+- **Test Everything**: Tests catch bugs before code review
+- **Communicate**: Push code early, get feedback fast
+- **Documentation**: Comment as you code, not at the end
+- **You've Got This**: Sprint 1 proof that the team can execute
+
+---
+
+**Questions?** Ask now. Don't assume.
+
+**Blockers?** Escalate immediately.
+
+**Code ready?** Push for review.
+
+---
+
+**Status**: READY TO EXECUTE  
+**Owner**: You (Gameplay Engineer)  
+**ME Support**: Amp (< 4h response time)  
+**Go Date**: NOW
