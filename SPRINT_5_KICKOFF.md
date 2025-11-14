@@ -9,7 +9,7 @@
 
 ## What We're Building
 
-The user interface layer—all buttons, text displays, menus, and popups that the player interacts with during gameplay. This includes:
+The user interface layer—all buttons, text displays, menus, and popups that the player innaging teracts with during gameplay. This includes:
 - Dice roll button & animation
 - BUMP button (context-sensitive)
 - Scoreboard (live score updates)
