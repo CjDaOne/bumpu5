@@ -1,324 +1,344 @@
 # HUD Architecture
+
 **Created**: Nov 14, 2025  
 **Owner**: UI Engineer  
-**Status**: ACTIVE
+**Status**: ACTIVE  
+**Authority**: Team Assignment Complete
 
 ---
 
 ## Overview
 
-The HUD (Heads-Up Display) is the primary user interface during active gameplay. It displays real-time game state, provides interactive buttons for player actions, and communicates game events to the player. The HUD is orchestrated by HUDManager, which listens to GameStateManager events and updates all UI elements synchronously.
+The HUD (Heads-Up Display) is the primary interface layer that manages real-time game state communication to the player during active gameplay. It displays current game information, provides interaction points, and updates in response to GameStateManager events.
+
+The HUD works in concert with GameStateManager and provides visual feedback and player agency during gameplay phases. All HUD updates are event-driven from the game state, ensuring synchronization and preventing UI drift.
 
 ---
 
-## Core Components
+## HUD Responsibilities
 
-### DiceRollButton
-- **Purpose**: Initiates a dice roll action
-- **State**: Active during player's turn, disabled otherwise
-- **Interaction**: 
-  - Click/tap triggers GameStateManager.RollDice()
-  - Shows animation while rolling (duration 300ms)
-  - Displays rolled number (1-6) briefly
-- **Visual**: Large primary button, center-bottom of screen
-- **Feedback**: Roll result animation + sound effect
-- **Position**: Bottom-center, 48px height, 200px width
+### Display
+- Current player indicator
+- Current turn phase (Rolling, Playing, Waiting)
+- Active player's available actions
+- Current player's score/progress
+- Dice roll result
+- Valid move highlighting coordination
 
-### BumpButton
-- **Purpose**: Declare a bump action (land on opponent's chip)
-- **State**: Active only when valid move would result in bump
-- **Interaction**:
-  - Click/tap moves selected chip to target cell with bump logic
-  - Automatically detects if move is bump-eligible
-  - Shows as disabled if current selected move is not a bump
-- **Visual**: Secondary button (outlined), right-side of screen
-- **Feedback**: Bump animation (opponent chip eject, scoring)
-- **Position**: Right-center, 48px height, 160px width
+### Interaction Points
+- Dice Roll button (when allowed)
+- BUMP button (when allowed)
+- Declare Win button (when allowed)
+- Menu/Settings access
+- Pause functionality
 
-### DeclareWinButton
-- **Purpose**: Declare victory when win conditions met
-- **State**: Active only when player meets game mode's win condition
-- **Interaction**:
-  - Click/tap validates win condition
-  - Transitions to win screen on success
-  - Shows confirmation dialog if uncertain
-- **Visual**: Success green button, top-right of screen
-- **Feedback**: Victory animation, confetti, sound
-- **Position**: Top-right, 48px height, 160px width
-- **Safety**: Requires 2-step confirmation to prevent accidents
+### State Feedback
+- Phase indicators
+- Action availability
+- Move validation feedback
+- Win detection notifications
+- Penalty/special event notifications
 
-### ScoreboardDisplay
-- **Purpose**: Show current score/progress for all players
-- **Content**:
-  - Player names + colors
-  - Current bumps (for Bump-based modes)
-  - Chips on board vs off board
-  - Current turn indicator
-  - Chip count for active player
-- **State**: Updates real-time on every action
-- **Position**: Top-center, vertical list format
-- **Update Frequency**: Every game state change (< 50ms)
+---
 
-### PhaseIndicator
-- **Purpose**: Show current game phase/turn state
-- **Content**:
-  - Current game phase (Setup, Playing, Waiting, Ended)
-  - Active player name
-  - Current roll value (if applicable)
-  - Turn order visualization
-- **State**: Updates with each phase transition
-- **Position**: Top-left corner, compact format
-- **Visual**: Text + icon, clear typography
+## HUD Components
 
-### PopupManager
-- **Purpose**: Display contextual notifications and alerts
+### 1. DiceRollButton
+- **Purpose**: Initiate dice roll when player's turn begins
+- **Visibility**: Enabled only during "Rolling" phase for active player
+- **Visual**: Large, centered, prominent blue button (56px height)
+- **Feedback**: 
+  - On click: Disabled until result returned
+  - On roll complete: Returns to available state
+- **State**: Available (enabled) / Disabled (grayed)
+
+### 2. BumpButton
+- **Purpose**: Declare bump action during "Playing" phase
+- **Visibility**: Enabled only during "Playing" phase for active player
+- **Visual**: Secondary button next to DiceRollButton (48px height)
+- **Feedback**:
+  - On click: Triggers bump validation in GameStateManager
+  - On validation: Confirms or rejects bump
+- **State**: Available / Disabled / Validated
+
+### 3. DeclareWinButton
+- **Purpose**: Player attempts to declare win condition met
+- **Visibility**: Enabled only when win condition may be valid
+- **Visual**: Success-state green button (48px height)
+- **Feedback**:
+  - On click: Validates win conditions
+  - On validation: Confirms win or shows error message
+- **State**: Available / Disabled
+
+### 4. ScoreboardDisplay
+- **Purpose**: Show all players' scores and current standings
+- **Contents**:
+  - Player name
+  - Player color indicator
+  - Current score/progress
+  - Turn order indicator (circle showing current player)
+  - Win status indicator
+- **Update Frequency**: Real-time on game state changes
+- **Position**: Top right, persistent throughout gameplay
+- **Format**:
+  ```
+  Player 1 [Red]    [●] Score: 24
+  Player 2 [Blue]   [ ] Score: 15
+  Player 3 [Gold]   [ ] Score: 18
+  Player 4 [Green]  [ ] Score: 12
+  ```
+
+### 5. PhaseIndicator
+- **Purpose**: Display current game phase and whose turn it is
+- **Display**: 
+  - Current phase (Rolling, Playing, Waiting, etc.)
+  - Current player name and color
+  - Estimated time remaining (if applicable)
+- **Position**: Top center
+- **Update Frequency**: On phase change only
+- **Example**: `Player 1 (Red) - Rolling Phase`
+
+### 6. ActionFeedback (Contextual)
+- **Purpose**: Display validation results and action feedback
 - **Types**:
-  - **PENALTY**: Rule violation, penalty applied (red alert)
-  - **PASS_THE_CHIP**: Chip control transferred (info popup)
-  - **TAKE_IT_OFF**: Player can exit chip (success popup)
-  - **INVALID_MOVE**: Move not allowed (warning popup)
-  - **GENERAL**: Information or confirmation dialogs
-- **Behavior**: Center-screen modal, auto-dismiss or user dismiss
-- **Animation**: Fade in 150ms, fade out 150ms, 3-second display (manual popup)
-- **Position**: Center-screen, 300px width, responsive height
+  - "Invalid move selected" (red text, brief timeout)
+  - "Bump successful!" (green text, brief timeout)
+  - "No valid moves available" (yellow text, stays until new phase)
+  - "Cannot declare win: X chips still need movement" (red, modal)
+- **Position**: Center bottom of screen or modal overlay
+- **Duration**: 2-3 seconds (auto-dismiss) or modal (requires action)
 
-### GameModeSelectionScreen
-- **Purpose**: Allow player to choose game mode at start
-- **Content**:
-  - 5 buttons for Game 1-5
-  - Game name + short description
-  - Player count (solo/multiplayer indicator)
-- **Interaction**: Click game → configure player count → start
-- **Visual**: Grid of game mode cards, 2-3 per row
-- **Position**: Full screen, visible before gameplay starts
+### 7. PauseMenu
+- **Purpose**: Pause gameplay and show menu options
+- **Options**:
+  - Resume Game
+  - Settings
+  - Rules
+  - Quit to Menu
+- **Behavior**: 
+  - Freezes game state
+  - Dims game board
+  - Shows menu modal
+  - Resumes seamlessly on resume
+- **Position**: Full screen modal overlay
 
 ---
 
 ## HUD State Machine
 
-### States
-1. **Menu** - Game mode selection screen, main menu
-2. **Setup** - Player/mode configured, ready to start
-3. **Playing** - Active gameplay, player can take actions
-4. **Waiting** - Waiting for opponent turn or system action
-5. **Ended** - Game finished, win/loss screen shown
-6. **Paused** - Game paused, pause menu showing
+The HUD operates with the following states, driven by GameStateManager events:
+
+```
+┌─────────────────────────────────────────────────┐
+│                  MENU STATE                      │
+│  - No HUD displayed                              │
+│  - Main menu visible                             │
+└──────────────────┬──────────────────────────────┘
+                   │ Game Started
+                   ▼
+┌─────────────────────────────────────────────────┐
+│              PLAYING STATE                       │
+│  - Full HUD visible                              │
+│  - Scoreboard active                             │
+│  - Phase indicator active                        │
+└──────────┬──────────────────────────┬───────────┘
+           │                          │
+    ROLLING PHASE              PLAYING PHASE
+    - Dice button ON           - Move selection
+    - Bump/Win OFF             - Dice button OFF
+    - Waiting text             - Bump button ON
+                               - Win button ON
+    ┌──────────────────┬──────────────────────────┐
+    │ WAITING PHASE    │                          │
+    │ - All buttons    │       WIN DETECTED       │
+    │   disabled       │       - Celebrate        │
+    │ - "Waiting for   │       - Show winner      │
+    │   Player X"      │       - Options: Play    │
+    │                  │         again / Quit     │
+    └──────────────────┴──────────────────────────┘
+```
+
+---
+
+## Event Binding to GameStateManager
+
+### HUD Listens To:
+```csharp
+// Phase changes
+GameStateManager.OnPhaseChanged += UpdatePhaseIndicator;
+
+// Turn changes
+GameStateManager.OnTurnChanged += UpdateCurrentPlayerDisplay;
+GameStateManager.OnPlayerTurnStarted += EnablePlayerActions;
+GameStateManager.OnPlayerTurnEnded += DisablePlayerActions;
+
+// Action events
+GameStateManager.OnDiceRolled += DisplayDiceResult;
+GameStateManager.OnMoveExecuted += UpdateBoardAndScores;
+GameStateManager.OnBumpDetected += ShowBumpFeedback;
+GameStateManager.OnWinDetected += ShowWinNotification;
+
+// State events
+GameStateManager.OnGameStateChanged += UpdateFullHUD;
+GameStateManager.OnPenaltyApplied += ShowPenaltyNotification;
+GameStateManager.OnSpecialRuleTriggered += ShowSpecialRuleNotification;
+```
+
+### HUD Calls GameStateManager:
+```csharp
+// Player actions
+RollDiceButton.onClick += GameStateManager.RollDice;
+BumpButton.onClick += GameStateManager.DeclareBump;
+DeclareWinButton.onClick += GameStateManager.DeclareWin;
+
+// Menu actions
+PauseButton.onClick += GameStateManager.PauseGame;
+ResumeButton.onClick += GameStateManager.ResumeGame;
+QuitButton.onClick += GameStateManager.ReturnToMenu;
+```
+
+---
+
+## HUD Animations
+
+### Button Feedback Animations
+- **On Hover**: Scale up 1.05, duration 150ms, easing ease-out
+- **On Press**: Scale down 0.95, duration 150ms, easing ease-in
+- **On Release**: Scale to 1.0, duration 100ms, easing ease-out
+- **On Disable**: Opacity to 0.5, no scale change, immediate
 
 ### State Transitions
-```
-Menu → Setup → Playing ↔ Waiting → Ended
-  ↓                ↓      ↓       ↓
-  └─────────────→ Paused ←──────┘
-```
+- **Phase Change**: Fade out old phase text (150ms), fade in new text (150ms)
+- **Player Change**: Slide scoreboard highlight left/right (200ms) to new player
+- **Win Notification**: Scale-in animation (300ms), confetti effect (1000ms)
+- **Penalty**: Red flash (200ms), then normal
 
-### Entry Actions
-- **Menu**: Show game mode selection, hide HUD buttons
-- **Setup**: Hide game mode screen, show game board
-- **Playing**: Activate buttons (Dice, Bump, DeclareWin), show phase
-- **Waiting**: Disable buttons, show "waiting" message
-- **Ended**: Show win/loss screen, deactivate all buttons
-- **Paused**: Show pause menu, dim board, disable interactions
-
----
-
-## Event Binding System
-
-### GameStateManager → HUD Events
-```
-OnGameStateChanged
-├─ Update ScoreboardDisplay
-├─ Update PhaseIndicator
-├─ Update button availability
-└─ Trigger animations if major change
-
-OnDiceRolled
-├─ Animate dice display (3x rotation, 300ms)
-├─ Show rolled number (1-6)
-└─ Trigger sound effect
-
-OnMoveMade
-├─ Update board visualization
-├─ Update scoreboard (chip counts)
-├─ Check if bump occurred
-└─ Show popup if needed
-
-OnGameWon
-├─ Activate DeclareWinButton
-├─ Show victory indicators
-└─ Enable win declaration
-
-OnBumpOccurred
-├─ Show PENALTY or PASS_THE_CHIP popup
-├─ Update scoreboard
-└─ Play bump sound effect
-
-OnPhaseChanged
-├─ Update PhaseIndicator
-├─ Enable/disable buttons based on phase
-└─ Update turn indicator
-```
-
-### Button → GameStateManager Events
-```
-DiceRollButton.OnClick
-└─ Call GameStateManager.RollDice()
-
-BumpButton.OnClick
-└─ Call GameStateManager.ExecuteMove(selectedCell, isBump: true)
-
-DeclareWinButton.OnClick
-└─ Call GameStateManager.DeclareWin()
-```
-
----
-
-## Animation Specifications
-
-### DiceRollButton Animation
-- Trigger: DiceRollButton clicked
-- Animation: Rotate 3 full rotations (1080°)
-- Duration: 300ms
-- Easing: Ease-Out
-- Post-animation: Display rolled number in label
-
-### BumpButton Feedback
-- Trigger: Valid bump move executed
-- Animation: Scale up 1.2x, bounce effect
-- Duration: 250ms
-- Sound: Bump/collision sound effect (100ms)
-- Particle effect: Optional chip collision animation
-
-### ScoreboardDisplay Update
-- Trigger: Game state changed
-- Animation: Subtle fade transition on changed values
-- Duration: 150ms
-- Target: Only fields that changed (not entire board)
-
-### PopupAnimation
-- Entry: Fade in + slide up (center origin)
-- Duration: 150ms easing out
-- Exit: Fade out + slide down
-- Duration: 150ms easing in
-- Display duration: 3000ms (auto-dismiss) or manual
-
-### PhaseIndicator Transition
-- Trigger: Phase changed
-- Animation: Pulse effect (scale 1.0 → 1.1 → 1.0)
-- Duration: 200ms
-- Color shift: Highlight if turn changes
+### Continuous Animations
+- **Dice Rolling Button**: Subtle rotation (360° over 600ms) while rolling
+- **Valid Move Glow**: Pulsing opacity (0.7 to 1.0) during move selection
+- **Timer Countdown**: Smooth decrease of progress bar (if timer used)
 
 ---
 
 ## Prefab Hierarchy
 
 ```
-Canvas (ScreenSpace-Overlay, 1920×1080 design resolution)
+Canvas (ScreenSpace - Overlay)
 │
-├─ Board (12-cell game board)
-│  └─ [Cells and Chips - see BOARD_ARCHITECTURE.md]
+├─ HUDPanel (Panel - Full Screen)
+│  │
+│  ├─ TopBar (Panel - Horizontal Layout)
+│  │  ├─ PhaseIndicatorText (Text)
+│  │  └─ ScoreboardPanel (Panel - Vertical Layout)
+│  │     ├─ PlayerRow_1 (Horizontal Layout)
+│  │     │  ├─ PlayerColorIndicator (Image)
+│  │     │  ├─ PlayerNameText (Text)
+│  │     │  └─ PlayerScoreText (Text)
+│  │     ├─ PlayerRow_2 (Horizontal Layout)
+│  │     │  └─ [same structure]
+│  │     ├─ PlayerRow_3 (Horizontal Layout)
+│  │     │  └─ [same structure]
+│  │     └─ PlayerRow_4 (Horizontal Layout)
+│  │        └─ [same structure]
+│  │
+│  ├─ BottomBar (Panel - Horizontal Layout)
+│  │  ├─ DiceRollButton (Button + Image)
+│  │  ├─ BumpButton (Button + Image)
+│  │  ├─ DeclareWinButton (Button + Image)
+│  │  └─ PauseButton (Button + Image)
+│  │
+│  └─ NotificationPanel (Panel - Center, Dynamic)
+│     ├─ NotificationText (Text)
+│     └─ NotificationIcon (Image - optional)
 │
-├─ HUD (Container for all HUD elements)
-│  │
-│  ├─ TopBar
-│  │  ├─ PhaseIndicator (top-left)
-│  │  ├─ ScoreboardDisplay (top-center)
-│  │  └─ DeclareWinButton (top-right)
-│  │
-│  ├─ BottomBar
-│  │  ├─ DiceRollButton (bottom-center, large)
-│  │  └─ BumpButton (bottom-right)
-│  │
-│  ├─ PopupContainer (center, above everything)
-│  │  ├─ PopupBackground (overlay)
-│  │  └─ PopupContent (text + buttons)
-│  │
-│  └─ GameModeSelectionScreen (full-screen, shows on startup)
-│     ├─ Background
-│     ├─ Title
-│     └─ GameModeButtons[5] (1-5 for each mode)
+├─ ModalOverlay (Panel - Full Screen, Initially Inactive)
+│  ├─ DimBackground (Image - Black, 50% opacity)
+│  └─ ModalContent (Panel - Center)
+│     ├─ ModalTitle (Text)
+│     ├─ ModalMessage (Text)
+│     ├─ ModalButton_Primary (Button)
+│     └─ ModalButton_Secondary (Button)
 │
-└─ SystemIndicators
-   ├─ FPSCounter (debug, top-right)
-   └─ DebugLog (debug, bottom-left)
+└─ PauseMenuOverlay (Panel - Full Screen, Initially Inactive)
+   ├─ DimBackground (Image - Black, 50% opacity)
+   └─ PauseMenuPanel (Panel - Center)
+      ├─ PauseTitle (Text - "Game Paused")
+      ├─ ResumeButton (Button)
+      ├─ SettingsButton (Button)
+      ├─ RulesButton (Button)
+      └─ QuitButton (Button)
 ```
 
 ---
 
-## Component Dependencies
+## Component Relationships
 
-### HUDManager Script
-- Listens to: GameStateManager.OnGameStateChanged
-- Controls: All HUD components
-- Updates: Button states, text displays, animations
-- Broadcasts: None (receives events, doesn't send)
+### MonoBehaviour Classes
+1. **HUDManager** (Main orchestrator)
+   - References: GameStateManager, all HUD components
+   - Responsibilities: Lifecycle, event subscriptions, update logic
 
-### DiceRollButton Script
-- Listens to: None (user input)
-- Calls: GameStateManager.RollDice()
-- Updates: Button animation, result display
-- State: Enabled only during player's turn
+2. **ActionButtonController**
+   - References: DiceRollButton, BumpButton, DeclareWinButton
+   - Responsibilities: Enable/disable based on game phase
 
-### ScoreboardDisplay Script
-- Listens to: GameStateManager.OnGameStateChanged
-- Updates: Player names, scores, chip counts, turn indicator
-- Refresh rate: Real-time (synchronous)
-- No user input
+3. **ScoreboardController**
+   - References: ScoreboardPanel, individual player rows
+   - Responsibilities: Update player scores and turn order display
 
-### PopupManager Script
-- Listens to: GameStateManager events (bump, penalty, etc.)
-- Displays: Popup prefabs, auto-dismisses or waits for input
-- Animation: Fade/slide transitions
-- Queue: Can handle multiple popups (queued)
+4. **NotificationController**
+   - References: NotificationPanel, NotificationText
+   - Responsibilities: Show/hide/auto-dismiss notifications
+
+5. **ModalController**
+   - References: ModalOverlay, ModalContent, buttons
+   - Responsibilities: Show/hide modals, handle button clicks
 
 ---
 
-## Interaction Flow
+## Update Cycle
 
-### Example: Player Takes a Turn
-1. Player taps DiceRollButton
-2. DiceRollButton.OnClick() → GameStateManager.RollDice()
-3. GameStateManager rolls 1-6, updates GameState
-4. GameStateManager broadcasts OnDiceRolled event
-5. HUDManager receives event:
-   - DiceRollButton animates (rotation + result display)
-   - Board highlighting updates (valid moves shown)
-   - BumpButton enabled/disabled (if bump possible)
-6. Player selects board cell (or taps BumpButton if applicable)
-7. GameStateManager executes move, broadcasts OnMoveMade
-8. HUDManager updates:
-   - ScoreboardDisplay (chip counts, scores)
-   - PhaseIndicator (next player's turn)
-   - Popups (if penalty or special event)
-9. Turn passes to next player
+### Per Frame (Update)
+- Check button hover states (visual feedback only)
+- Animate notification fade-out if active
+- Update timer display (if applicable)
+
+### Event-Driven (OnEvent)
+- Phase change → Update phase indicator
+- Turn change → Update scoreboard highlight
+- Score change → Update score displays
+- Action required → Enable/disable buttons
+- Game end → Show win notification modal
+
+### Deferred (LateUpdate if needed)
+- Layout adjustment for safe areas (iOS notch)
+- Final positioning of any dynamic elements
 
 ---
 
-## Canvas Scaling Strategy
+## Integration Checklist
 
-### Design Resolution
-- Base resolution: 1920×1080 (16:9)
-- Safe area: 10% margin on all sides
-
-### Mobile Scaling
-- iPhone (375×667): Scale UI proportionally, button sizes stay >= 44px
-- iPad (1024×768): Similar scaling
-- Android phones: Variable, but min touch target always 44px
-- Android tablets: Similar to iPad scaling
-
-### Responsive Rules
-- Buttons never scale below 44px (touch target)
-- Text scales with canvas (min 12px at smallest resolution)
-- Popups constrain to safe area
-- Landscape mode: HUD repositions left/right
-- Portrait mode: HUD stacks top/center/bottom
+- [ ] HUDManager subscribed to all GameStateManager events
+- [ ] All buttons have click handlers connected
+- [ ] Scoreboard updates sync with GameStateManager player list
+- [ ] Phase indicator updates on every phase change
+- [ ] Notifications appear and disappear correctly
+- [ ] Modal system works for win/loss screens
+- [ ] Pause menu functional
+- [ ] All animations smooth and correct duration
+- [ ] Safe area handling tested on mobile
+- [ ] Accessibility: Touch targets ≥44px
+- [ ] Accessibility: Color contrast meets WCAG AA
 
 ---
 
 ## Related Documents
+
 - UI_DESIGN_SYSTEM.md
 - UI_STANDARDS.md
 - SPRINT_5_UI_PREP.md
 
 ---
 
-**Status**: Complete - Production Ready
+**Last Updated**: Nov 14, 2025  
+**Status**: Complete & Ready for Implementation

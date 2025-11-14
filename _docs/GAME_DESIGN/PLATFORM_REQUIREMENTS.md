@@ -1,333 +1,491 @@
 # Platform Requirements
+
 **Created**: Nov 14, 2025  
 **Owner**: Build Engineer  
-**Status**: ACTIVE
+**Status**: ACTIVE  
+**Authority**: Team Assignment Complete
 
 ---
 
-## Performance Targets
+## Overview
 
-### Frame Rate Targets
-- **WebGL (Desktop)**: 60 FPS (target), 30 FPS minimum
-- **Android**: 60 FPS (modern devices), 30 FPS minimum (older)
-- **iOS**: 60 FPS (standard), 120 FPS (Pro models, if optimized)
-
-### Memory Constraints
-- **WebGL**: 512MB (modern browser allocation)
-- **Android**: 256MB-512MB (varies by device)
-- **iOS**: 512MB-2GB (varies by device)
-
-### Battery Impact
-- **Target**: < 50mA average drain (idle game)
-- **Active Play**: 100-200mA (acceptable for game)
-- **GPU Intensive**: 300-400mA (high but acceptable)
+Platform Requirements define the technical constraints, device specifications, and platform-specific considerations for supporting WebGL (browser), Android (Play Store), and iOS (App Store).
 
 ---
 
-## WebGL Requirements
+## WebGL (Browser)
 
-### Browser Support
-| Browser | Min Version | Note |
-|---------|-------------|------|
-| Chrome | 90+ | WebGL 2.0 |
-| Firefox | 88+ | WebGL 2.0 |
-| Safari | 14+ | WebGL 2.0 (partial) |
-| Edge | 90+ | WebGL 2.0 |
+### Minimum Browser Requirements
 
-### Memory Requirements
-- **Available VRAM**: 256MB minimum
-- **System RAM**: 2GB minimum
-- **Allocation**: Allow 512MB for game
+| Browser | Min Version | OS |
+|---------|-------------|-----|
+| Chrome | 90+ | Windows, Mac, Linux |
+| Firefox | 88+ | Windows, Mac, Linux |
+| Safari | 14+ | macOS, iOS (iPad only) |
+| Edge | 90+ | Windows |
 
-### GPU Requirements
-- **Minimum**: Intel HD Graphics 520 (2015+)
-- **Recommended**: Dedicated GPU (NVIDIA/AMD)
-- **Fallback**: WebGL 1.0 support (slower)
+### Hardware Requirements
 
-### Input Requirements
-- **Mouse**: Standard mouse input
-- **Keyboard**: Escape to exit, Enter to submit (optional)
-- **Touch**: If on tablet browser (HTML5 touch events)
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| CPU | Dual-core 2 GHz | Quad-core 2.5 GHz |
+| RAM | 2 GB | 4+ GB |
+| GPU | Integrated (Intel HD) | Dedicated (NVIDIA/AMD) |
+| Storage | 50 MB (download) | 100 MB (cache) |
+| Network | 5 Mbps | 10+ Mbps |
 
-### Display Requirements
-- **Minimum Resolution**: 480×720 (smallest phone)
-- **Typical Resolutions**: 720×1280 to 3840×2160
-- **Aspect Ratios**: 16:9, 9:16, 4:3, custom
+### Performance Constraints
 
-### Network Requirements
-- **Download**: < 50MB (WebGL build)
-- **Load Time**: < 5 seconds (on average connection)
-- **Offline**: Game works offline (no internet needed)
+**Memory Limits**:
+- Single-context memory: ~200-400 MB (varies by browser)
+- Garbage collection must be active (60-120ms pause acceptable)
+- No WebAssembly size limit (practical: < 50 MB)
 
----
+**Graphics**:
+- WebGL 2.0 (fallback to 1.0 not supported)
+- Texture compression: ASTC not available (use uncompressed)
+- Max texture size: 4096 × 4096 (most devices)
+- Rendering: Forward pipeline only
 
-## Android Requirements
+**Network**:
+- Initial load: Assets served over HTTPS
+- Caching: Browser cache used (ETag, Last-Modified headers)
+- No streaming assets (all included in build)
 
-### OS Versions
-- **Minimum**: Android 5.0 (API 21)
-- **Target**: Android 12+ (API 32+)
-- **Latest**: Android 13+ (API 33+)
+### Browser-Specific Issues
 
-### Device Classes
-| Category | RAM | Screen | Examples |
-|----------|-----|--------|----------|
-| Budget | 2GB | 4.5" | Moto G, A-series |
-| Mid-Range | 4GB | 5.5"-6" | Pixel 5, S10 |
-| Flagship | 6GB+ | 5.5"-6.7" | Pixel 6, S21 |
-| Tablet | 4GB+ | 7"-12" | iPad, Galaxy Tab |
+**Chrome**:
+- Aggressive garbage collection (may pause 50-100ms)
+- Good WebGL 2.0 support
+- Developer tools integrated
 
-### Performance by Category
-- **Budget**: 30 FPS (acceptable)
-- **Mid-Range**: 60 FPS (target)
-- **Flagship**: 60+ FPS (easy)
-- **Tablet**: 60 FPS (expected)
+**Firefox**:
+- More stable performance
+- Good WebGL support
+- Canvas rendering optimized
 
-### GPU/CPU Requirements
-- **Minimum**: Snapdragon 410 (2014, basic)
-- **Recommended**: Snapdragon 765 (2019, mid-range)
-- **Optimal**: Snapdragon 8 series (flagship)
+**Safari**:
+- Limited WebGL support (but 14+ sufficient)
+- May throttle background tabs
+- Power saving on battery
 
-### Memory Requirements
-- **RAM**: 2GB minimum (game uses ~150-300MB)
-- **Storage**: 50MB free (APK install)
-- **Installed Size**: ~200MB (with all assets)
+### Deployment
 
-### Display Requirements
-- **DPI**: ldpi to xxxhdpi (1x to 4x)
-- **Resolutions**: 480×800 to 1440×3040+
-- **Aspect Ratios**: 9:16 to 20:9 (foldables)
-- **Notches**: Account for notch (top safe area)
-- **Refresh Rate**: 60Hz (standard), 90Hz+, 120Hz (newer)
+**Host Options**:
+1. **Itch.io** (recommended for MVP)
+   - Free hosting
+   - Built-in analytics
+   - Easy updates
+   - Embeddable
 
-### Input Requirements
-- **Touch**: Multi-touch capable (standard)
-- **Buttons**: Back, Home (system buttons)
-- **Sensors**: Optional (accelerometer, gyro for tilt)
-- **Keyboard**: Not required (virtual keyboard as fallback)
+2. **Custom Server**
+   - Full control
+   - Domain customization
+   - HTTPS required (for microphone/camera access, future)
+   - CDN recommended for global delivery
 
-### Network Requirements
-- **Optional**: Game works offline
-- **Graphics Update**: May check for assets online (optional)
+3. **AWS/Google Cloud**
+   - S3 + CloudFront (AWS)
+   - Cloud Storage + CDN (Google)
+   - Higher cost, better global performance
 
----
-
-## iOS Requirements
-
-### OS Versions
-- **Minimum**: iOS 11.0
-- **Target**: iOS 14+
-- **Recommended**: iOS 15+
-
-### Device Classes
-| Category | RAM | Screen | Examples |
-|----------|-----|--------|----------|
-| Older | 2GB | 4.7" | iPhone 6s, 7, 8 |
-| Current | 4GB | 5.4"-6.7" | iPhone 12, 13 |
-| Pro | 6GB+ | 5.8"-6.7" | iPhone 13 Pro |
-| iPad | 4GB+ | 7.9"-12.9" | iPad Air, Pro |
-
-### Performance by Category
-- **Older**: 30-60 FPS (depends on game state)
-- **Current**: 60 FPS (target)
-- **Pro**: 60+ FPS (easy, consider 120 FPS)
-- **iPad**: 60 FPS (expected)
-
-### GPU/CPU Requirements
-- **Minimum**: A9 chip (iPhone 6s, 2015)
-- **Recommended**: A12 chip (iPhone XS, 2018+)
-- **Optimal**: A15 Bionic (iPhone 13, 2021+)
-
-### Memory Requirements
-- **RAM**: 2GB minimum (game uses ~150-300MB)
-- **Storage**: 50MB free (app download)
-- **Installed Size**: ~200MB (with all assets)
-
-### Display Requirements
-- **Safe Area**: Notch (top), Home Indicator (bottom)
-- **Resolutions**: 375×812 (iPhone) to 1024×1366 (iPad)
-- **Aspect Ratios**: 9:19.5 to 4:3
-- **Refresh Rate**: 60Hz (standard), 120Hz (ProMotion on Pro)
-- **Dynamic Island**: Optional (treat like notch)
-
-### Input Requirements
-- **Touch**: Multi-touch capable
-- **Buttons**: Home button or gesture
-- **Gestures**: Respect system swipe gestures
-- **Face ID/Touch ID**: Optional (no authentication needed for game)
-
-### Network Requirements
-- **Optional**: Game works offline
-- **iCloud**: Not required (no save sync)
-
-### App Store Specific
-- **Age Rating**: ESRB, PEGI (non-violent game, likely 3+)
-- **Privacy Policy**: Required
-- **App Clips**: Optional (preview before install)
-
----
-
-## Safe Area Handling
-
-### iOS Safe Area Insets
-- **Top**: Notch (44pt iPhone, 0pt landscape)
-- **Bottom**: Home Indicator (34pt, 0pt iPhone 8 and earlier)
-- **Left/Right**: 0pt (no side notches currently)
-
-### Android Safe Area
-- **Status Bar**: 24dp (system info)
-- **Navigation Bar**: 48-72dp (bottom, varies)
-- **Cutout Areas**: Notch handling (varies by device)
-
-### Implementation
-```csharp
-// Unity's safe area API
-Rect safeArea = Screen.safeArea;
-// Returns insets: left, top, right, bottom
-
-// Recommended: Inset UI by safeArea
-RectTransform uiRect = GetComponent<RectTransform>();
-uiRect.offsetMin = new Vector2(safeArea.x, safeArea.y);
-uiRect.offsetMax = new Vector2(-safeArea.width, -safeArea.height);
+**Server Setup (Nginx example)**:
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name bumpu.example.com;
+    
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+    
+    gzip on;
+    gzip_types application/wasm text/javascript application/javascript;
+    
+    location / {
+        root /var/www/bumpu-webgl;
+        try_files $uri $uri/ /index.html;
+    }
+    
+    # Cache-busting for versioned assets
+    location ~* \.(js|wasm|data)\.gz$ {
+        add_header Cache-Control "max-age=31536000, immutable";
+    }
+    
+    location ~* \.html$ {
+        add_header Cache-Control "max-age=3600";
+    }
+}
 ```
 
-### Game Board Safe Area
-- Never place critical board cells under notch
-- Board should fit in safe area entirely
-- HUD buttons inset from edges
-- Status messages clear of top bar
+---
+
+## Android
+
+### Device Requirements
+
+**Minimum Spec**:
+- **OS**: Android 7.0 (API 24)
+- **CPU**: ARMv8 64-bit (ARM64)
+- **RAM**: 2 GB minimum
+- **Storage**: 150 MB (APK/AAB size)
+
+**Target Devices**:
+- Phone: 6.0" - 6.7" diagonal
+- Aspect ratio: 18:9 to 20:9 (modern phones)
+- Resolution: 1080 × 2160 minimum (1440 × 3120 common)
+
+**Recommended Spec** (for 60 FPS):
+- **OS**: Android 10+ (API 29+)
+- **CPU**: Snapdragon 855+ or Exynos 9820+
+- **RAM**: 4+ GB
+- **GPU**: Mali-G77, Adreno 665 or better
+
+### API Level Strategy
+
+**Min API Level**: 24 (Android 7.0)
+- Target most phones (90%+ of active devices)
+- Essential features available
+
+**Target API Level**: 34 (Android 14)
+- Required by Play Store (as of 2024)
+- Access to latest OS features
+- Better security
+
+**Supported Versions**:
+```
+Android 7.0 (API 24)   → 5% active devices
+Android 8-9 (API 26-28) → 15% active devices
+Android 10-13 (API 29-33) → 70% active devices
+Android 14+ (API 34+)  → 10%+ active devices
+```
+
+### Architecture Support
+
+**Primary**: ARM64 (armv8-a)
+- Modern standard
+- All current devices support
+- Better performance
+- 64-bit advantage (precision, memory)
+
+**Secondary (Optional)**: ARMv7
+- Older devices (pre-2015)
+- Backwards compatibility
+- Increases build size (~20%)
+- Not required for MVP
+
+**x86/x86_64**:
+- Emulators only
+- Some tablets
+- Not prioritized
+
+### Graphics/Performance
+
+**GPU Support**:
+- OpenGL ES 3.0 minimum
+- Vulkan (if available, future optimization)
+- Support for both (automatic selection)
+
+**Performance Targets**:
+- Modern phones (2020+): 60 FPS
+- Mid-range (2018-2019): 45-60 FPS, capped at 60
+- Budget (2016-2017): 30 FPS (locked)
+
+**Memory Management**:
+- Target heap: < 200 MB
+- Peak usage: < 400 MB
+- Monitor via Android Profiler
+- Avoid frequent GC pauses
+
+### Storage & Permissions
+
+**Minimum Permissions**:
+```xml
+<uses-permission android:name="android.permission.INTERNET" />
+```
+
+**Optional Permissions** (future):
+```xml
+<!-- For future multiplayer/cloud saves -->
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+```
+
+**Storage**:
+- App size on disk: 100-150 MB
+- Requires available space for decompression
+- No save data in MVP (stateless)
+
+### Device Fragmentation
+
+**Fragmentation Challenges**:
+- Screen sizes: 4.5" to 7.5" common
+- Resolutions: 720p to 1440p to 2K
+- Safe areas: Notches (top), gesture buttons (bottom)
+- Manufacturers: Samsung, Google, OnePlus, Xiaomi (different UX)
+
+**Mitigation**:
+- Canvas scaler (responsive)
+- Safe area calculation
+- Test on representative devices
+- Avoid hardware-specific features
+
+### Distribution (Play Store)
+
+**Release Types**:
+1. **Closed Testing**: 20+ testers, internal only
+2. **Open Testing**: Public beta, limited countries
+3. **Production**: Full release, all countries
+
+**Requirement for Submission**:
+- Target API 34+
+- 64-bit architecture
+- Privacy policy
+- Content rating
+- Minimum app size (no bloat)
 
 ---
 
-## Input Latency Targets
+## iOS
 
-### Touch Input Latency
-- **Detection**: < 16ms (one frame at 60 FPS)
-- **Response**: < 50ms (feel responsive)
-- **Acceptable**: < 100ms (noticeable but playable)
-- **Unacceptable**: > 200ms (feels laggy)
+### Device Requirements
 
-### Network Latency (if applicable)
-- Not applicable (offline game)
+**Minimum Spec**:
+- **OS**: iOS 12.0
+- **Device**: iPhone 6s or later
+- **RAM**: 2 GB minimum
+- **Storage**: 150 MB
+
+**Target Devices**:
+- **Small**: iPhone 12 mini, 13 mini (5.4")
+- **Standard**: iPhone 12, 13, 14, 15 (6.1")
+- **Pro/Plus**: iPhone 12 Pro Max, 13 Pro Max, 14 Plus, 15 Plus (6.7")
+- **SE**: iPhone SE (4.7" - budget)
+- **Tablets**: iPad (9.7"+) - optional for v1
+
+**Recommended Spec** (for 60 FPS):
+- **OS**: iOS 15+ (A14 Bionic+)
+- **Device**: iPhone 12 or later
+- **RAM**: 4+ GB
+- **GPU**: Apple GPU Gen 4+
+
+### iOS Version Strategy
+
+**Min iOS Version**: 12.0
+- Support most active devices (~70%)
+- Essential features available
+- Requires careful testing
+
+**Target iOS Version**: 17.0+
+- Current standard (2024)
+- Latest features available
+- Recommended for new projects
+
+**Supported Versions**:
+```
+iOS 12-13  → 10% of active devices
+iOS 14-15  → 40% of active devices
+iOS 16     → 30% of active devices
+iOS 17+    → 20%+ of active devices
+```
+
+### Architecture & Performance
+
+**Architecture**: ARM64 only
+- Universal (works on all modern iPhones)
+- 32-bit support removed (iOS 11+)
+- Better memory access (performance)
+
+**Graphics**:
+- Metal API (primary)
+- OpenGL ES 3.0 fallback (if needed)
+- Metal provides 2-3x better performance
+
+**Performance Targets**:
+- Modern iPhones (12+): 60 FPS
+- Older iPhones (11, XS): 45-60 FPS
+- Oldest iPhones (SE, 8): 30 FPS
+
+**Memory**:
+- Target heap: < 200 MB
+- Peak usage: < 400 MB
+- iOS aggressive memory management (app termination if over limit)
+
+### Safe Area Handling
+
+**Top Safe Area** (notch/Dynamic Island):
+- iPhone 12+: ~47 pixels (notch)
+- iPhone 12 Pro/Pro Max: ~47 pixels
+- Must reserve space in HUD
+
+**Bottom Safe Area** (home indicator):
+- All modern iPhones: ~34 pixels
+- Must reserve space for buttons, UI
+
+**Calculation**:
+```csharp
+Rect safeArea = Screen.safeArea;
+float topInset = Screen.height - safeArea.yMax;
+float bottomInset = safeArea.yMin;
+float leftInset = safeArea.xMin;
+float rightInset = Screen.width - safeArea.xMax;
+
+// Apply to RectTransform
+hudPanel.offsetMin = new Vector2(leftInset, bottomInset);
+hudPanel.offsetMax = new Vector2(-rightInset, -topInset);
+```
+
+### Permissions & Privacy
+
+**Minimum Permissions**: None (game doesn't access device features)
+
+**Privacy Policy** (required for App Store):
+- No user data collection
+- No analytics (or disclose)
+- No third-party SDKs (or disclose)
+- COPPA compliance (if targeting under 13)
+
+**Example Privacy Policy**:
+```
+Bump U does not collect, store, or transmit any personal data.
+No user accounts are required.
+No analytics or tracking is performed.
+All gameplay occurs offline.
+```
+
+### Device Fragmentation
+
+**Fragmentation Challenges**:
+- Screen sizes: 4.7" to 6.7" (plus notch variations)
+- Safe areas: Top (notch/Dynamic Island), bottom (home)
+- Performance: A14 Bionic → A18 Pro (significant gap)
+
+**Mitigation**:
+- Canvas scaler (responsive)
+- Safe area layout guide
+- Profiling on oldest target device
+- Avoid deprecated APIs
+
+### Distribution (App Store)
+
+**Review Process**:
+- Initial review: 24-48 hours
+- Rejection possible (grounds: crashes, inappropriate content, misleading)
+- Resubmission: < 24 hours again
+
+**Requirement for Submission**:
+- iOS 12.0+
+- Arm64 architecture
+- App Privacy Policy
+- ESRB Content Rating
+- Screenshots (5 required)
+- No beta/unfinished content
+
+**TestFlight (Closed Testing)**:
+- Optional beta program
+- 100 internal testers (free)
+- 10,000 external testers (paid account)
+- Distribute early for feedback
 
 ---
 
-## Temperature & Thermal Management
+## Cross-Platform Consistency
 
-### Target Temperatures
-- **Idle**: Device temperature + 5°C
-- **Active Play**: Device temperature + 15-20°C
-- **Maximum**: 45°C (device safety limit)
+### Resolution Strategy
 
-### Thermal Throttling
-- Devices throttle performance above 40°C
-- Game should perform below throttling point
-- If throttling occurs: Reduce graphics, lower target FPS
+**Base Resolution**: 1080 × 1920 (9:16 portrait)
 
-### Mitigation
-- Optimize rendering (fewer particles, simpler shaders)
-- Cap FPS at 60 (don't push unnecessary)
-- Monitor GPU usage (use Unity Profiler)
+**Scaling by Platform**:
+```
+WebGL: Fixed canvas (responsive via CSS scaling)
+Android: Dynamic (varies by device)
+iOS: Dynamic (varies by device)
 
----
+Canvas scaler in Unity:
+- Reference resolution: 1080 × 1920
+- Scale with screen size: enabled
+- Match: Width or Height (height priority)
+```
 
-## Graphics & Rendering
+### Input Handling
 
-### Graphics API Support
-| Platform | Primary | Fallback | Notes |
-|----------|---------|----------|-------|
-| WebGL | WebGL 2 | WebGL 1 | Automatic fallback |
-| Android | Vulkan | OpenGL ES 3 | Automatic selection |
-| iOS | Metal | OpenGL ES 2 | Metal only (iOS 8+) |
+**Mouse/Touch**:
+```
+WebGL: Mouse (desktop) + Touch (iPad)
+Android: Touch (required)
+iOS: Touch (required)
+```
 
-### Rendering Resolution
-- **Base**: 1920×1080 (design resolution)
-- **Scaling**: Maintain aspect ratio, scale to device
-- **Minimum**: 480×720 (smallest phones)
-- **Maximum**: 3840×2160 (large displays)
+**Supported Interactions**:
+- Tap cell (all)
+- No multi-touch
+- No drag (future)
+- No keyboard input (menus only)
 
-### Texture Quality
-- **Compression**: ASTC (Android), PVRTC (iOS)
-- **MipMaps**: Yes (reduce aliasing)
-- **Anisotropic Filtering**: Optional (affects memory)
+### Graphics Settings
 
-### Shader Complexity
-- **Simple Scenes**: 1-2 light sources max
-- **Particle Effects**: < 100 particles per effect
-- **Post-Processing**: Minimal (blur, color grading)
+| Setting | WebGL | Android | iOS |
+|---------|-------|---------|-----|
+| Antialiasing | 2x | 2x | 2x |
+| Texture Compression | Uncompressed | ETC2 | ASTC |
+| Rendering Path | Forward | Forward | Forward |
+| V Sync | Off | Off | Off |
+| Target FPS | 60 | 60 | 60 |
 
----
+### Performance Profiling
 
-## Audio Requirements
+**Tools**:
+- **WebGL**: Chrome DevTools (Performance tab)
+- **Android**: Android Profiler (Android Studio)
+- **iOS**: Xcode Instruments (Metal, CPU profiler)
 
-### Audio Formats
-- **WebGL**: MP3, OGG Vorbis, WAV
-- **Android**: OGG, MP3, WAV
-- **iOS**: M4A (AAC), MP3, WAV
-
-### Audio Quality
-- **Target**: 128-192 kbps (compressed)
-- **Size**: All audio < 20MB combined
-- **Channels**: Mono or Stereo (3D audio optional)
-
-### Audio Performance
-- **Simultaneous**: 4-8 sounds max
-- **Master Volume**: Always controllable
-- **Mute Option**: Respected system mute switch
+**Metrics to Monitor**:
+- FPS (stable 60 or capped 30)
+- Memory (< 400 MB)
+- CPU usage (< 80%)
+- GPU utilization (< 90%)
+- Garbage collection pauses (< 50ms)
 
 ---
 
-## Storage & Installation
+## Testing Checklist
 
-### Installation Size
-- **WebGL**: 50MB (browser cache)
-- **Android APK**: 35-45MB
-- **Android AAB**: 45-60MB (Play Store, varies by device)
-- **iOS**: 50-80MB (App Store download)
+### WebGL
+- [ ] Loads in < 5 seconds
+- [ ] 60 FPS on desktop
+- [ ] 30 FPS on mobile browser
+- [ ] Mobile responsive (portrait only)
+- [ ] Touch input works
+- [ ] All game modes functional
+- [ ] No console errors
 
-### Installed Size
-- **WebGL**: 0MB (streamed)
-- **Android**: 150-200MB total
-- **iOS**: 150-200MB total
+### Android
+- [ ] Installs and launches
+- [ ] 60 FPS on modern device
+- [ ] 30 FPS on budget device
+- [ ] Safe area respected
+- [ ] Touch input responsive
+- [ ] Memory under 400 MB
+- [ ] No crashes
 
-### Storage Requirements
-- **Minimum**: 50MB free space
-- **Recommended**: 200MB free space
-- **No Cloud Save**: Game doesn't require cloud storage
-
----
-
-## Network Requirements
-
-### Connectivity
-- **Offline**: Game fully playable offline
-- **No Server**: No server required
-- **No Ads**: No ad network integration (optional)
-
----
-
-## Accessibility Requirements
-
-### Color Contrast
-- **Text**: 4.5:1 ratio minimum
-- **UI**: 3:1 ratio minimum
-- **Colorblind**: Support deuteranopia (green-red blind)
-
-### Text Size
-- **Minimum**: 12px (12pt on screen)
-- **Recommended**: 16px+
-- **Scaling**: Respects system font size setting
-
-### Touch Targets
-- **Minimum**: 44×44px (iOS), 48×48px (Android)
-- **Spacing**: 8px minimum between targets
+### iOS
+- [ ] Installs (TestFlight or device)
+- [ ] 60 FPS on iPhone 12+
+- [ ] 30 FPS on iPhone SE
+- [ ] Safe area respected (notch, home)
+- [ ] Touch input responsive
+- [ ] Memory under 400 MB
+- [ ] No crashes
 
 ---
 
 ## Related Documents
+
 - BUILD_PIPELINE.md
 - APP_STORE_REQUIREMENTS.md
 - SPRINT_7_BUILD_PREP.md
 
 ---
 
-**Status**: Complete - Production Ready
+**Last Updated**: Nov 14, 2025  
+**Status**: Complete & Ready for Implementation

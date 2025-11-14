@@ -97,16 +97,13 @@ Project planning and decision logs.
 
 ## Root-Level Current Operational Files
 
-These are kept in the root directory for easy access:
+These are kept in the root directory for easy access and daily updates:
 
+- **README.md** - Project overview and introduction
 - **SPRINT_STATUS.md** - Real-time sprint progress (updated daily)
-- **PROJECT_STATUS_CURRENT.md** - Overall project health
-- **README.md** - Project overview
-- **GAME_MODES_RULES_SUMMARY.md** - Quick reference (in root for team access)
-- **ME_ACCELERATION_ORDER_ALL_TEAMS.md** - Current acceleration order
-- **ME_DAILY_STANDUP_TEMPLATE.md** - Daily standup format
-- **ME_SPRINT*_COMPLETION_ORDER.md** - Recent sprint approvals
-- **TEAM_DISPATCH_SPRINT*_.md** - Active team dispatch orders
+- **GAME_MODES_RULES_SUMMARY.md** - Quick reference (team access)
+- **DOCUMENTATION_GUIDE.md** - How to navigate all documentation
+- **TEAM_DISPATCH_SPRINT4_*.md** - Current sprint team assignments
 
 ---
 
@@ -116,5 +113,16 @@ Historical and obsolete documentation in `ARCHIVE/` folder.
 
 ---
 
+## Recent Updates
+
+- **Nov 14, 2025**: Documentation cleanup complete
+  - Archived 15+ historical status and team dispatch files
+  - Consolidated all documentation into _docs/ structure
+  - Root directory now contains only active operational files
+  - Added DOCUMENTATION_GUIDE.md for navigation help
+  - Created sprint status files in _docs/SPRINTS/
+
+---
+
 **Last Updated**: Nov 14, 2025  
-**Structure Version**: 1.0
+**Structure Version**: 1.1 (Cleaned & Consolidated)

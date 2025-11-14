@@ -1,293 +1,377 @@
 # UI Standards
+
 **Created**: Nov 14, 2025  
 **Owner**: UI Engineer  
-**Status**: ACTIVE
+**Status**: ACTIVE  
+**Authority**: Team Assignment Complete
 
 ---
 
 ## Accessibility Standards
 
 ### Touch Targets
-- **Minimum Size**: 44×44px (WCAG 2.1 Level AAA, iOS/Android standard)
-- **Recommended Size**: 48×48px (optimal for mobile, no accidental taps)
-- **Spacing Between**: Minimum 8px gap between interactive elements
-- **Small Elements**: If < 44px, must have 44px padding around (hover/tap zone)
 
-### Color Contrast
-- **Normal Text (< 18px)**: 4.5:1 contrast ratio (WCAG AA)
-- **Large Text (>= 18px)**: 3:1 contrast ratio (WCAG AA)
-- **UI Components/Graphics**: 3:1 minimum
-- **Enhanced**: 7:1 (WCAG AAA, where possible)
-- **Focus Indicators**: Always visible, never removed
-- **Text on Images**: Ensure contrast against underlying image
+**Minimum Size**: 44px × 44px (WCAG 2.5.5 Level AAA)  
+**Recommended Size**: 56px × 56px (mobile games)  
+**Spacing Between Targets**: 8px minimum (to prevent accidental taps)
+
+### Application
+- All buttons must be at least 44px × 44px
+- Interactive elements on mobile must be at least 56px × 56px
+- Dice button, BUMP button, Declare Win button: all 56px height minimum
+- Scoreboard player rows: 48px height minimum
+- Close buttons: 40px × 40px minimum
+
+### Testing
+- Test on actual mobile devices (not just emulators)
+- Test with finger sizes (larger than mouse cursor)
+- No accidental double-taps should trigger actions
+
+---
+
+### Color Contrast Ratios
+
+**WCAG AA Standard**: 4.5:1 for normal text, 3:1 for large text  
+**WCAG AAA Standard**: 7:1 for normal text, 4.5:1 for large text
+
+### Text Contrast
+| Text Type | Min Size | Min Ratio |
+|-----------|----------|-----------|
+| Body text | 14px | 4.5:1 |
+| Labels | 12px | 4.5:1 |
+| Large text | 18px+ | 3:1 |
+| UI components | N/A | 3:1 |
+
+### Examples
+- Dark text (#1F2937) on light background (#FFFFFF): ✅ 16:1 (exceeds AA & AAA)
+- Primary button (#2563EB) with white text (#FFFFFF): ✅ 8.6:1 (exceeds AA & AAA)
+- Error text (#EF4444) on white: ✅ 5.9:1 (exceeds AA, below AAA for body)
+
+### Testing
+- Use color contrast checker tools (WebAIM, Axe DevTools)
+- Test with color blindness simulators (Coblis)
+- Never rely on color alone to convey information
+
+---
+
+### Font Sizes & Readability
+
+**Minimum Font Size**: 12px (body text), 14px recommended  
+**Maximum Line Length**: 60-80 characters for optimal readability
 
 ### Font Size Standards
-- **Minimum**: 12px (absolute minimum, body text)
-- **Recommended**: 16px (body text)
-- **Headings**: 24px+ (large, scannable)
-- **Labels**: 14px+ (interactive element labels)
-- **Line Height**: 1.5× font size minimum (body text)
+- Display: 32px
+- Heading 1: 28px
+- Heading 2: 24px
+- Body: 14-16px
+- Small: 12px (minimum for body)
+- Caption: 10px (only for secondary info)
 
-### Keyboard Navigation
-- **Tab Order**: Logical, top-to-bottom, left-to-right
-- **Focus Visible**: Always visible outline or highlight
-- **Keyboard Shortcuts**: Standard (Escape = close, Enter = submit)
-- **Skip Links**: Optional skip-to-content for complex UIs
+### Line Height
+- Display: 1.1 (tight spacing for large text)
+- Body: 1.5 (comfortable reading)
+- Labels: 1.3 (compact but readable)
 
-### Screen Reader Support
-- **Labels**: All buttons/inputs have clear text labels
-- **Alt Text**: N/A for game (not image-heavy, but icon labels provided)
-- **Semantic HTML**: Proper element hierarchy (Canvas game may not apply)
-- **ARIA**: If applicable for complex interactive elements
+---
+
+### Focus & Keyboard Navigation
+
+**Focus Indicator**: 2px outline, #2563EB, 4px offset from element  
+**Focus Order**: Logical, left-to-right, top-to-bottom
+
+### Implementation
+```csharp
+// Focus state CSS equivalent in Unity
+button:focus {
+  outline: 2px solid #2563EB;
+  outline-offset: 4px;
+}
+```
+
+### Tab Navigation
+- All interactive elements must be keyboard accessible
+- Tab order: logical (top-left to bottom-right)
+- Escape key: close modals/menus
 
 ---
 
 ## Mobile Responsiveness
 
-### Supported Screen Sizes
-- **Small phones**: 320×568 (iPhone SE)
-- **Medium phones**: 375×667 (iPhone 8)
-- **Large phones**: 414×896 (iPhone 11 Pro)
-- **Tablets**: 768×1024 (iPad mini) to 1024×1366 (iPad Pro)
-- **Landscape**: All of above in landscape orientation
+### Supported Resolutions
 
-### Layout Adaptations
-- **Portrait**: Vertical stack (board top, controls bottom)
-- **Landscape**: Horizontal (board left, HUD right side)
-- **Tablets**: Larger board, button group repositioned
-- **Buttons**: Always >= 44px, scale proportionally
-- **Text**: Scales with screen, never below 12px
+**Minimum Width**: 320px (iPhone SE)  
+**Maximum Width**: 1920px (desktop/tablet in landscape)  
+**Aspect Ratios**: 9:16 (portrait, mobile), 16:9 (landscape, tablet)
 
-### Safe Area Handling
-- **iOS**: Respect safe area (notch, home indicator)
-- **Android**: Respect system navigation bars
-- **Implementation**: Use CSS/Unity safe area APIs
-- **Margin**: 16px padding from screen edges minimum
-- **Elements**: Never place critical UI under notch
+### Device Classes
+| Class | Width | Height | Example |
+|-------|-------|--------|---------|
+| Small Phone | 320-375px | 640-812px | iPhone SE, 6/7/8 |
+| Large Phone | 375-430px | 812-932px | iPhone 12/13/14 |
+| Tablet Portrait | 600-768px | 800-1024px | iPad mini |
+| Tablet Landscape | 1024px+ | 600px+ | iPad Pro |
+| Desktop | 1280px+ | 720px+ | PC/Mac |
 
-### Aspect Ratio Support
-- **Locked to Portrait**: 9:16 (phones)
-- **Locked to Landscape**: 16:9 (optional, for tablets)
-- **Adaptive**: Adjust layout based on screen aspect ratio
-- **Max Height**: Cap game board at device height minus HUD
+### Responsive Scaling
+
+**Base Breakpoints**:
+- **Mobile**: < 480px
+- **Tablet**: 480px - 768px
+- **Desktop**: > 768px
+
+**Scaling Rules**:
+- Canvas scaler: Reference resolution 1080 × 1920 (9:16)
+- Scale with screen size (automatic scaling)
+- Safe area adjustment for notches/safe areas
 
 ---
 
-## Platform Differences
+### Safe Area Handling
+
+**iOS Notch Areas**: Must reserve space for notch/dynamic island  
+**Android Safe Area**: Account for system gesture areas
+
+### Implementation
+```csharp
+// Get safe area insets
+var safeArea = Screen.safeArea;
+var left = safeArea.xMin;
+var right = Screen.width - safeArea.xMax;
+var top = Screen.height - safeArea.yMax;
+var bottom = safeArea.yMin;
+
+// Adjust HUD panels with safe area
+hudPanel.offsetMin = new Vector2(left, bottom);
+hudPanel.offsetMax = new Vector2(-right, -top);
+```
+
+### Safe Area Testing
+- Test on actual iOS devices with notch (iPhone X+)
+- Test on Android with gesture navigation (Pixel phones)
+- Test on iPad in landscape mode
+- Ensure all buttons are visible in safe area
+
+---
+
+### Portrait & Landscape Orientation
+
+**Portrait (Primary)**:
+- 9:16 aspect ratio
+- Board in center, HUD above/below
+- Vertical scoreboard on right
+
+**Landscape (Secondary)**:
+- 16:9 aspect ratio
+- Board on left, scoreboard on right
+- Buttons at bottom
+
+### Orientation Handling
+- Auto-rotate enabled (with locked orientations)
+- Locked to portrait for phone games
+- Allow landscape for tablet games
+- Smooth transition animation (200ms)
+
+---
+
+## Platform-Specific Standards
 
 ### WebGL (Browser)
-- **Input**: Mouse (hover states), keyboard support
-- **Cursor**: Change to pointer on interactive elements
-- **Hover Effects**: Use hover states (desktop-specific)
-- **Performance**: Optimize for 60 FPS on standard gaming laptops
-- **Resolution**: Support 720p to 2160p displays
-- **Testing Browsers**: Chrome, Firefox, Safari (latest versions)
 
-### Android (Mobile)
-- **Input**: Touch only (no hover)
-- **Viewport**: Account for notches (Samsung, Pixel)
-- **Safe Area**: Use Android's inset management
-- **Gesture**: Support swipe back (system gesture)
-- **Keyboard**: IME (input method) handling not needed (game input)
-- **Orientation**: Support both portrait and landscape
-- **DPI**: Support ldpi to xxxhdpi (1x to 4x)
+**Target Resolution**: 1080 × 1920 (9:16 portrait)  
+**Frame Rate**: 60 FPS target, 30 FPS minimum  
+**Browser Support**: Chrome, Firefox, Safari (latest 2 versions)
 
-### iOS (Mobile)
-- **Input**: Touch only (no hover)
-- **Viewport**: iPhone notch (top), Dynamic Island, Home Indicator (bottom)
-- **Safe Area**: Mandatory safe area insets
-- **Gesture**: Respect system swipe gestures
-- **Haptics**: Optional haptic feedback (vibration on actions)
-- **Orientation**: Support both portrait and landscape
-- **Scaling**: Support 1x to 3x Retina (iPhone 6s+)
+**Considerations**:
+- High DPI displays (Retina, 4K)
+- Mouse input (hover states)
+- Keyboard input (tab navigation)
+- No touch input (or optional touch on tablets)
 
-### Cross-Platform Standards
-- **Button Behavior**: Same on all platforms (press → action)
-- **Animations**: Consistent timing, reduced motion respected
-- **Colors**: Exactly the same (no platform-specific tints)
-- **Typography**: Same font stack, fallback chain
+---
+
+### Android
+
+**Target Resolution**: 1080 × 2160 (9:20, accounting for status bar)  
+**Frame Rate**: 60 FPS target, 30 FPS minimum on older devices  
+**API Level**: 24+ (Android 7.0+)
+
+**Android-Specific**:
+- Safe area for system gesture buttons (bottom)
+- Status bar area (top, reserved)
+- Navigation bar area (bottom, varies by device)
+- Back button handling
+- Touch input responsiveness
+
+---
+
+### iOS
+
+**Target Resolution**: 1080 × 2160 (9:19.5, accounting for notch)  
+**Frame Rate**: 60 FPS target, 30 FPS minimum on older devices  
+**iOS Version**: 12.0+
+
+**iOS-Specific**:
+- Safe area for notch/dynamic island
+- Safe area for gesture zones (left/right/bottom)
+- Home indicator area (bottom)
+- Touch input with haptic feedback
+- No back button (swipe gesture)
 
 ---
 
 ## Button Affordance
 
-### Visual States
+### Visual Affordance States
 
-#### Default State
-- **Background**: Primary color (#1E88E5)
-- **Text**: White, bold
-- **Border**: None (solid fill)
-- **Shadow**: Slight elevation (2px shadow)
-- **Cursor**: Pointer
+**Enabled (Default)**
+- Full opacity, normal color
+- Text color: high contrast
+- Pointer cursor on hover
 
-#### Hover State (Desktop Only)
-- **Background**: Darken 10% (#1565C0)
-- **Shadow**: Increase elevation (4px shadow)
-- **Scale**: Subtle 1.02x scale
-- **Cursor**: Pointer
+**Hover State** (Desktop only)
+- Background lightens by 10%
+- Text remains same
+- Slight scale increase (1.05)
+- Duration: 150ms
 
-#### Pressed/Active State
-- **Background**: Darken 15% (#0D47A1)
-- **Shadow**: Inset 2px shadow (pressed effect)
-- **Scale**: 0.98x (slight depression)
-- **Duration**: 100ms (instant feedback)
+**Pressed/Active State**
+- Background darkens by 20%
+- Slight scale decrease (0.95)
+- Duration: 150ms
+- Instant feedback (no delay)
 
-#### Disabled State
-- **Background**: Gray (#BDBDBD)
-- **Text**: Darker gray, 50% opacity
-- **Cursor**: Not-allowed
-- **Interaction**: No events, no hover effect
-- **Opacity**: 60% overall
+**Disabled State**
+- 50% opacity
+- Gray text (#9CA3AF)
+- Gray background (#D1D5DB)
+- No cursor change (not-allowed)
+- No animation on interaction
 
-#### Focus State
-- **Outline**: 4px solid primary color
-- **Offset**: 2px outside button
-- **Visible**: Always, keyboard-only or always-on
-- **Color**: High contrast (primary + background)
-
-### Feedback Mechanisms
-- **Visual**: Color change, scale, shadow change
-- **Haptic**: Optional vibration (100ms pulse on press)
-- **Audio**: Optional subtle sound effect (optional)
-- **Animation**: Instant (< 100ms perceived latency)
+**Focused State** (Keyboard navigation)
+- 2px outline #2563EB
+- 4px offset
+- No other visual changes
 
 ---
 
 ## Error Messaging
 
-### Message Format
-- **Tone**: Clear, non-technical, friendly
-- **Action**: Tell user what's wrong + how to fix
-- **Length**: 1-2 sentences maximum
-- **Icon**: Error icon (⚠️ or ❌) + red color
+### Error Display Standards
 
-### Message Placement
-- **Position**: Near the error (inline if possible, or popup)
-- **Visual**: Red text, high contrast background
-- **Duration**: Persistent until user fixes or dismisses
-- **Prominence**: High visibility, but not intrusive
+**Location**: Center-bottom of screen or modal overlay  
+**Duration**: 
+- Brief errors: 2-3 seconds (auto-dismiss)
+- Critical errors: Modal (requires action)
 
-### Examples
-- ❌ "Invalid move. Please select a valid cell."
-- ❌ "You need 5 bumps to win. Current: 3."
-- ❌ "Cell is already occupied. Choose another."
+**Visual**: 
+- Red text (#EF4444) or red icon
+- White background or transparent with text
+- Sufficient contrast (4.5:1 minimum)
 
-### Error Types
-- **User Input**: Missing data, invalid selection
-- **Game Logic**: Rule violation, illegal move
-- **System**: Network error (not applicable for single-player)
+### Error Message Format
 
----
+**Tone**: Clear, non-blaming, actionable  
+**Length**: 1-2 sentences max  
+**Example**:
+- ❌ "You failed to declare a win"
+- ✅ "Cannot declare win: 2 chips still need movement"
 
-## Animation Preferences
+### Error Types & Messages
 
-### Respects System Setting
-- **prefers-reduced-motion**: CSS media query
-- **Behavior**: Disable or shorten animations
-- **Guidelines**:
-  - Flash/strobe: Forbidden (< 3 Hz or > 55 Hz threshold violated)
-  - Movement: Minimize for sensitive users
-  - Scale: Fast transitions preferred (100-150ms vs 300ms)
-
-### Implementation
-```css
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-```
+| Error | Message | Duration | Type |
+|-------|---------|----------|------|
+| Invalid move | "Invalid move selected" | 2s | Toast |
+| Cannot bump | "Cannot bump: no chips to move" | 3s | Toast |
+| Cannot win | "Cannot declare win: [reason]" | Modal | Modal |
+| Crash | "Game error encountered. Return to menu?" | Modal | Modal |
+| Network | "Connection lost. Offline mode." | 3s | Toast |
 
 ---
 
-## Text Legibility
+## Success Messaging
 
-### Line Length
-- **Optimal**: 50-75 characters per line
-- **Maximum**: 100 characters (avoid extreme lengths)
-- **Body Text**: 60-70 characters
-- **Headings**: Flexible
-
-### Line Spacing (Line Height)
-- **Body Text**: 1.5 (24px for 16px font)
-- **Headings**: 1.2 (comfortable reading)
-- **Dense Content**: 1.75 (accessibility enhancement)
-
-### Paragraph Spacing
-- **Default**: 1.5× line height between paragraphs
-- **Generous**: 2× line height (for emphasis sections)
-- **Minimal**: 1× line height (in tight spaces)
-
-### Readability Checks
-- **Font**: Sans-serif preferred (Roboto, Arial)
-- **Weight**: Regular (400) for body, Bold (700) for emphasis
-- **Italics**: Avoid for body text (harder to read on screens)
-- **All-Caps**: Avoid for body text (slower reading)
+**Visual**: Green text (#10B981) or checkmark icon  
+**Duration**: 2-3 seconds (auto-dismiss)  
+**Examples**:
+- "Bump successful!"
+- "Move completed"
+- "You won the game!"
 
 ---
 
-## Orientation Lock
+## Loading & Waiting States
 
-### Portrait Lock (Phone)
-- Lock to portrait by default
-- Landscape support optional (if device large enough)
-- Rotation trigger: iOS auto-rotate enabled, Android similar
+**Visual Indicator**:
+- Loading spinner (rotating circle)
+- Progress bar (if duration known)
+- "Loading..." text
 
-### Landscape Support (Tablet/Opt-in)
-- Provide landscape layout
-- Reposition HUD (left/right side instead of bottom)
-- Scale board to fit wider screen
-- Support both orientations seamlessly
+**Duration**: Display until complete (min 1s for perception)
 
-### Transition Animation
-- Rotate board 90°
-- Reposition HUD components
-- Duration: 300ms
-- Easing: Ease-in-out
+**Example**: While waiting for other players to complete turn
 
 ---
 
-## Loading States
+## Input Field Standards
 
-### Loading Indicator
-- **Style**: Spinning circle or progress bar
-- **Color**: Primary blue (#1E88E5)
-- **Position**: Center of screen
-- **Text**: "Loading..." or game-specific message
-- **Duration**: Shown for >= 500ms (no flash)
+**Height**: 40px  
+**Padding**: 8px horizontal, 8px vertical  
+**Border**: 1px #D1D5DB  
+**Border Radius**: 6px  
+**Font Size**: 14px  
+**Placeholder Text**: Gray #9CA3AF, 14px
 
-### Minimum Load Time
-- **Perceived minimum**: 500ms (even if loads faster)
-- **Prevents flashing**: Provides consistent feedback
-- **Fallback**: If load > 5s, show progress percentage
+**Focus State**:
+- Border: 2px #2563EB
+- Shadow: 0 0 0 3px rgba(37, 99, 235, 0.1)
 
 ---
 
-## Notification System
+## Text Standards
 
-### Toast Notifications
-- **Position**: Bottom-center or top-center
-- **Duration**: 3-4 seconds auto-dismiss
-- **Types**: Success (green), Error (red), Info (blue)
-- **Animation**: Slide in from bottom, fade out
-- **Text**: 1-line max, action not required
+### Headings
+- **H1**: 28px, 700 weight, line-height 1.2
+- **H2**: 24px, 600 weight, line-height 1.2
+- **H3**: 20px, 600 weight, line-height 1.2
 
-### Modal Dialogs
-- **Position**: Center of screen
-- **Overlay**: Semi-transparent black background
-- **Close Options**: X button, outside click, or button action
-- **Animation**: Fade in (150ms), scale (slight zoom)
-- **Keyboard**: Escape key closes (if applicable)
+### Body
+- **Regular**: 14-16px, 400 weight, line-height 1.5
+- **Small**: 12px, 400 weight, line-height 1.4
+
+### Labels & UI
+- **Label**: 12px, 600 weight, line-height 1.3
+- **Button**: 14px, 600 weight, line-height 1.3
+
+---
+
+## Spacing & Layout
+
+**Margin/Padding Scale**:
+- 8px (xs) - Small internal spacing
+- 16px (sm) - Standard padding
+- 24px (md) - Section spacing
+- 32px (lg) - Major blocks
+
+**Grid**: 8px grid (all elements align to 8px multiples)
+
+---
+
+## Dark Mode (Future Consideration)
+
+- Not required for launch
+- Design system supports future dark mode
+- Use color variables (not hard-coded colors)
+- Prepare for: theme switching, persistence
 
 ---
 
 ## Related Documents
+
 - UI_DESIGN_SYSTEM.md
 - HUD_ARCHITECTURE.md
 - SPRINT_5_UI_PREP.md
 
 ---
 
-**Status**: Complete - Production Ready
+**Last Updated**: Nov 14, 2025  
+**Status**: Complete & Ready for Implementation

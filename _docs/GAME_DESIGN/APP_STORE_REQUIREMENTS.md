@@ -1,497 +1,656 @@
 # App Store Requirements
+
 **Created**: Nov 14, 2025  
 **Owner**: Build Engineer  
-**Status**: ACTIVE
+**Status**: ACTIVE  
+**Authority**: Team Assignment Complete
+
+---
+
+## Overview
+
+App Store Requirements define the specific submission process, asset requirements, metadata, and approval guidelines for releasing Bump U on Google Play Store (Android) and Apple App Store (iOS).
 
 ---
 
 ## Google Play Store (Android)
 
-### App Information
+### Account & Setup
+
+**Prerequisites**:
+- Google Play Developer account ($25 one-time)
+- Google account linked
+- Verified identity (name, address)
+- Payment method on file
+
+**Setup Process**:
+1. Visit [Google Play Console](https://play.google.com/console)
+2. Create new app → Select "Create app"
+3. Choose app name, default language
+4. Select content rating
+5. Complete store listing
+
+### App Metadata
 
 #### App Name
-- **Primary**: "Bump U Box"
-- **Short Description**: "Roll, bump, and win in 5 classic board games"
-- **Full Description** (4000 chars):
-  ```
-  Bump U Box brings 5 unique board games to your phone:
-  
-  • BUMP 5: Roll the dice and bump opponents to win
-  • KRAZY 6: Escape the board in exactly 6 turns
-  • PASS THE CHIP: Last chip standing wins
-  • BUMP U AND 5: Combine bumping with racing
-  • SOLITARY: Challenge yourself on the board
-  
-  Simple rules, addictive gameplay, works offline.
-  
-  Features:
-  - Local multiplayer (pass and play)
-  - Single player modes
-  - Fast-paced, casual gameplay
-  - No ads, no in-app purchases
-  - Works on phones and tablets
-  ```
+- **Format**: Max 50 characters
+- **Example**: "Bump U - Board Game"
+- **Best Practice**: Include game type (Board Game, Dice Game) for searchability
 
-### Store Graphics
+#### Short Description
+- **Format**: Max 80 characters
+- **Purpose**: Shows on store listing and search
+- **Example**: "Roll dice, bump opponents, race to win!"
 
-#### App Icon
-- **Size**: 512×512px (for store listing)
-- **Format**: PNG (32-bit with transparency)
-- **Corners**: Rounded 20% recommended
-- **Safe Area**: 90% inner 50% of square
-- **Content**: Game logo or main visual
-- **Style**: Bright, recognizable, professional
+#### Full Description
+- **Format**: Max 4,000 characters
+- **Purpose**: Detailed explanation of game
+- **Include**:
+  - Game premise (2-3 sentences)
+  - Core gameplay mechanics (3-4 bullet points)
+  - Game modes available
+  - Platform support (iOS, WebGL)
+  - No in-app purchases
+  - Offline gameplay (single-player mode note)
 
-#### Screenshots
-- **Quantity**: Minimum 2, maximum 8
-- **Size**: 1080×1920px (portrait) or 1920×1080px (landscape)
+**Example Description**:
+```
+Bump U is a classic board game of strategy and luck for 1-4 players.
+
+GAME MODES:
+• Bump 5: First to score 25 points wins
+• Krazy 6: Race around board twice
+• Pass The Chip: Pass chip to opponent
+• Bump U And 5: Combination of rules
+• Solitary: Single-player puzzle mode
+
+FEATURES:
+• Roll dice and move chips around the board
+• Bump opponents' chips back to home
+• Race to victory against AI or local players
+• Works offline - no internet required
+• Available on Android, iOS, and web browsers
+
+No in-app purchases. No ads. Pure board game fun!
+```
+
+### App Icon
+
+**Specifications**:
+- **Size**: 512 × 512 pixels
 - **Format**: PNG or JPEG
-- **Content**:
-  1. Main menu screen
-  2. Gameplay screenshot (pick most engaging mode)
-  3. Game mode selection
-  4. Win screen
-  5. Alternate game mode (optional)
-  6. Optional: Feature highlight
-  7. Optional: UI overview
-  8. Optional: Multiplayer indication
+- **Safe Area**: All critical content must fit in 432 × 432 (center)
+- **Background**: Opaque (no transparency)
+- **Colors**: Follow your brand (game logo)
 
-#### Feature Graphic
-- **Size**: 1024×500px (landscape)
+**Design Guidelines**:
+- Clear, recognizable at small size (32 × 32)
+- No text (except logo wordmark)
+- Readable from distance
+- Avoid thin lines (< 2 pixels)
+
+**Process**:
+1. Create/design 512 × 512 icon
+2. Save as PNG (no transparency needed)
+3. Upload in Google Play Console → App icon
+4. Preview shows how icon appears
+
+### Feature Graphic
+
+**Specifications**:
+- **Size**: 1024 × 500 pixels
 - **Format**: PNG or JPEG
-- **Purpose**: Promotional banner
-- **Content**: Game title, key art, one key feature
-- **Used**: Featured section, wishlists
+- **Safe Area**: All content in 924 × 500 (centered)
+- **Background**: Can be any color or pattern
+- **No transparency**: Opaque background only
 
-#### Preview Video
-- **Duration**: 15-30 seconds
-- **Format**: MP4 or WebM
-- **Resolution**: 1080p minimum
-- **Content**: Gameplay footage, UI walkthrough
-- **Audio**: Background music, optional voiceover
+**Purpose**: Banner image shown on store listing and featured sections
 
-### Store Listing Details
+**Design Tips**:
+- Showcase main game board or characters
+- Include app name/logo (optional)
+- Make visually appealing, not cluttered
+- Ensure text is readable
 
-#### Category
-- **Primary**: Games → Casual
-- **Content Rating**: Not for everyone (3+)
+### Screenshots
 
-#### Content Rating
-- **IARC Questionnaire**:
-  - Violence: None / Cartoon / Low
-  - Sexual Content: None
-  - Profanity: None
-  - Alcohol/Tobacco/Drugs: None
-  - **Result**: Likely ESRB 3+ or equivalent
+**Requirements**:
+- **Minimum**: 2 screenshots
+- **Maximum**: 8 screenshots
+- **Size**: 1080 × 1920 pixels (or other standard sizes)
+- **Format**: PNG or JPEG
+- **Text**: Optional, but helpful for context
 
-#### Release Information
-- **Release Type**: Full release (not beta)
-- **Release Date**: Choose release date (immediate or scheduled)
+**Recommended Screenshots**:
+1. Main menu (overview)
+2. Gameplay (board view)
+3. Win screen (celebration)
+4. Settings/options
+5. Help/rules screen
+6. [Additional gameplay detail]
+7. [Game mode example]
+8. [Mobile experience]
 
-#### Pricing
-- **Price Tier**: Free
-- **In-App Purchases**: None
-- **Subscription**: No
+**Best Practices**:
+- Include 1-2 lines of text per screenshot (e.g., "Roll dice and move your chip")
+- Show actual gameplay (not just menus)
+- Use consistent device frame (optional)
+- Highlight key features
 
-#### Distribution
-- **Target Countries**: All (default)
-- **Device Support**: Phones & Tablets
+### Privacy Policy
 
-### Privacy & Content
+**Required**: Yes (even if no data collection)
 
-#### Privacy Policy
-- **Required**: Yes (even if no data collection)
-- **Content**:
-  ```
-  # Privacy Policy
-  
-  Bump U Box does not collect any personal data.
-  No user account is required.
-  No analytics or tracking.
-  No advertisements.
-  
-  The game works entirely offline.
-  No data is transmitted to external servers.
-  
-  [Full policy required by law - 200+ words typical]
-  ```
+**Hosting**: Can be on website or within app
 
-#### Target Audience
-- **Primary**: Casual gamers, 3+
-- **Age Suitability**: Family friendly
+**Minimum Content**:
+```
+PRIVACY POLICY
 
-#### Data & Privacy Declarations
-- **Collects Personal Data**: No
-- **Tracks Users**: No
-- **Requires Account**: No
-- **Shares Data**: No
+Bump U does not collect, store, or transmit any personal 
+or usage data from players.
 
-### Submission Checklist
+Data Not Collected:
+- No user accounts required
+- No analytics or tracking
+- No device identifiers tracked
+- No crash reports sent
+- No third-party SDKs
 
-#### Before Submission
-- [ ] App icon (512×512px) ready
-- [ ] 2-8 screenshots prepared
-- [ ] Feature graphic ready (optional)
-- [ ] Preview video prepared (optional)
-- [ ] Privacy policy written (200+ words)
-- [ ] APK/AAB built and tested
-- [ ] No critical crashes on test devices
-- [ ] All game modes playable
-- [ ] Gameplay feels smooth (no lag)
+Offline Play:
+All gameplay occurs entirely on the player's device. 
+No internet connection is required after initial download.
 
-#### Content Compliance
-- [ ] No references to gambling
-- [ ] No copyrighted content (music, art)
-- [ ] No misleading claims
-- [ ] No offensive content
-- [ ] App description matches actual gameplay
+Contact:
+For questions, contact [your email]
+```
 
-#### Technical Requirements
-- [ ] Minimum API 21 (Android 5.0)
-- [ ] Target API 31+ (Android 12)
-- [ ] 64-bit support (arm64)
-- [ ] Safe to download (no malware)
-- [ ] Complies with Google Play policies
+**Link in Console**:
+- Create text file on your website
+- Provide HTTPS URL in Play Console
+- Or paste full text in console field
 
-#### Publishing Steps
-1. Create Google Play Developer account ($25 one-time)
-2. Create app listing
-3. Upload APK/AAB
-4. Configure store graphics
-5. Set pricing/distribution
-6. Submit for review
-7. Wait for approval (1-24 hours typical)
-8. Monitor for rejections
+### Content Rating
+
+**IARC Questionnaire**:
+1. Go to Google Play Console
+2. Content ratings → Complete questionnaire
+3. Answer questions about:
+   - Violence/gore
+   - Sexual content
+   - Language
+   - Substance use
+   - Game mechanics (gambling?)
+
+**Typical Answers for Bump U**:
+- Violence: No
+- Sexual content: No
+- Language: No profanity
+- Substance use: No
+- Gambling: No (dice roll is mechanic, not gambling)
+- Result: PEGI 3 / ESRB E / USK 0
+
+### Pricing & Distribution
+
+**Pricing**:
+- Price tier: Free
+- Pricing currency: Auto-detect (or select)
+- Free trial: N/A (game is free)
+
+**Distribution**:
+- Countries: All countries (or select specific)
+- Targeting: No regional restrictions
+
+**Release Date**:
+- Set to automatic (immediately after approval)
+- Or schedule for specific date
+
+### Pre-Submission Checklist
+
+- [ ] App name (50 chars max)
+- [ ] Short description (80 chars)
+- [ ] Full description (4,000 chars)
+- [ ] App icon (512 × 512 PNG)
+- [ ] Feature graphic (1024 × 500 PNG)
+- [ ] 2-8 screenshots (1080 × 1920)
+- [ ] Privacy policy (URL or text)
+- [ ] Content rating (completed IARC)
+- [ ] Pricing (Free selected)
+- [ ] APK/AAB build uploaded
+- [ ] App credentials filled
+- [ ] Rights confirmed (no licensing issues)
+
+### Submission Process
+
+**Step 1: Prepare Assets**
+- Create all graphics (icon, feature, screenshots)
+- Write metadata (name, description)
+- Create privacy policy
+
+**Step 2: Upload Build**
+- Go to Console → Internal Testing
+- Upload signed APK or AAB
+- Wait for processing (~ 5 min)
+- Test link generated
+
+**Step 3: Internal Testing**
+- Add test users (email addresses)
+- Send link to testers
+- Verify game works
+- Check for crashes
+- Confirm all features functional
+
+**Step 4: Upload to Production**
+- Console → Production
+- Upload same APK/AAB
+- Fill metadata (name, description, etc.)
+- Upload all assets (icon, feature, screenshots)
+- Set privacy policy link
+
+**Step 5: Submit for Review**
+- Review all information
+- Agree to content policies
+- Click "Submit app for review"
+- Wait 24-48 hours for review
+
+**Step 6: Monitoring**
+- Check Console for approval/rejection
+- If rejected: Review feedback, fix issues, resubmit
+- If approved: Live on Play Store
+
+### Common Rejection Reasons
+
+| Reason | Solution |
+|--------|----------|
+| APK crashes | Test on multiple devices, fix bugs, rebuild |
+| Misleading description | Ensure description matches actual game |
+| Content rating mismatch | Retake questionnaire, ensure accurate |
+| Screenshot quality low | Use actual device screenshots (1080 × 1920) |
+| Icon too small/unclear | Redesign icon (512 × 512, clear) |
+| Missing privacy policy | Add link to privacy policy in metadata |
+| Intellectual property issue | Ensure all art/music are original/licensed |
 
 ---
 
 ## Apple App Store (iOS)
 
-### App Information
+### Account & Setup
+
+**Prerequisites**:
+- Apple Developer Program account ($99/year)
+- Apple ID with verified identity
+- Payment method on file
+- App-specific password (not main Apple ID password)
+
+**Setup Process**:
+1. Visit [App Store Connect](https://appstoreconnect.apple.com)
+2. "My Apps" → Create new app
+3. Select platform (iOS)
+4. Fill in app name, bundle identifier, SKU, language
+5. Select category, subcategory
+
+### App Metadata
 
 #### App Name
-- **Display Name**: "Bump U Box"
-- **Subtitle** (30 chars max): "Roll & Bump Board Games"
-- **Description** (4000 chars):
-  ```
-  Bump U Box brings classic board games to your iPhone and iPad.
-  
-  Play 5 unique games:
-  
-  • BUMP 5: Roll and bump your way to victory
-  • KRAZY 6: Escape in exactly 6 turns
-  • PASS THE CHIP: Control chips through bumping
-  • BUMP U AND 5: Combine bumping with racing
-  • SOLITARY: Challenge mode on the board
-  
-  Perfect for casual gaming, no internet required.
-  
-  Features:
-  - Local pass-and-play multiplayer
-  - Single player challenges
-  - Fast-paced, addictive gameplay
-  - Fully offline
-  - No ads, no in-app purchases
-  - Universal app (iPhone & iPad)
-  ```
+- **Format**: Max 30 characters (for icon label)
+- **Example**: "Bump U"
+- **Important**: Keep short for display under icon
+
+#### Subtitle
+- **Format**: Max 30 characters
+- **Example**: "Roll, Bump, Win!"
+- **Purpose**: Shows below app name in App Store
+
+#### Description
+- **Format**: Max 4,000 characters
+- **Purpose**: Full description of game features and gameplay
+- **Same as Android**: Use similar content, adapted for iOS
+
+**Example**:
+```
+Bump U is a classic board game of strategy and luck for 1-4 players.
+
+Roll dice, move your chip around the board, and race to victory! 
+Bump opponents back to home, strategize your moves, and compete 
+in 5 unique game modes:
+
+• Bump 5 - First to 25 points wins
+• Krazy 6 - Race around twice
+• Pass The Chip - Pass to your opponent
+• Bump U And 5 - Combined rules
+• Solitary - Single-player mode
+
+Features:
+✓ Play offline - no internet required
+✓ Works on iPhone and iPad
+✓ No in-app purchases or ads
+✓ Support for 1-4 players
+✓ AI opponents available
+```
 
 #### Keywords
-- "board games" "dice games" "casual" "family" "offline"
-- (Exactly 30 characters total, optional on iOS 15+)
+- **Format**: 30 characters max total (comma-separated)
+- **Purpose**: Improve search discoverability
+- **Examples**: "board game, dice game, multiplayer, strategy"
+- **Count**: 3-5 keywords recommended
 
 #### Support URL
-- **Required**: Support website or contact page
-- **Example**: `https://yourcompany.com/support`
-- **Content**: How to contact support, FAQ, terms
+- **Format**: HTTPS link to website/support page
+- **Purpose**: Link users can click for help
+- **Example**: "https://bumpu.example.com/support"
 
 #### Privacy Policy URL
-- **Required**: Full privacy policy
-- **Publicly accessible**: Yes
-- **HTTPS**: Required
+- **Format**: HTTPS link (required)
+- **Purpose**: Link to full privacy policy
+- **Example**: "https://bumpu.example.com/privacy"
 
-### Store Graphics
+### App Icon
 
-#### App Icon
-- **Size**: 1024×1024px (for store listing)
-- **Format**: PNG (32-bit, no transparency for App Store icon)
-- **Corners**: No rounded corners (App Store rounds automatically)
-- **Safe Area**: 90% of square
-- **Content**: Game logo or distinctive visual
-- **Quality**: High contrast, recognizable at small sizes
+**Specifications**:
+- **Size**: 1024 × 1024 pixels
+- **Format**: PNG
+- **Transparency**: Not allowed (opaque)
+- **Safe Area**: Avoid corners (rounded in display)
+- **Requirements**: No text (except small logo)
 
-#### Screenshots
-- **Quantity**: Minimum 2, maximum 10 per device family
-- **Resolutions**:
-  - iPhone 6.7" (e.g., iPhone 14 Pro Max): 1290×2796px
-  - iPhone 5.5" (e.g., iPhone 8): 1242×2208px
-  - iPad 12.9" (5th gen): 2048×2732px
+**Process**:
+1. Create/design 1024 × 1024 PNG
+2. App Store Connect → App Information → App Icon
+3. Drag and drop or select file
+4. Preview shows how it will appear
+
+### App Preview Video (Optional)
+
+**Specifications** (if included):
+- **Resolution**: 1080 × 1920 (9:16 portrait)
+- **Duration**: 15-30 seconds
+- **Format**: MP4 or MOV
+- **No audio**: Auto-muted on store
+
+**Purpose**: Showcase gameplay to potential users
+
+**Content Ideas**:
+- Intro (title screen, 3 sec)
+- Gameplay (dice roll, move chip, 8 sec)
+- Game mode showcase (2-3 modes, 5 sec)
+- Win screen (2 sec)
+- Call to action (3 sec)
+
+### Screenshots
+
+**Requirements**:
+- **Minimum**: 2 screenshots
+- **Maximum**: 10 screenshots
+- **Resolution**: 1080 × 1920 pixels (9:16 portrait)
 - **Format**: PNG or JPEG
-- **Content**:
-  1. Main gameplay screen
-  2. Game mode selection
-  3. Different game mode in action
-  4. Win screen celebration
-  5. Optional: Menu/settings
-  6. Optional: Tutorial/instructions
-  7-10. Optional: Additional modes or features
+- **Order**: Shows in order you upload
 
-#### App Preview Video
-- **Duration**: 15-30 seconds (required)
-- **Format**: MP4, MOV, or GIF
-- **Resolution**: 1290×2796px (iPhone), 2048×2732px (iPad)
-- **Frame Rate**: 25-30 fps
-- **Codec**: H.264
-- **Content**: Best gameplay footage, no voiceover (auto-muted)
+**Recommended Set**:
+1. Main menu / title screen
+2. Gameplay (board with chips)
+3. Dice roll / game action
+4. Win condition / celebration
+5. Game settings/options
+6. Rules/help screen
+7. Game mode selection
+8. Single-player AI gameplay
 
-#### Promotional Artwork
-- **App Store**: Art automatically generated from icon
-- **Alternative**: Custom app previews (if needed)
+**Best Practices**:
+- Use actual device screenshots (not mocked-up)
+- Include 1 line of descriptive text (optional)
+- Show key features in each screenshot
+- Consistent device/background
 
-### Store Listing Details
+### Privacy Policy
 
-#### Category
-- **Primary**: Games → Casual
-- **Secondary**: None
+**Required**: Yes, full URL must be provided
 
-#### Age Rating
-- **ESRB Rating**: Likely 3+ (no violence/content)
-- **PEGI Rating**: Likely 3+ (EU)
-- **Content Descriptors**: None
+**Hosting**: On your website (HTTPS required)
 
-#### Languages
-- **Primary**: English
-- **Additional**: [Optional other languages]
+**Content**: Same as Android privacy policy
 
-#### Availability
-- **Countries**: All available countries
-- **Regions**: Worldwide
-
-#### Pricing
-- **Price**: Free
-- **In-App Purchases**: None
-
-#### Sign-In Requirements
-- **Sign-In Not Required**: Yes (no account needed)
-
-#### Rating and Reviews
-- **Allow User Ratings**: Yes
-- **Rating Appearance**: Version or app-wide
-
-### Privacy & Compliance
-
-#### Privacy Policy
-- **Required**: Yes
-- **Content**:
-  ```
-  # Privacy Policy
-  
-  Bump U Box does not collect any personal information.
-  The game does not require user accounts.
-  No analytics, tracking, or advertising.
-  
-  The application works entirely offline and transmits
-  no data to external servers.
-  
-  [Full policy - 500+ words typical for App Store]
-  ```
-
-#### Data & Privacy Declarations
-- **Does your app collect user data?**: No
-- **Does your app track users?**: No
-- **Does your app require login?**: No
-- **Does your app access health/fitness data?**: No
-- **Does your app contain ads?**: No
-
-#### Sign in with Apple
-- **Not Required**: Game doesn't need authentication
-
-#### Export Compliance
-- **Encryption**: Standard (not requiring declaration)
-- **ITAR**: Not applicable
-
-### TestFlight Beta (Optional)
-
-#### TestFlight Setup
-- **Invitations**: 10,000 external testers max
-- **Duration**: 90 days before expiration
-- **Feedback**: Collect tester feedback before submission
-- **Recommended**: Test on 2-3 device types before submission
-
-#### TestFlight Considerations
-- Helps catch last-minute bugs
-- Collects user feedback
-- Increases confidence before submission
-- Optional but recommended
-
-### Submission Checklist
-
-#### Before Submission
-- [ ] App icon (1024×1024px) ready
-- [ ] 2+ screenshots per device size
-- [ ] App preview video prepared
-- [ ] Privacy policy written and published
-- [ ] Built on Mac with Xcode
-- [ ] Archive created for distribution
-- [ ] Provisioning profile configured
-- [ ] Code signing certificate valid
-
-#### Content Compliance
-- [ ] No inappropriate content
-- [ ] Game works as described
-- [ ] No crashes during testing
-- [ ] All features functional
-- [ ] Privacy policy available (URL)
-- [ ] Support URL provided
-- [ ] No copyright infringement
-
-#### Technical Requirements
-- [ ] Minimum iOS 11.0 (or higher)
-- [ ] Supports both portrait and landscape (if applicable)
-- [ ] Retina display compatible
-- [ ] Notch/safe area handling correct
-- [ ] No private API usage
-- [ ] No jailbreak detection
-
-#### Publishing Steps
-1. Enroll in Apple Developer Program ($99/year)
-2. Configure app in App Store Connect
-3. Upload build via Xcode Organizer or Transporter
-4. Fill out app information (metadata, screenshots)
-5. Submit for App Store Review
-6. Wait for approval (24-48 hours typical)
-7. Release when approved (automatic or manual)
-
----
-
-## WebGL Deployment
-
-### Hosting Platforms
-
-#### Option 1: itch.io (Recommended)
-- **Cost**: Free (or 10% revenue share if selling)
-- **Setup**: Create account, upload WebGL build
-- **Domain**: yourname.itch.io/bumpu
-- **Analytics**: Built-in
-- **Features**: Ratings, comments, analytics
-
-#### Option 2: Custom Server
-- **Cost**: $5-10/month (hosting)
-- **Setup**: Upload files via FTP/SFTP
-- **Domain**: yoursite.com/games/bumpu
-- **HTTPS**: Required for WebGL
-- **Performance**: Can optimize further
-
-#### Option 3: GitHub Pages (Free)
-- **Cost**: Free
-- **Setup**: Push to gh-pages branch
-- **Domain**: username.github.io/bumpu
-- **Limitations**: Static hosting only
-- **Performance**: CDN-backed (fast)
-
-### WebGL File Structure
+**Minimum**:
 ```
-index.html (entry point)
-TemplateData/
-  style.css
-  favicon.ico
-Build/
-  WebGL.loader.js
-  WebGL.framework.js.gz
-  WebGL.data.unityweb
-  WebGL.wasm
+PRIVACY POLICY - Bump U
+
+Bump U does not collect, store, or transmit any personal data.
+
+What We Don't Collect:
+- No user accounts or sign-up required
+- No analytics or tracking
+- No device identifiers
+- No crash reports
+- No third-party SDKs or trackers
+
+Gameplay:
+All gameplay is offline and local. No internet connection required.
+
+Questions:
+Contact: [email]
+Website: [website]
 ```
 
-### HTTPS Requirement
-- **Mandatory**: WebGL requires HTTPS
-- **Certificate**: Use Let's Encrypt (free) or similar
-- **Automatic Redirect**: http → https
+### Content Rating (Age Rating)
 
-### Metadata for WebGL
-- **Title**: "Bump U Box"
-- **Description**: Same as app stores
-- **Tags**: board games, dice games, casual, offline
-- **Category**: Games > Casual
+**Required**: ESRB, PEGI, ClassInd rating
+
+**Process**:
+1. App Store Connect → App Information → Age Rating
+2. Answer 8-10 questions
+3. System auto-calculates rating
+
+**Typical Answer for Bump U**:
+- Violence: None
+- Sexual/suggestive: None
+- Alcohol/tobacco: None
+- Gambling: No (dice is game mechanic)
+- Result: 4+ (or equivalent in your region)
+
+### Release Notes
+
+**For Each Version**:
+- **Format**: 170 characters max
+- **Purpose**: Shown on app store updates page
+- **Example**: "Version 1.0 - Initial release with 5 game modes, offline play, and 1-4 player support."
+
+### Category & Subcategory
+
+**Primary Category**: Games
+
+**Subcategory Options**:
+- Board Games (recommended)
+- Strategy Games
+- Casual Games
+
+**Most Appropriate**: Board Games
+
+### Pre-Submission Checklist
+
+- [ ] App name (max 30 chars)
+- [ ] Subtitle (max 30 chars, optional but recommended)
+- [ ] Description (max 4,000 chars)
+- [ ] Keywords (max 30 chars total)
+- [ ] Support URL (HTTPS)
+- [ ] Privacy Policy URL (HTTPS)
+- [ ] App icon (1024 × 1024 PNG)
+- [ ] 2-10 screenshots (1080 × 1920)
+- [ ] Age rating completed
+- [ ] Category selected (Board Games)
+- [ ] Release notes (170 chars)
+- [ ] Build uploaded and processed
+- [ ] EULA accepted
+- [ ] Content rights confirmed
+
+### Submission Process (TestFlight + Production)
+
+**Step 1: Build Preparation**
+- Create signed build in Xcode
+- Upload to App Store Connect
+- Wait for processing (5-10 min)
+
+**Step 2: TestFlight (Internal Testing)**
+- Go to TestFlight tab
+- Build processing complete → add testers
+- Add internal team members (email)
+- Send invitations
+- Test on actual devices
+- Verify 60 FPS, no crashes
+
+**Step 3: TestFlight (External Testing, Optional)**
+- Create external test group
+- Add up to 10,000 beta testers
+- Distribute link (TestFlight link or email)
+- Collect feedback for 1-2 weeks
+- Monitor crash reports
+
+**Step 4: Fill App Metadata**
+- All information from checklist above
+- Screenshots, descriptions, keywords
+- Privacy policy and support URLs
+- Age rating, category
+- Release notes
+
+**Step 5: Select Build for Production**
+- Choose build (internal tested)
+- Attach to production release
+- Review all information
+- Press "Submit for Review"
+
+**Step 6: Apple Review Process**
+- Automated initial checks (1-5 min)
+- Manual review (24-48 hours typical)
+- Potential issues:
+  - App crashes → fix and resubmit
+  - Misleading description → update and resubmit
+  - Intellectual property → clarify or remove
+
+**Step 7: Release**
+- Approved → Release immediately or schedule date
+- Users can download from App Store
+- Monitor crash reports and reviews
+
+### Common Rejection Reasons
+
+| Reason | Solution |
+|--------|----------|
+| Crashes on startup | Test on multiple iOS versions, fix bugs |
+| Unresponsive UI | Ensure buttons work, animations smooth |
+| Privacy policy missing/invalid | Add valid HTTPS URL to privacy policy |
+| Misleading description | Match description to actual game |
+| Inappropriate content | Remove or rate correctly |
+| Incomplete game | Ensure fully playable, not beta |
+| Spam-like behavior | Avoid excessive notifications |
+| Too similar to existing app | Differentiate or clarify unique features |
+
+### Post-Launch Monitoring
+
+**Monitor**:
+- Crash reports (every day)
+- User reviews (for feedback)
+- App analytics (user retention)
+- Performance metrics (FPS stability)
+
+**Updates**:
+- Plan bug fixes for v1.0.1 (if needed)
+- Plan feature updates for v1.1+
+- Maintain regular update cycle (at least annually)
 
 ---
 
-## Common Rejection Reasons (Avoid These)
+## WebGL Deployment (Itch.io)
 
-### Content Issues
-- ❌ Misleading description (game doesn't match description)
-- ❌ Copyrighted content without permission
-- ❌ Offensive language or imagery
-- ❌ Gambling mechanics (even if no real money)
-- ❌ Repeated crashes during review
+### Setup
 
-### Technical Issues
-- ❌ Won't install on target OS
-- ❌ Crashes immediately upon launch
-- ❌ Missing required permissions explanation
-- ❌ Poor icon/screenshots (low quality)
-- ❌ Needs account but doesn't allow offline play
+1. Create [Itch.io](https://itch.io) account (free)
+2. Creator dashboard → Create new project
+3. Fill in title, description, category (Game)
+4. Set as "HTML" game
+5. Upload WebGL build
 
-### Policy Issues
-- ❌ Missing privacy policy
-- ❌ Collects data without disclosure
-- ❌ No contact information
-- ❌ Violates platform guidelines
-- ❌ Previous rejection for same reason
+### Metadata
 
----
+**Title**: "Bump U"  
+**Description**: Same as store listings  
+**Category**: Board Game  
+**Tags**: board-game, dice-game, multiplayer, strategy
 
-## Pre-Release Checklist
+### Build Upload
 
-### Week Before Submission
-- [ ] Game fully playable end-to-end
-- [ ] No known critical bugs
-- [ ] All 5 game modes work
-- [ ] Win conditions function correctly
-- [ ] UI responsive on smallest/largest devices
-- [ ] Touch input feels responsive
-- [ ] Performance acceptable (60 FPS or 30+ minimum)
+**Process**:
+1. Create WebGL build in Unity
+2. Go to project settings
+3. Select "Upload to itch.io"
+4. Drag build folder → Upload
+5. Make public when ready
 
-### Day Before Submission
-- [ ] Final build created and tested
-- [ ] Screenshots taken (all required sizes)
-- [ ] Icon finalized
-- [ ] Privacy policy final
-- [ ] Support URL active
-- [ ] All text proofread
-- [ ] Review process requirements understood
+**File Structure to Upload**:
+```
+bumpu-webgl/
+├─ index.html
+├─ Build/
+│  ├─ [ProjectName].framework.js.gz
+│  ├─ [ProjectName].data.gz
+│  └─ [ProjectName].wasm.gz
+├─ TemplateData/
+│  ├─ style.css
+│  └─ favicon.ico
+└─ StreamingAssets/
+```
 
-### Submission Day
-- [ ] Create app listing
-- [ ] Upload build
-- [ ] Add store graphics
-- [ ] Fill all metadata
-- [ ] Double-check compliance
-- [ ] Submit for review
+### Publishing
+
+1. Set visibility: Public
+2. Choose if monetization needed
+3. Add optional "Download" option (allow offline play)
+4. Share link with community
 
 ---
 
-## Post-Launch
+## Cross-Store Coordination
 
-### Monitor Reviews
-- **Frequency**: Check daily for first week
-- **Response**: Reply to user feedback
-- **Issues**: Address reported bugs quickly
+### Timeline
 
-### Update Release Notes
-- **Format**: Simple bullet points
-- **Content**: New features, bug fixes, performance improvements
-- **Examples**: "Fixed crash on startup" "Improved performance on older devices"
+```
+Week 1: Prepare assets (all platforms)
+  ├─ Icon, screenshots, descriptions
+  ├─ Privacy policy
+  └─ Content rating questionnaire
 
-### Tracking
-- **Analytics**: Monitor downloads, crashes, ratings
-- **Platforms**: Use Google Play Console and App Store Connect
+Week 2: Internal testing
+  ├─ Android: Closed testing on Play Store
+  ├─ iOS: TestFlight internal
+  └─ WebGL: Manual testing on itch.io
+
+Week 3: Submission
+  ├─ Android: Submit to Play Store
+  ├─ iOS: Submit to App Store
+  └─ WebGL: Already live on itch.io
+
+Week 4: Monitoring
+  ├─ Check for approvals/rejections
+  ├─ Fix issues if needed
+  ├─ Go live on iOS/Android
+  └─ Monitor crash reports
+```
+
+### Consistent Messaging
+
+**Across all platforms**:
+- Same app name (or minor adaptation)
+- Same description (localize if needed)
+- Same icon design
+- Consistent screenshots style
+- Same privacy policy
 
 ---
 
 ## Related Documents
+
 - BUILD_PIPELINE.md
 - PLATFORM_REQUIREMENTS.md
 - SPRINT_7_BUILD_PREP.md
 
 ---
 
-**Status**: Complete - Production Ready
+**Last Updated**: Nov 14, 2025  
+**Status**: Complete & Ready for Implementation

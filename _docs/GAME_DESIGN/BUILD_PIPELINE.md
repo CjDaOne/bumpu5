@@ -1,392 +1,502 @@
 # Build Pipeline
+
 **Created**: Nov 14, 2025  
 **Owner**: Build Engineer  
-**Status**: ACTIVE
+**Status**: ACTIVE  
+**Authority**: Team Assignment Complete
 
 ---
 
-## WebGL Build Setup
+## Overview
 
-### Build Settings Configuration
+The Build Pipeline defines the complete process for creating optimized, release-ready builds for all three target platforms: WebGL (browser), Android (Play Store), and iOS (App Store). This document standardizes build settings, optimization steps, and quality gates.
+
+---
+
+## WebGL Build
+
+### Target Specification
+- **Platform**: WebGL (IL2CPP backend)
+- **Resolution**: 1080 × 1920 (portrait, 9:16 aspect ratio)
+- **Target Browsers**: Chrome, Firefox, Safari (latest 2 versions)
+- **FPS Target**: 60 FPS (desktop), 30 FPS minimum (mobile browsers)
+- **File Size Target**: < 50 MB (compressed)
+
+### Build Settings (Unity)
+
 ```
 File → Build Settings
-├─ Platform: WebGL
-├─ Target Arch: WebGL 2.0 (hardware accelerated)
-├─ Development Build: No (production)
-├─ IL2CPP: Yes (faster, optimized bytecode)
-├─ Compression Format: Gzip (80% smaller)
-└─ Development Build: Disabled
+
+Platform: WebGL
+Scene List:
+  - MainMenu
+  - Gameplay
+  - Settings
+  
+Architecture: IL2CPP
+Scripting Backend: IL2CPP (not Mono)
+IL2CPP Code Generation: Faster builds
+
+Target Architecture: WebGL 2.0
+Compression: Gzip (reduces .js.gz by 70%)
+
+Graphics:
+  - Rendering Path: Forward
+  - Color Space: sRGB
+  - Anti Aliasing: 2x
+  - Texture Compression: Default
+
+Resolution:
+  - Default Canvas Width: 1080
+  - Default Canvas Height: 1920
+  - Match Browser Window: true (responsive)
+
+Other:
+  - Strip Engine Code: true (smaller build)
+  - Managed Stripping Level: High
+  - Player Loop: Optimization for WebGL
 ```
 
-### WebGL Optimization
-- **Compression**: Gzip (reduces build size 60-80%)
-- **IL2CPP**: Enabled (IL2CPP→C++ compilation, faster)
-- **Linking Level**: Aggressive (remove unused code)
-- **Strip Engine Code**: Yes (removes unused Unity features)
-- **Memory**: 256MB minimum allocation
+### WebGL-Specific Optimizations
 
-### Build Output
-- **Location**: `./WebGLBuilds/`
-- **Files**:
-  - `index.html` (entry point)
-  - `Build/[name].json` (metadata)
-  - `Build/[name].js` (game code, IL2CPP)
-  - `Build/[name].wasm` (WebAssembly bytecode)
-- **Size Target**: < 50MB (with compression)
+**Compression**:
+```
+Build → Output directory
+Compression: Gzip (server-side)
+Result: ~15-20 MB gzip
+```
 
-### Build Command (CLI)
+**Memory Management**:
+```csharp
+// In game code: Optimize garbage collection
+Instantiate() in Update → Create pool instead
+Destroy() during gameplay → Defer until phase end
+Texture memory: Use atlases instead of individual textures
+```
+
+**Loading Screen**:
+- Build → Player → WebGL Template
+- Create custom loading screen (percentage, spinner)
+- Target: < 10s initial load, < 3s scene load
+
+**JavaScript Size**:
+- Use LOD system for complex scenes
+- Strip unused code (managed stripping)
+- Minimize 3D objects (board 12 cells only, no extras)
+
+### Build Command Line
+
 ```bash
-unity -projectPath . \
+# Windows
+"C:\Program Files\Unity\Hub\Editor\[Version]\Editor\Unity.exe" \
+  -projectPath "C:\Projects\BumpU" \
   -buildTarget WebGL \
-  -executeMethod BuildTools.BuildWebGL \
+  -customBuildTarget WebGL \
+  -executeMethod BuildScript.BuildWebGL \
+  -quit -batchmode
+
+# Mac/Linux
+/Applications/Unity/Hub/Editor/[Version]/Unity \
+  -projectPath "/Projects/BumpU" \
+  -buildTarget WebGL \
+  -executeMethod BuildScript.BuildWebGL \
   -quit -batchmode
 ```
 
----
+### Output Structure
 
-## Android Build Process
-
-### Build Settings Configuration
 ```
-File → Build Settings
-├─ Platform: Android
-├─ Minimum API Level: 21 (Android 5.0)
-├─ Target API Level: 33+ (latest)
-├─ Graphics API: OpenGL ES 3.0 / Vulkan
-├─ Development Build: No (production)
-├─ IL2CPP: Yes
-└─ Compression: LZ4 (balance size/speed)
-```
-
-### APK Build Process
-1. **Keystore Setup** (first build only)
-   - Create keystore: `keytool -genkey -v -keystore release.keystore ...`
-   - Location: `Assets/Keystore/release.keystore`
-   - Password: [secure password]
-
-2. **Player Settings**
-   - Bundle Identifier: `com.yourcompany.bumpu`
-   - Version: 1.0.0
-   - Build Number: 1
-   - Minimum API: 21
-   - Target API: 33+
-
-3. **Build APK**
-   ```
-   Unity Editor → Build Settings → Build
-   Output: Bump_U_1.0.0.apk
-   ```
-
-4. **Sign APK** (automatic with keystore)
-   - Signing certificate: Present in keystore
-   - v2 Signing: Enabled
-
-### AAB (App Bundle) Build
-- **For Play Store**: Use AAB format (more flexible)
-- **Format**: Android App Bundle (.aab)
-- **Build Settings**: Same as APK, select "Build App Bundle"
-- **Output**: `Bump_U_1.0.0.aab`
-
-### Build Configuration
-- **Compression**: LZ4 (faster load, slightly larger)
-- **Engine Code**: Stripped (remove unused)
-- **Graphics**: Vulkan primary, OpenGL fallback
-- **Memory**: 512MB (standard for modern devices)
-
-### Build Command (CLI)
-```bash
-unity -projectPath . \
-  -buildTarget Android \
-  -executeMethod BuildTools.BuildAndroid \
-  -quit -batchmode
-```
-
----
-
-## iOS Build Process
-
-### Build Settings Configuration
-```
-File → Build Settings
-├─ Platform: iOS
-├─ Minimum iOS Version: 11.0
-├─ Targeted Device Family: iPhone + iPad
-├─ Graphics API: Metal
-├─ Development Build: No (production)
-├─ IL2CPP: Yes
-└─ Debugging: Disabled
-```
-
-### Xcode Export Process
-1. **Initial Build**
-   ```
-   Unity → Build Settings → Build
-   Output: Xcode project (iOS_Build/)
-   ```
-
-2. **Open in Xcode**
-   ```bash
-   open iOS_Build/Unity-iPhone.xcodeproj
-   ```
-
-3. **Configure in Xcode**
-   - Team ID: [Apple Developer Account]
-   - Bundle Identifier: `com.yourcompany.bumpu`
-   - Version: 1.0.0
-   - Build: 1
-   - Provisioning Profile: Automatic
-
-4. **Archive**
-   ```
-   Product → Archive
-   Output: .xcarchive
-   ```
-
-5. **Upload to App Store Connect**
-   - Use Xcode Organizer or Transporter
-   - Upload .xcarchive
-   - Notarization: Automatic (Apple handles)
-
-### Build Configuration
-- **Metal**: Primary graphics API (faster on iOS)
-- **Bitcode**: Enabled (for device compatibility)
-- **Optimization**: Fastest, Smallest (tradeoff)
-- **Signing**: Automatic (Xcode manages)
-
-### Build Command (CLI)
-```bash
-unity -projectPath . \
-  -buildTarget iOS \
-  -executeMethod BuildTools.BuildiOS \
-  -quit -batchmode
-```
-
----
-
-## CI/CD Pipeline (Optional)
-
-### GitHub Actions Workflow
-```yaml
-name: Build on Push
-
-on: [push, pull_request]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build WebGL
-        run: |
-          unity -projectPath . \
-            -buildTarget WebGL \
-            -executeMethod BuildTools.BuildWebGL \
-            -quit -batchmode
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: WebGL-Build
-          path: WebGLBuilds/
-```
-
-### Jenkins Pipeline (Alternative)
-- Trigger on git push
-- Build all platforms in parallel
-- Run automated tests
-- Deploy to staging
-- Generate release notes
-
----
-
-## Build Outputs & Locations
-
-### WebGL
-```
-WebGLBuilds/
+WebGL Build/
 ├─ index.html
+├─ Build/
+│  ├─ [ProjectName].framework.js.gz
+│  ├─ [ProjectName].data.gz
+│  ├─ [ProjectName].wasm.gz
+│  └─ [ProjectName].symbols.json
 ├─ TemplateData/
-└─ Build/
-   ├─ WebGL.loader.js
-   ├─ WebGL.framework.js.gz
-   ├─ WebGL.data.unityweb
-   └─ WebGL.wasm
-```
-
-### Android
-```
-Builds/Android/
-├─ Bump_U_Release.apk (file)
-├─ Bump_U_Release.aab (for Play Store)
-└─ symbols.zip (debug symbols)
-```
-
-### iOS
-```
-iOS_Build/
-├─ Unity-iPhone.xcodeproj (Xcode project)
-└─ Built Products/
-   └─ Bump_U.ipa (installed app file)
+│  ├─ style.css
+│  ├─ favicon.ico
+│  └─ UnityProgress.js
+└─ StreamingAssets/
+   └─ [any streamed content]
 ```
 
 ---
 
-## Compression Settings
+## Android Build
 
-### WebGL Compression
-- **Format**: Gzip (.gz)
-- **Compression Level**: 9 (maximum)
-- **Target Size**: < 50MB
-- **Decompression Time**: < 2 seconds (browser)
+### Target Specification
+- **Platform**: Android
+- **Min API Level**: 24 (Android 7.0)
+- **Target API Level**: 34 (Android 14)
+- **Architecture**: ARM64 (armv8) primary, ARMv7 fallback
+- **FPS Target**: 60 FPS (modern), 30 FPS minimum (older devices)
+- **File Size Target**: < 150 MB (APK/AAB)
 
-### Android Compression
-- **Format**: LZ4 (fast decompression)
-- **Uncompressed Assets**: ~80MB
-- **Compressed APK**: ~30-40MB
-- **Uncompressed at Install**: ~150MB total
+### Build Settings (Unity)
 
-### iOS Compression
-- **Format**: Bitcode (Apple compresses further)
-- **App Size**: ~40-60MB (on App Store)
-- **Downloaded Size**: ~30-50MB (varies by compression)
-- **Installed Size**: ~200MB (full game + assets)
+```
+File → Build Settings
 
----
+Platform: Android
+Scene List:
+  - MainMenu
+  - Gameplay
+  - Settings
 
-## IL2CPP Configuration
+Player Settings:
+  Graphics:
+    - API: OpenGL ES 3.0
+    - Auto Graphics API: Off (specify ES 3.0 only)
+    - Rendering Path: Forward
+    - Color Space: sRGB
+    - V Sync: Off (use FPS limiter in code)
+    - Anti Aliasing: 2x
+    - Texture Compression: ETC2
+  
+  Resolution:
+    - Default Orientation: Portrait
+    - Orientation: Portrait (lock)
+    - Allow Fullscreen: Yes
+    - Default Width: 1080
+    - Default Height: 1920
+    - Refresh Rate: 60 Hz (or device max)
+  
+  Identification:
+    - Package Name: com.bumpu.game
+    - Version: 1.0.0
+    - Bundle Version Code: 1
+    - Minimum API Level: 24
+    - Target API Level: 34
+  
+  Other:
+    - Scripting Backend: IL2CPP
+    - IL2CPP Code Generation: Faster builds
+    - Managed Stripping Level: High
+    - Strip Engine Code: true
+    - Build Splitting: Split per CPU architecture
 
-### IL2CPP Settings
-- **Enable**: Yes (for all platforms)
-- **Linker**: Aggressive (remove unused code)
-- **CPU: arm64 (Android & iOS 64-bit)
-- **Script Stripping**: Enabled
+Publishing Settings:
+  - Keystore: Create/use signing keystore
+  - Key Alias: [your-alias]
+  - Key Password: [secure password]
+  - Keystore Password: [secure password]
+  - Create: Check "Create new keystore if not found"
+```
 
-### Script Stripping Process
-- Analyzes code dependencies
-- Removes unused classes/methods
-- Can cause runtime errors if not careful
-- Add `link.xml` for protected code
+### Keystore Creation (One-Time)
 
-### link.xml Example
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<linker>
-  <assembly fullname="Assembly-CSharp">
-    <namespace fullname="Gameplay">
-      <type fullname="GameMode" preserve="all"/>
-    </namespace>
-  </assembly>
-</linker>
+```bash
+# Generate keystore
+keytool -genkey -v \
+  -keystore bumpu.keystore \
+  -keyalg RSA \
+  -keysize 2048 \
+  -validity 10000 \
+  -alias bumpu_key
+
+# Then reference in Player Settings:
+# Publishing Settings → Keystore Path: bumpu.keystore
+# Key Alias: bumpu_key
+```
+
+### Android-Specific Optimizations
+
+**Graphics**:
+```csharp
+// Frame rate limiting
+QualitySettings.vSyncCount = 0; // Disable V Sync
+Application.targetFrameRate = 60; // Cap at 60 FPS
+
+// Detect device capability and adjust
+if (SystemInfo.processorFrequency < 2000)
+{
+    // Older device: reduce effects
+    QualitySettings.SetQualityLevel(0); // Lowest
+}
+```
+
+**Memory**:
+```csharp
+// Monitor memory (typical limit: 2GB)
+long memoryUsage = SystemInfo.systemMemorySize;
+if (memoryUsage < 2000)
+{
+    // Low-end device: reduce asset quality
+    Resources.UnloadUnusedAssets();
+}
+```
+
+**Safe Area**:
+```csharp
+// Handle system gesture areas
+Rect safeArea = Screen.safeArea;
+// Adjust HUD panels to account for notches, gesture buttons
+```
+
+### Build Types
+
+**APK (Direct Installation)**:
+```
+Build → Build APK
+Output: BumpU.apk (~100-150 MB)
+Use for: Testing, sideloading
+Limitation: Single architecture (slower build)
+```
+
+**AAB (App Bundle for Play Store)**:
+```
+Build → Build and Run (or Build App Bundle)
+Output: app-release.aab
+Use for: Play Store submission
+Benefit: Dynamic feature modules, optimized delivery
+```
+
+### Build Command Line
+
+```bash
+# Android APK
+Unity.exe -projectPath "C:\Projects\BumpU" \
+  -buildTarget Android \
+  -executeMethod BuildScript.BuildAndroidAPK \
+  -quit -batchmode
+
+# Android AAB
+Unity.exe -projectPath "C:\Projects\BumpU" \
+  -buildTarget Android \
+  -executeMethod BuildScript.BuildAndroidAAB \
+  -quit -batchmode
 ```
 
 ---
 
-## Build Optimization Checklist
+## iOS Build
 
-### Pre-Build
-- [ ] All scenes included in Build Settings
-- [ ] No compile errors
-- [ ] All assets imported
-- [ ] Player settings configured per platform
-- [ ] Keystore/signing setup for Android/iOS
+### Target Specification
+- **Platform**: iOS (iPhone, iPad)
+- **Min iOS Version**: 12.0
+- **Target iOS Version**: 17.0+
+- **Architecture**: ARM64 (universal, no 32-bit)
+- **FPS Target**: 60 FPS (modern), 30 FPS minimum (older)
+- **File Size Target**: < 150 MB (App Store)
 
-### Build Phase
-- [ ] IL2CPP enabled
-- [ ] Compression enabled
-- [ ] Engine code stripping enabled
-- [ ] Development build disabled
-- [ ] Linking level aggressive
+### Build Settings (Unity)
 
-### Post-Build
-- [ ] Test on actual devices (not just Editor)
-- [ ] Verify all gameplay works
-- [ ] Check performance (FPS, memory)
-- [ ] Verify graphics rendering
-- [ ] Test touch input (mobile)
-
-### Size Optimization
-- [ ] Compress textures (reduce to 25% if possible)
-- [ ] Remove unused assets
-- [ ] Use asset bundles for large content (optional)
-- [ ] Verify final build size < targets
-
----
-
-## Build Size Targets
-
-### WebGL
-- **Target**: < 50MB (with compression)
-- **Decompress Time**: < 2 seconds
-- **Testing**: Chrome, Firefox, Safari
-
-### Android
-- **APK Target**: < 40MB
-- **AAB Target**: < 45MB (Play Store)
-- **Testing**: Multiple device sizes/OS versions
-
-### iOS
-- **App Size**: < 60MB
-- **Download Size**: < 50MB (on App Store)
-- **Testing**: iPhone + iPad, various iOS versions
-
----
-
-## Platform-Specific Build Settings
-
-### Graphics API Per Platform
-| Platform | Primary | Fallback | Auto-Graphics |
-|----------|---------|----------|--------------|
-| WebGL | WebGL 2 | WebGL 1 | Automatic |
-| Android | Vulkan | OpenGL ES 3 | Automatic |
-| iOS | Metal | OpenGL ES 2 | Metal only |
-
-### CPU Architecture
-| Platform | Arch | Notes |
-|----------|------|-------|
-| WebGL | wasm | WebAssembly |
-| Android | arm64 | 64-bit standard |
-| iOS | arm64 | 64-bit standard |
-
----
-
-## Testing After Build
-
-### Automated Tests
-- Unit tests (gameplay logic)
-- Integration tests (board + UI)
-- Performance tests (FPS, memory)
-
-### Manual Testing
-1. Launch game
-2. Select game mode
-3. Play full round (test win condition)
-4. Test all 5 modes
-5. Verify FPS on target devices
-
-### Device Testing Matrix
 ```
-WebGL:
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
+File → Build Settings
 
-Android:
-- Pixel 5 / Galaxy S21 (modern)
-- Pixel 4 / Galaxy S10 (mid-range)
-- Older device (performance baseline)
+Platform: iOS
+Scene List:
+  - MainMenu
+  - Gameplay
+  - Settings
 
-iOS:
-- iPhone 12 / 13
-- iPhone 11 / XS
-- iPad (if supported)
+Player Settings:
+  Graphics:
+    - Metal Editor Support: Yes
+    - Metal API Validation: No (release builds)
+    - API: Metal
+    - Rendering Path: Forward
+    - Color Space: sRGB
+    - Anti Aliasing: 2x
+    - Texture Compression: ASTC (iOS best)
+  
+  Resolution:
+    - Default Orientation: Portrait
+    - Orientation: Portrait (lock)
+    - Status Bar Hidden: No
+    - Supported Device Orientations: Portrait only
+    - Default Width: 1080
+    - Default Height: 1920
+    - Refresh Rate: 60 Hz (or device max)
+  
+  Identification:
+    - Product Name: Bump U
+    - Bundle Identifier: com.bumpu.game
+    - Version: 1.0.0
+    - Build: 1
+    - Supported Device Families: iPhone only
+  
+  Other:
+    - Scripting Backend: IL2CPP
+    - IL2CPP Code Generation: Faster builds
+    - Arm64: Yes (only)
+    - Managed Stripping Level: High
+    - Strip Engine Code: true
+
+Architecture:
+  - iOS Architecture: ARM64 only
+  - Enable on-demand resources: No (for v1)
+
+Signing & Capabilities:
+  - Automatically Sign: Yes (or manual)
+  - Team ID: [Your Apple Developer Team ID]
+  - Development Team: [Your Team Name]
+  - Provisioning Profile: Automatic
+```
+
+### Provisioning & Signing
+
+**One-Time Setup**:
+1. Register app bundle identifier: `com.bumpu.game`
+2. Create App ID in Apple Developer account
+3. Create provisioning profiles (Development, Distribution)
+4. Download certificates & profiles
+
+**Build Process**:
+1. Unity → Build
+2. Xcode opens automatically
+3. Xcode: General → Signing & Capabilities
+4. Select Team → Xcode auto-signs
+5. Product → Archive
+6. Organizer → Distribute App
+
+### iOS-Specific Optimizations
+
+**Safe Area**:
+```csharp
+// Handle notch, home indicator
+Rect safeArea = Screen.safeArea;
+RectTransform hudPanel = GetComponent<RectTransform>();
+hudPanel.offsetMin = new Vector2(safeArea.xMin, safeArea.yMin);
+hudPanel.offsetMax = new Vector2(-safeArea.xMax, -safeArea.yMax);
+```
+
+**Frame Rate**:
+```csharp
+// iOS ProMotion (120 Hz) detection
+int maxRefreshRate = Screen.currentResolution.refreshRateRatio.numerator / 
+                     Screen.currentResolution.refreshRateRatio.denominator;
+Application.targetFrameRate = Mathf.Min(maxRefreshRate, 60);
+```
+
+**Memory**:
+```csharp
+// Typical limit: 2-4 GB depending on device
+long memoryUsage = SystemInfo.systemMemorySize;
+```
+
+### Build Command Line
+
+```bash
+# iOS Xcode project generation
+Unity.exe -projectPath "C:\Projects\BumpU" \
+  -buildTarget iOS \
+  -executeMethod BuildScript.BuildiOS \
+  -quit -batchmode
+
+# Then use Xcode CLI to build & archive
+xcodebuild -project BumpU.xcodeproj \
+  -scheme Unity-iPhone \
+  -configuration Release \
+  -archivePath build/BumpU.xcarchive \
+  archive
+
+# Upload to App Store
+xcodebuild -exportArchive \
+  -archivePath build/BumpU.xcarchive \
+  -exportOptionsPlist ExportOptions.plist \
+  -exportPath build/
+```
+
+---
+
+## Device Testing Matrix
+
+### Minimum Device List
+
+| Platform | Device | OS | RAM | Notes |
+|----------|--------|----|----|-------|
+| Android | Pixel 5a | 12 | 6GB | Reference mid-range |
+| Android | Galaxy S21 | 12 | 8GB | High-end |
+| Android | Galaxy A10 | 10 | 2GB | Low-end (optional) |
+| Android | Pixel 4a | 11 | 6GB | Performance baseline |
+| iOS | iPhone 12 | 15 | 4GB | Modern reference |
+| iOS | iPhone 13 | 16 | 4GB | Current standard |
+| iOS | iPhone SE | 15 | 3GB | Budget option |
+| WebGL | Chrome | Latest | N/A | Primary browser |
+| WebGL | Firefox | Latest | N/A | Secondary browser |
+| WebGL | Safari | Latest | N/A | iOS web support |
+
+### Test Checklist Per Device
+
+- [ ] Game launches without crash
+- [ ] Menu loads in < 5 seconds
+- [ ] Gameplay smooth (60 FPS or stable 30 FPS)
+- [ ] All buttons responsive
+- [ ] Safe area respected (notch, gesture areas)
+- [ ] Touch input accurate
+- [ ] Audio plays correctly
+- [ ] No memory warnings
+- [ ] Battery usage reasonable
+
+---
+
+## Performance Targets
+
+### Frame Rate
+- **Target**: 60 FPS
+- **Acceptable**: 30 FPS minimum (locked)
+- **Monitor**: Use Profiler in-game
+
+### Memory Usage
+- **WebGL**: < 200 MB (browser memory)
+- **Android**: < 500 MB (app memory)
+- **iOS**: < 500 MB (app memory)
+
+### Load Times
+- **App Launch**: < 5 seconds
+- **Scene Load**: < 2 seconds
+- **UI Response**: < 100ms
+
+### Build Size
+- **WebGL**: < 50 MB (gzipped)
+- **Android**: < 150 MB (AAB)
+- **iOS**: < 150 MB (App Store)
+
+---
+
+## Quality Assurance Gate
+
+Before submission, verify:
+
+- [ ] All 5 game modes work end-to-end
+- [ ] No crashes on supported devices
+- [ ] No memory leaks
+- [ ] FPS target met
+- [ ] Load times acceptable
+- [ ] All UI responsive
+- [ ] Save/load works (if applicable)
+- [ ] Settings persist
+- [ ] Audio/music works
+- [ ] Performance profiler OK
+
+---
+
+## Continuous Integration (Optional, Future)
+
+**Setup** (post-launch):
+```
+GitHub → Actions → Create workflow
+Trigger: On push to main
+Steps:
+  1. Checkout code
+  2. Run Unity tests
+  3. Build WebGL
+  4. Build Android AAB
+  5. Upload artifacts
+Result: Automated builds on every commit
 ```
 
 ---
 
 ## Related Documents
+
 - PLATFORM_REQUIREMENTS.md
 - APP_STORE_REQUIREMENTS.md
 - SPRINT_7_BUILD_PREP.md
 
 ---
 
-**Status**: Complete - Production Ready
+**Last Updated**: Nov 14, 2025  
+**Status**: Complete & Ready for Implementation

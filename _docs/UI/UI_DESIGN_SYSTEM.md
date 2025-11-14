@@ -1,255 +1,240 @@
 # UI Design System
+
 **Created**: Nov 14, 2025  
 **Owner**: UI Engineer  
-**Status**: ACTIVE
+**Status**: ACTIVE  
+**Authority**: Team Assignment Complete
 
 ---
 
-## Color Palette
+## Colors
 
-### Primary Colors
-- **Primary Blue**: #1E88E5 (main buttons, focus states)
-- **Primary Dark**: #1565C0 (hover state, darker shade)
-- **Primary Light**: #64B5F6 (disabled, background tints)
+### Primary Palette
+- **Primary Action**: `#2563EB` (Blue) - Dice button, main interactions
+- **Primary Alt**: `#1E40AF` (Dark Blue) - Hover/pressed state
+- **Success**: `#10B981` (Green) - Win, successful actions
+- **Error**: `#EF4444` (Red) - Invalid moves, errors
+- **Warning**: `#F59E0B` (Amber) - Penalties, cautions
 
-### Secondary Colors
-- **Success Green**: #43A047 (win state, valid actions)
-- **Warning Orange**: #FB8C00 (alert, pending actions)
-- **Error Red**: #E53935 (invalid actions, penalties)
-- **Info Cyan**: #29B6F6 (information badges)
+### Secondary Palette
+- **Background**: `#F9FAFB` (Light Gray) - Canvas background
+- **Surface**: `#FFFFFF` (White) - Cards, panels
+- **Border**: `#E5E7EB` (Gray) - Dividers, edges
+- **Text Primary**: `#1F2937` (Dark Gray) - Main text
+- **Text Secondary**: `#6B7280` (Medium Gray) - Secondary text
+- **Disabled**: `#D1D5DB` (Light Gray) - Disabled buttons/text
 
-### Neutral Colors
-- **White**: #FFFFFF (backgrounds, primary text)
-- **Gray 100**: #F5F5F5 (light backgrounds)
-- **Gray 500**: #9E9E9E (secondary text, borders)
-- **Gray 900**: #212121 (primary text, dark elements)
-- **Black**: #000000 (highest contrast, emphasis)
-
-### State Colors
-- **Disabled**: #BDBDBD (grayed out, 50% opacity)
-- **Focus**: #1E88E5 with 4px outline
-- **Hover**: Lighten primary by 10%
-- **Active**: Darken primary by 15%
+### Game-Specific
+- **Player 1**: `#EF4444` (Red)
+- **Player 2**: `#3B82F6` (Blue)
+- **Player 3**: `#FBBF24` (Amber)
+- **Player 4**: `#10B981` (Green)
+- **Valid Move Highlight**: `#DBEAFE` (Light Blue, 50% opacity)
+- **Selected Cell**: `#BFDBFE` (Medium Blue, 80% opacity)
 
 ---
 
-## Spacing System
+## Spacing Scale
 
 ### Base Unit: 8px
-- **xs**: 4px (micro spacing, letter-spacing)
-- **sm**: 8px (tight spacing, small padding)
-- **md**: 16px (standard spacing, padding)
-- **lg**: 24px (larger spacing, section margins)
-- **xl**: 32px (major spacing, container margins)
-- **2xl**: 48px (page-level spacing)
-- **3xl**: 64px (major section breaks)
+- **xs**: 4px - Small internal spacing
+- **sm**: 8px - Button padding, small gaps
+- **md**: 16px - Standard padding, card spacing
+- **lg**: 24px - Section spacing, large gaps
+- **xl**: 32px - Major section breaks
+- **2xl**: 48px - Top-level spacing
 
-### Usage Guidelines
-- Padding (buttons): 12px (vertical) × 24px (horizontal)
-- Padding (cards): 24px (all sides)
-- Margin (between elements): 16px
-- Margin (between sections): 32px
-- Gap (grid/flex): 16px or 24px
+### Use Cases
+- **sm (8px)**: Icon-to-text spacing, small button padding
+- **md (16px)**: Card padding, button padding, content margins
+- **lg (24px)**: Section separation, modal padding
+- **xl (32px)**: Screen padding, major layout blocks
 
 ---
 
 ## Typography
 
 ### Font Family
-- **Primary**: Roboto (system default fallback: -apple-system, BlinkMacSystemFont, "Segoe UI")
-- **Mono**: Roboto Mono (code, numbers, IDs)
+- **Primary Font**: `Roboto` or `Arial` (fallback)
+- **Weight Range**: 400 (regular), 600 (medium), 700 (bold)
 
 ### Font Sizes
-- **Display**: 48px (1.5rem, headings, large titles)
-- **Headline**: 36px (1.125rem, section titles)
-- **Title**: 28px (0.875rem, card titles, subsections)
-- **Body Large**: 18px (0.5625rem, primary text)
-- **Body Regular**: 16px (0.5rem, default text size)
-- **Body Small**: 14px (0.4375rem, secondary text, captions)
-- **Label**: 12px (0.375rem, UI labels, tags)
-- **Mono**: 14px (fixed-width code, statistics)
-
-### Font Weights
-- **Light**: 300 (secondary information, disabled text)
-- **Regular**: 400 (body text, default)
-- **Medium**: 500 (labels, buttons, emphasis)
-- **Bold**: 700 (headings, important text)
+- **Display**: 32px (main menu title)
+- **Heading 1**: 28px (screen headers)
+- **Heading 2**: 24px (section headers)
+- **Heading 3**: 20px (subsection headers)
+- **Body Large**: 16px (main content)
+- **Body Regular**: 14px (secondary content, labels)
+- **Body Small**: 12px (helper text, captions)
+- **Caption**: 10px (annotations, timestamps)
 
 ### Line Heights
-- **Tight**: 1.2 (headings, titles)
-- **Normal**: 1.5 (body text)
-- **Relaxed**: 1.75 (long-form content)
-- **Loose**: 2.0 (accessibility-focused paragraphs)
+- **Display**: 1.1 (32px)
+- **Heading**: 1.2 (24-28px text)
+- **Body**: 1.5 (14-16px text)
+- **Tight**: 1.3 (labels, buttons)
 
-### Text Contrast
-- **AA Standard**: 4.5:1 (body text on background)
-- **AAA Standard**: 7:1 (important text, accessibility)
-- **Minimum**: Never go below 3:1 for any text
+### Font Weights
+- **Regular (400)**: Body text, regular content
+- **Medium (600)**: Button labels, subsection headers
+- **Bold (700)**: Main headers, important labels
 
 ---
 
-## Button System
+## Buttons
 
-### Standard Button Sizes
-- **Large**: 56px height, 24px padding (primary actions)
-- **Medium**: 48px height, 20px padding (standard buttons, touch)
-- **Small**: 40px height, 16px padding (secondary actions)
-- **Tiny**: 32px height, 12px padding (tertiary actions)
-
-### Mobile Button Sizing
-- **Touch Target**: Minimum 44×44px (iOS/Android standard)
-- **Recommended**: 48×48px (optimal for mobile)
-- **Spacing Between**: 8px minimum gap
+### Standard Button
+- **Height**: 48px (desktop), 56px (mobile)
+- **Min Width**: 96px (desktop), 120px (mobile)
+- **Padding**: 12px 24px (desktop), 16px 32px (mobile)
+- **Border Radius**: 8px
+- **Font Size**: 14px (desktop), 16px (mobile)
+- **Font Weight**: 600
 
 ### Button States
-- **Default**: Primary color background, white text
-- **Hover**: 10% lighter background, pointer changes
-- **Pressed/Active**: 15% darker background, 2px inset shadow
-- **Disabled**: Gray background, 50% opacity, no pointer events
-- **Focus**: 4px outline in primary color, 2px offset
+- **Default**: Background color, text color
+- **Hover**: Slightly darker background (10% darkening)
+- **Pressed/Active**: Darker background (20% darkening), slight scale down (98%)
+- **Disabled**: Gray background (#D1D5DB), gray text (#9CA3AF), 50% opacity
 
-### Button Types
-- **Primary**: Bold, primary color, main actions
-- **Secondary**: Outlined, gray border, secondary actions
-- **Tertiary**: Text-only, primary color text, minimal actions
-- **Danger**: Error red background, white text, destructive actions
-
----
-
-## Icon System
-
-### Size Grid
-- **xs**: 16px (inline, labels, small UI)
-- **sm**: 24px (buttons, compact UI)
-- **md**: 32px (standard icons, toolbar)
-- **lg**: 48px (feature icons, hero elements)
-- **xl**: 64px (display icons, prominent features)
-
-### Icon Specifications
-- **Stroke Weight**: 2px (medium, legible)
-- **Corner Radius**: 2px (rounded corners, modern feel)
-- **Padding/Clearance**: Minimum 4px around icon
-- **Color**: Inherit from text color or apply specific color
-
-### Icon Usage
-- **Buttons**: Icon + label (preferred) or icon-only (with tooltip)
-- **Navigation**: Icon-only with label below
-- **Inline**: Icon + text, vertically centered
-- **Size Pairing**: Never mix icon sizes in same component
-
----
-
-## Animation & Motion
-
-### Animation Timing
-- **Fast**: 150ms (micro interactions, state changes)
-- **Normal**: 300ms (transitions, fade effects)
-- **Slow**: 500ms (major layout changes, modals)
-- **Extra Slow**: 750ms (immersive sequences, emphasis)
-
-### Easing Curves
-- **Ease-In-Out**: cubic-bezier(0.4, 0, 0.2, 1) (standard transitions)
-- **Ease-Out**: cubic-bezier(0, 0, 0.2, 1) (entering elements)
-- **Ease-In**: cubic-bezier(0.4, 0, 1, 1) (exiting elements)
-- **Linear**: Linear (continuous motion, spins, progress)
-
-### Animation Types
-- **Fade**: Opacity change (150-300ms)
-- **Slide**: Transform translate (300ms)
-- **Scale**: Transform scale (250ms)
-- **Rotate**: Transform rotate (300-500ms)
-- **Bounce**: Spring easing (400-600ms)
-
-### Animation Guidelines
-- Use animations to guide user attention
-- Disable animations if system prefers reduced motion
-- Keep animations < 1 second for UI (except special effects)
-- Avoid flashing/strobe effects (accessibility)
-
----
-
-## Dark Mode Support
-
-### Dark Palette
-- **Background**: #121212 (primary dark background)
-- **Surface**: #1E1E1E (card/component background)
-- **Text Primary**: #FFFFFF (main text, 100% opacity)
-- **Text Secondary**: #BDBDBD (secondary text, 70% opacity)
-- **Divider**: #424242 (borders, 12% opacity)
-
-### Contrast in Dark Mode
-- **AA Standard**: Still 4.5:1 (white on dark background achieves this)
-- **Lighter colors**: Use gray tints (avoid pure colors)
-- **Icons**: Same sizing, higher opacity (60-100%)
-
-### Implementation
-- CSS custom properties (--dark-bg, --dark-text, etc.)
-- Prefers-color-scheme media query
-- System preference detection
-- Manual toggle option (optional)
-
----
-
-## Component Tokens
-
-### Button Components
-- Primary Button: Primary Blue bg, white text, 48px tall
-- Secondary Button: Outlined, gray border, gray text
-- Danger Button: Error Red bg, white text
-- Text Button: No background, primary blue text
-
-### Input Components
-- Text Input: 44px height (mobile), gray border, gray placeholder
-- Touch Target: 44×44px minimum
-- Focus State: Blue outline, 4px offset
-- Error State: Red border, error message below
-
-### Cards
-- Padding: 24px (standard)
-- Border-radius: 8px (modern rounded corners)
-- Elevation: 4px shadow (subtle depth)
-- Max-width: 400px (mobile), unlimited (desktop)
-
-### Modals
-- Overlay: Black, 30% opacity
-- Modal width: 90% (mobile), 500px (desktop)
-- Padding: 24px (standard, 16px mobile)
-- Border-radius: 16px (emphasis)
-
----
-
-## Accessibility Requirements
+### Button Variants
+| Variant | Background | Text | Border |
+|---------|-----------|------|--------|
+| Primary | #2563EB | White | None |
+| Secondary | #FFFFFF | #2563EB | 2px #2563EB |
+| Danger | #EF4444 | White | None |
+| Success | #10B981 | White | None |
+| Disabled | #D1D5DB | #9CA3AF | None |
 
 ### Touch Targets
-- Minimum: 44×44px (WCAG 2.1 Level AAA)
-- Preferred: 48×48px (Android Material standard)
-- Spacing: 8px minimum between targets
+- **Minimum**: 44px × 44px (WCAG standard)
+- **Recommended**: 56px × 56px (mobile)
+- **Spacing Between**: 8px minimum
+
+---
+
+## Icons
+
+### Icon Grid
+- **Small**: 16px × 16px
+- **Regular**: 24px × 24px
+- **Large**: 32px × 32px
+- **XL**: 48px × 48px
+
+### Icon Style
+- **Stroke Weight**: 2px (consistent)
+- **Corner Radius**: 2px (slight rounding on corners)
+- **Padding Inside Icon**: 2px (internal breathing room)
+
+### Icon Use Cases
+- **Action Icons**: Dice button, BUMP button, declare win
+- **UI Icons**: Menu, settings, help, close
+- **Status Icons**: Valid move check, error cross, win star
+
+---
+
+## Animations
+
+### Duration Standards
+- **Quick Feedback**: 150ms (button press, toggle, quick feedback)
+- **Transition**: 250ms (fade in/out, slide)
+- **Entrance**: 300ms (modal appear, complex animation)
+- **Drag/Drop**: 200ms (smooth movement)
+
+### Easing Curves
+- **Ease-In**: `cubic-bezier(0.4, 0, 1, 1)` - Exit animations
+- **Ease-Out**: `cubic-bezier(0, 0, 0.2, 1)` - Entrance animations
+- **Ease-In-Out**: `cubic-bezier(0.4, 0, 0.2, 1)` - Continuous animations
+- **Custom Spring**: `cubic-bezier(0.68, -0.55, 0.265, 1.55)` - Bounce effect
+
+### Animation Targets
+- **Scale**: 0.95 (pressed) to 1.0 (normal)
+- **Opacity**: 0 to 1 (fade in)
+- **Translate**: -10px to 0px (slide in from left)
+- **Rotate**: 0deg to 360deg (spin for loading)
+
+---
+
+## Layout Components
+
+### Card
+- **Border Radius**: 8px
+- **Padding**: 16px
+- **Shadow**: `0 1px 3px rgba(0,0,0,0.1)`
+- **Background**: #FFFFFF
+- **Border**: 1px #E5E7EB
+
+### Modal/Dialog
+- **Max Width**: 480px (desktop), 90vw (mobile)
+- **Border Radius**: 12px
+- **Padding**: 24px
+- **Shadow**: `0 10px 25px rgba(0,0,0,0.2)`
+- **Backdrop**: rgba(0,0,0,0.5)
+
+### Input Field
+- **Height**: 40px
+- **Padding**: 8px 12px
+- **Border Radius**: 6px
+- **Border**: 1px #D1D5DB
+- **Font Size**: 14px
+- **Focus Border**: 2px #2563EB
+
+---
+
+## Responsive Breakpoints
+
+### Screen Sizes
+- **Mobile**: < 480px
+- **Tablet**: 480px - 768px
+- **Desktop**: > 768px
+
+### Layout Adjustments
+| Element | Mobile | Tablet | Desktop |
+|---------|--------|--------|---------|
+| Font Size (Body) | 14px | 14px | 16px |
+| Button Height | 56px | 48px | 48px |
+| Padding | 12px | 16px | 24px |
+| Column Count | 1 | 2 | 3 |
+
+---
+
+## Accessibility
 
 ### Color Contrast
-- Text on background: 4.5:1 (AA)
-- Large text (18pt+): 3:1 (AA minimum)
-- Graphics/components: 3:1 (WCAG 2.1)
-- Focus indicators: High contrast outline
+- **Text on Background**: Minimum 4.5:1 ratio (WCAG AA)
+- **Large Text**: Minimum 3:1 ratio
+- **UI Components**: Minimum 3:1 ratio
 
-### Text Legibility
-- Minimum font size: 12px (12px body text is minimum)
-- Preferred: 16px body text
-- Max line length: 60-80 characters
-- Line height: 1.5 minimum (1.75 preferred)
+### Touch Targets
+- **Minimum Size**: 44px × 44px
+- **Minimum Spacing**: 8px between targets
+- **Recommended**: 56px × 56px for mobile games
 
-### Interactive Elements
-- Focus indicators visible (not removed)
-- Keyboard navigation supported
-- Touch feedback provided (visual or haptic)
-- State changes clear (not color-only)
+### Visual Indicators
+- **Focus State**: 2px outline, #2563EB, 4px offset
+- **Disabled State**: Visual distinction (color + opacity)
+- **Active State**: Clear visual feedback (scale, color)
+
+---
+
+## Dark Mode (Future)
+
+### Dark Palette
+- **Background**: `#1F2937`
+- **Surface**: `#111827`
+- **Border**: `#374151`
+- **Text Primary**: `#F9FAFB`
+- **Text Secondary**: `#D1D5DB`
 
 ---
 
 ## Related Documents
+
 - HUD_ARCHITECTURE.md
 - UI_STANDARDS.md
 - SPRINT_5_UI_PREP.md
 
 ---
 
-**Status**: Complete - Production Ready
+**Last Updated**: Nov 14, 2025  
+**Status**: Complete & Ready for Implementation

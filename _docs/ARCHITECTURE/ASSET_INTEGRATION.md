@@ -1,381 +1,479 @@
 # Asset Integration
+
 **Created**: Nov 14, 2025  
 **Owner**: Board Engineer  
-**Status**: ACTIVE
+**Status**: ACTIVE  
+**Authority**: Team Assignment Complete
+
+---
+
+## Overview
+
+Asset Integration defines the workflow for importing, organizing, and managing art assets (sprites, animations, materials) in Unity. This document ensures consistent naming, folder structure, and usage patterns across the project.
 
 ---
 
 ## Asset Import Workflow
 
-### Step 1: Import PNG Sprite Sheet
-- **Location**: Assets/Board/Sprites/
-- **Naming**: `board_cells.png`, `board_chips.png`
-- **Format**: PNG with transparency (RGBA)
-- **Resolution**: 2x resolution recommended (will scale down)
+### Standard Workflow (PNG Sprite Sheets)
 
-### Step 2: Configure Import Settings
+**Step 1: Prepare Art File**
+- File format: PNG (24-bit RGB with alpha)
+- Resolution: 2x target screen resolution (2160 × 3840 for 1080 × 1920 base)
+- DPI: 72 DPI (web standard)
+- Color profile: sRGB (not linear)
+
+**Step 2: Place in Project**
 ```
-Inspector → Texture Type: Sprite (2D and UI)
-          → Sprite Mode: Multiple (if sheet)
-          → Pixels Per Unit: 100 (standard)
-          → Filter Mode: Point (pixel-perfect, no blur)
-          → Compression: Compressed (unless VRAM limited)
+Assets/
+└─ Board/
+   └─ Sprites/
+      └─ board_cells.png
 ```
 
-### Step 3: Slice Sprites
-- **Slicing Tool**: Sprite Editor → Automatic Slice
-- **Grid Cell Size**: 100×100px (cells), 80×80px (chips)
-- **Padding**: 0px (no extra space)
-- **Apply** and save
+**Step 3: Configure Import Settings**
+- Texture Type: Sprite (2D and UI)
+- Sprite Mode: Multiple (grid-based slicing)
+- Pixel Per Unit: 100 (for 1080 × 1920 reference)
+- Compression: High Quality
+- Filter: Point (no filtering - crisp pixel art)
 
-### Step 4: Create Prefabs
-- **Cell Prefab**: Drag sliced cell sprite → create prefab
-- **Chip Prefab**: Drag sliced chip sprite → create prefab
-- **Location**: Assets/Board/Prefabs/
-- **Apply** components (BoxCollider, Animator, etc.)
+**Step 4: Slice Sprites (Grid or Custom)**
+- Grid size: Determine from art (e.g., 200 × 200 per sprite)
+- Cell size: 200 × 200 pixels (if uniform)
+- Offset: 0, 0
+- Padding: 2 pixels (internal padding)
 
-### Step 5: Reference in BoardGridManager
-- **Method**: Assign via Inspector or via Resources.Load()
-- **Fallback**: Built-in placeholder if missing
-- **Testing**: Verify sprites appear correctly in Editor
+**Step 5: Name Individual Sprites**
+- Convention: `{Asset}_{Type}_{State}`
+- Example: `Board_Cell_Empty`, `Board_Cell_Filled`, `Chip_Red`
+
+**Step 6: Create Prefabs**
+- Drag sprite into scene
+- Add components (Button, Image, Animator, etc.)
+- Test visually
+- Drag from scene into `Assets/Board/Prefabs/`
+- Name: `CellView.prefab`
+
+**Step 7: Reference in Code**
+```csharp
+[SerializeField] private Sprite cellEmptySprite;
+[SerializeField] private Sprite chipRedSprite;
+
+// In editor: Drag sprites into inspector
+```
 
 ---
 
 ## Naming Conventions
 
-### Sprite Names (After Slicing)
-- **Cell Sprites**: `Cell_Empty`, `Cell_Base`, `BoardCell_Variant1`
-- **Chip Sprites**: `Chip_Player1`, `Chip_Player2`, `Chip_Player3`, `Chip_Player4`
-- **Highlight**: `Highlight_Ring`, `Highlight_Glow`
-- **Animations**: `Cell_Highlight`, `Chip_Move`, `Chip_Bump`
+### Sprite Naming
 
-### Prefab Names
-- **Cell Prefab**: `CellView.prefab`
-- **Chip Prefab**: `ChipView.prefab`
-- **Board Prefab**: `BoardGridManager.prefab` (container)
+**Format**: `{Category}_{Component}_{State}`
 
-### Animation Clip Names
-- **State Naming**: `{Component}_{State}` (e.g., `Cell_HighlightEnter`)
-- **Action Naming**: `{Component}_{Action}` (e.g., `Chip_Move`)
-- **Effect Naming**: `{Effect}_{Type}` (e.g., `Particle_Bump`)
+**Examples**:
+- `Board_Cell_Empty` - Empty board cell
+- `Board_Cell_WithChip_Red` - Cell with red chip
+- `Board_Cell_WithChip_Blue` - Cell with blue chip
+- `Chip_Red` - Red player chip (standalone)
+- `Chip_Blue` - Blue player chip
+- `Button_Dice` - Dice roll button
+- `Button_Bump` - Bump action button
+- `Icon_Settings` - Settings gear icon
+- `Icon_Help` - Help question mark
 
-### Folder Structure
-```
-Assets/
-├─ Board/
-│  ├─ Sprites/
-│  │  ├─ board_cells.png (sprite sheet)
-│  │  ├─ board_chips.png (sprite sheet)
-│  │  └─ board_effects.png (highlight, effects)
-│  ├─ Prefabs/
-│  │  ├─ CellView.prefab
-│  │  ├─ ChipView.prefab
-│  │  └─ BoardGridManager.prefab
-│  ├─ Animations/
-│  │  ├─ Cell/
-│  │  │  ├─ Cell_HighlightEnter.anim
-│  │  │  ├─ Cell_HighlightExit.anim
-│  │  │  └─ Highlight_Pulse.anim
-│  │  ├─ Chip/
-│  │  │  ├─ Chip_Move.anim
-│  │  │  ├─ Chip_Bump.anim
-│  │  │  └─ Chip_Exit.anim
-│  │  └─ Controllers/
-│  │     ├─ CellViewController.controller
-│  │     └─ ChipViewController.controller
-│  └─ Materials/
-│     ├─ Cell_Default.mat
-│     ├─ Cell_Highlight.mat
-│     └─ Chip_Shadow.mat
-```
+**Naming Rules**:
+- PascalCase for category (Board, Chip, Button, Icon)
+- PascalCase for components (Cell, Dice, Bump)
+- PascalCase for states (Empty, Filled, Pressed, Disabled)
+- Use underscores to separate parts
+- No spaces or special characters
+- Lowercase acceptable for short names: `chip_red` (both acceptable)
+
+### Prefab Naming
+
+**Format**: `{Type}{Purpose}.prefab`
+
+**Examples**:
+- `CellView.prefab` - Individual board cell
+- `ChipView.prefab` - Chip piece
+- `DiceButton.prefab` - Dice roll button
+- `ScoreboardRow.prefab` - Player score row
+- `NotificationPanel.prefab` - Notification UI
+
+**Rules**:
+- PascalCase
+- Descriptive and unique
+- Include "View" suffix for visual prefabs
+- Include "Manager" suffix for managers (if prefab-based)
+
+### Material Naming
+
+**Format**: `{Surface}_{Effect}.mat`
+
+**Examples**:
+- `Cell_Default.mat` - Normal cell material
+- `Cell_Highlight.mat` - Highlighted cell material
+- `Chip_Red.mat` - Red chip material
+- `UI_Button_Default.mat` - Button default state
+
+### Animation Clip Naming
+
+**Format**: `{Component}_{State}`
+
+**Examples**:
+- `Cell_HighlightEnter` - Highlight fade-in
+- `Cell_HighlightExit` - Highlight fade-out
+- `Chip_Drop` - Chip landing/bouncing
+- `Chip_Spin` - Chip spinning
+- `Button_Press` - Button press animation
+- `WinCelebration_Confetti` - Confetti effect
 
 ---
 
-## Sprite Slicing Specifications
+## Sprite Slicing
 
-### Cell Sprite Sheet
-- **Grid Size**: 100×100px cells
-- **Columns**: 6 (cells per row)
-- **Rows**: 2 (2 rows of 6)
-- **Total Sprites**: 12 (one per cell position)
-- **Offset**: 0px (no padding)
-- **Padding**: 0px between sprites
+### Grid-Based Slicing (Uniform Sprites)
 
-### Chip Sprite Sheet
-- **Grid Size**: 80×80px chips
-- **Columns**: 4 (Player 1-4)
-- **Rows**: 1 (one row)
-- **Total Sprites**: 4 (one per player color)
-- **Offset**: 0px
-- **Padding**: 0px
+**Use When**: All sprites in sheet are same size
 
-### Highlight Sprite
-- **Size**: 100×100px (to fit cell)
-- **Style**: Glow ring or gradient
-- **Purpose**: Visual feedback for valid moves
-- **Offset**: Center of cell
+**Process**:
+1. Import PNG as described above
+2. In inspector: Sprite Mode → Multiple
+3. Click "Sprite Editor"
+4. Click "Slice" dropdown → Grid by Cell Count (or Grid by Cell Size)
+5. Set column/row counts or cell size
+6. Click "Slice"
+7. Apply
+
+**Example**:
+```
+Sheet: 400 × 400 pixels
+Cells: 2 × 2 grid
+Cell size: 200 × 200 each
+Result: 4 sprites (Sprite 0, Sprite 1, Sprite 2, Sprite 3)
+Rename each to match convention
+```
+
+### Custom Slicing (Non-Uniform Sprites)
+
+**Use When**: Sprites are different sizes or irregular layout
+
+**Process**:
+1. Import PNG as described
+2. Sprite Mode → Multiple
+3. Click "Sprite Editor"
+4. Manually draw rectangles around each sprite
+5. Name each slice individually
+6. Apply
+
+**Rules**:
+- No overlap between rectangles
+- Include padding around sprites (2-4 pixels)
+- Leave gaps between sprites for transparency
+- Test rendering (no bleeding/artifacts)
 
 ---
 
 ## Prefab Structure
 
 ### CellView Prefab
+
 ```
 CellView (GameObject)
-├─ Transform
-│  ├─ Position: Calculated by BoardGridManager
-│  ├─ Scale: 1,1,1 (unit size)
-│  └─ Rotation: 0,0,0
 │
-├─ SpriteRenderer (Background cell)
-│  ├─ Sprite: Cell_Empty (assigned per instance)
-│  ├─ Sorting Order: 0 (back layer)
-│  ├─ Color: #F5F5F5 (light gray)
-│  └─ Material: Cell_Default
+├─ Properties
+│  ├─ Layer: UI
+│  └─ Tag: Cell
 │
-├─ CanvasGroup (For opacity transitions)
-│  ├─ Alpha: 1 (full opacity)
-│  └─ Blocks Raycasts: Yes
+├─ RectTransform
+│  ├─ Width: 120
+│  ├─ Height: 120
+│  ├─ Anchor: Middle Center
+│  └─ Position: (determined by board layout)
 │
-├─ Animator (For highlight animation)
-│  ├─ Controller: CellViewController.controller
-│  └─ Avatar: None (not humanoid)
+├─ BackgroundImage (Image component)
+│  ├─ Source Image: Board_Cell_Empty
+│  ├─ Color: White (255, 255, 255, 255)
+│  ├─ Raycast Target: true
+│  └─ RectTransform: 120 × 120 (fill parent)
 │
-├─ BoxCollider2D (For tap detection)
-│  ├─ Size: 100×100px
-│  ├─ Offset: 0,0
-│  ├─ Is Trigger: Yes
-│  └─ Body Type: Dynamic (no gravity)
+├─ ChipImage (Image component) - INITIALLY DISABLED
+│  ├─ Source Image: Chip_Red (or reference in code)
+│  ├─ Color: Red (255, 0, 0, 255) or player color
+│  ├─ Raycast Target: false
+│  └─ RectTransform: 100 × 100 (centered, smaller than cell)
 │
-├─ EventTrigger (For pointer events)
-│  └─ OnPointerClick: CellView.OnPointerClick()
+├─ HighlightOverlay (Image component) - INITIALLY DISABLED
+│  ├─ Source Image: None (use color instead)
+│  ├─ Color: Light Blue (219, 234, 254, 180) with pulsing animation
+│  ├─ Raycast Target: false
+│  └─ RectTransform: 130 × 130 (slightly larger)
 │
-├─ CellView (Custom Script)
-│  ├─ CellIndex: [0-11]
-│  └─ Public methods: SetState(), Highlight(), UnHighlight()
+├─ SelectionBorder (Image component) - INITIALLY DISABLED
+│  ├─ Source Image: Border sprite (3px outline) or procedural
+│  ├─ Color: Blue (37, 99, 235, 255)
+│  ├─ Raycast Target: false
+│  └─ RectTransform: 130 × 130
 │
-├─ HighlightVisual (Child, Highlight Ring)
-│  ├─ Image (or SpriteRenderer)
-│  ├─ Sprite: Highlight_Ring
-│  ├─ Sorting Order: 1 (above cell)
-│  └─ Active: False (hidden until needed)
+├─ Button (Button component)
+│  ├─ Transition: Color Tint
+│  ├─ Target Graphic: BackgroundImage
+│  ├─ Normal Color: White
+│  ├─ Highlighted Color: Light Gray (240, 240, 240)
+│  ├─ Pressed Color: Medium Gray (200, 200, 200)
+│  ├─ Disabled Color: Light Gray (211, 211, 211)
+│  └─ On Click: CellView.OnTapped()
 │
-└─ ChipView (Child, optional - created at runtime)
-   └─ [See ChipView Prefab structure below]
+├─ Animator (Animator component) - OPTIONAL
+│  ├─ Controller: CellView.controller
+│  ├─ Avatar: None (2D sprite, no avatar)
+│  └─ Culling Type: Always animate
+│
+└─ CellView (MonoBehaviour script)
+   ├─ cellIndex: int [set in inspector]
+   ├─ backgroundImage: Image [auto-populated]
+   ├─ chipImage: Image [auto-populated]
+   ├─ highlightOverlay: Image [auto-populated]
+   ├─ selectionBorder: Image [auto-populated]
+   ├─ animator: Animator [auto-populated]
+   │
+   ├─ SetChipColor(Color): void
+   ├─ SetState(CellState): void
+   ├─ SetHighlight(HighlightState): void
+   ├─ OnTapped(): void
+   └─ AnimateChipArrival(): IEnumerator
 ```
 
-### ChipView Prefab
+### ChipView Prefab (Alternate Structure)
+
 ```
-ChipView (GameObject, spawned as needed)
-├─ Transform
-│  ├─ Position: Same as parent CellView
-│  ├─ Scale: 1,1,1
-│  └─ Rotation: 0,0,0
+ChipView (GameObject) - Floating chip for animation
 │
-├─ SpriteRenderer (Chip visual)
-│  ├─ Sprite: Chip_Player1 (assigned on instantiation)
-│  ├─ Sorting Order: 2 (above cell)
-│  ├─ Color: Tinted per player
-│  └─ Material: Chip_Default
+├─ SpriteRenderer (SpriteRenderer component)
+│  ├─ Sprite: Chip_Red (or dynamic)
+│  ├─ Color: Red (255, 0, 0, 255)
+│  ├─ Sorting Order: 10 (above board)
+│  └─ Flip: None
 │
-├─ Shadow (Child, optional)
-│  ├─ SpriteRenderer
-│  ├─ Sprite: Chip_Shadow
-│  ├─ Sorting Order: 1 (below chip)
-│  └─ Offset: 5px down, 5px right
+├─ Animator (Animator component)
+│  ├─ Controller: ChipView.controller
+│  └─ Parameters: [move_distance, bump_intensity]
 │
-├─ Animator (For chip animations)
-│  ├─ Controller: ChipViewController.controller
-│  └─ Parameters: moveDirection, isBumping
-│
-├─ ParticleSystem (For bump effect)
-│  ├─ Prefab: Particle_Bump
-│  ├─ Play on Awake: False
-│  ├─ Emission: Enabled when bump occurs
-│  └─ Duration: 500ms
-│
-└─ ChipView (Custom Script)
-   ├─ PlayerId: [1-4]
-   ├─ CurrentCell: [0-11]
-   └─ Public methods: Move(), Bump(), Exit()
+└─ ChipView (MonoBehaviour script)
+   ├─ spriteRenderer: SpriteRenderer
+   ├─ animator: Animator
+   ├─ SetColor(Color): void
+   └─ PlayAnimation(string): void
 ```
 
 ---
 
 ## Material Requirements
 
-### Default Cell Material
-```
-Name: Cell_Default
-Shader: Standard (or custom 2D)
-Color: #F5F5F5 (light gray)
-Properties:
-  Metallic: 0
-  Smoothness: 0.5
-  Emission: None
-```
+### Default Material
+- **Name**: `Standard.mat` (Unity default)
+- **Shader**: Sprites/Default
+- **Texture**: None (uses sprite's texture)
+- **Color**: White (1, 1, 1, 1)
 
 ### Highlight Material
-```
-Name: Cell_Highlight
-Shader: Custom (additive or glow)
-Color: #43A047 (success green) or #1E88E5 (primary blue)
-Properties:
-  Additive Blend: Yes (glowing effect)
-  Emission: Yes (bright, visible)
-  Smoothness: High (glossy)
-```
-
-### Chip Shadow Material
-```
-Name: Chip_Shadow
-Shader: Standard
-Color: #000000 (black, 30% opacity)
-Properties:
-  Metallic: 0
-  Smoothness: 0
-  Emission: None
-  Alpha: 0.3
-```
+- **Name**: `Cell_Highlight.mat`
+- **Shader**: Sprites/Default
+- **Color**: Light Blue (0.86, 0.92, 0.99, 0.5)
+- **Blend Mode**: Additive (for overlay effect)
 
 ### Disabled Material
-```
-Name: Cell_Disabled
-Shader: Standard
-Color: #BDBDBD (gray, desaturated)
-Properties:
-  Metallic: 0
-  Smoothness: 0
-  Emission: None
-  Saturation: -100 (grayscale)
+- **Name**: `Cell_Disabled.mat`
+- **Shader**: Sprites/Default
+- **Color**: Gray (0.7, 0.7, 0.7, 0.5)
+- **Blend Mode**: Normal
+
+### Use in Code
+```csharp
+public class CellView : MonoBehaviour
+{
+    [SerializeField] private Material defaultMaterial;
+    [SerializeField] private Material highlightMaterial;
+    [SerializeField] private Material disabledMaterial;
+    
+    public void SetHighlight(bool highlight)
+    {
+        Image img = GetComponent<Image>();
+        img.material = highlight ? highlightMaterial : defaultMaterial;
+    }
+}
 ```
 
 ---
 
 ## Animation Clips
 
-### Cell Highlight Animations
+### Cell Highlight Animation
 
-#### Cell_HighlightEnter.anim
-- **Duration**: 250ms
-- **Target**: HighlightVisual scale and opacity
-- **Keyframes**:
-  - 0ms: Scale 0, Opacity 0
-  - 250ms: Scale 1, Opacity 0.8
-- **Easing**: Ease-out
+**Duration**: 1000ms (1 second loop)  
+**Keyframes**: 
+- 0ms: Opacity 0.6
+- 500ms: Opacity 0.9
+- 1000ms: Opacity 0.6
 
-#### Cell_HighlightExit.anim
-- **Duration**: 250ms
-- **Target**: HighlightVisual scale and opacity
-- **Keyframes**:
-  - 0ms: Scale 1, Opacity 0.8
-  - 250ms: Scale 0, Opacity 0
-- **Easing**: Ease-in
+**Easing**: Smooth (sine curve)  
+**Loop**: Yes  
+**Looped Time**: True
 
-#### Highlight_Pulse.anim
-- **Duration**: 600ms (looping)
-- **Target**: HighlightVisual scale
-- **Keyframes**:
-  - 0ms: Scale 1
-  - 300ms: Scale 1.1 (peak)
-  - 600ms: Scale 1
-- **Easing**: Ease-in-out
-- **Loop**: Yes, continuous
+### Chip Movement Animation
 
-### Chip Animations
+**Duration**: 300ms (smooth movement)  
+**Start**: Source cell position
+**End**: Destination cell position  
+**Path**: Straight line (no arc)  
+**Easing**: EaseInOutCubic
 
-#### Chip_Move.anim
-- **Duration**: 300ms
-- **Target**: ChipView position (lerp from → to)
-- **Path**: Straight line, no arc
-- **Easing**: Ease-out (smooth landing)
-- **Sound**: Optional slide sound (attached to animation event)
+**Keyframes**:
+- 0ms: Position = source
+- 150ms: Position = lerp(source, dest, 0.5)
+- 300ms: Position = dest
 
-#### Chip_Bump.anim
-- **Duration**: 400ms
-- **Target**: ChipView position (off-board) and scale (grows)
-- **Keyframes**:
-  - 0ms: Position source, Scale 1
-  - 200ms: Position over cell, Scale 1.1
-  - 400ms: Position off-board, Scale 0
-- **Easing**: Ease-in (accelerating)
-- **Particle Trigger**: At 200ms (collision moment)
-- **Sound**: Bump impact sound at 200ms
+### Chip Bump Animation
 
-#### Chip_Exit.anim
-- **Duration**: 300ms
-- **Target**: ChipView position (move off board edge) and fade
-- **Keyframes**:
-  - 0ms: Position on finish cell, Opacity 1
-  - 300ms: Position off-board, Opacity 0
-- **Easing**: Ease-out
+**Duration**: 200ms (quick bounce)  
+**Keyframes**:
+- 0ms: Scale (1, 1), Position original
+- 100ms: Scale (1.2, 1.2), Position moved back
+- 200ms: Scale (1, 1), Position original
+
+**Easing**: EaseOutBounce
+
+### Button Press Animation
+
+**Duration**: 150ms  
+**Keyframes**:
+- 0ms: Scale (1, 1)
+- 75ms: Scale (0.95, 0.95)
+- 150ms: Scale (1, 1)
+
+**Easing**: EaseInOutQuad
 
 ---
 
-## Asset Organization Best Practices
+## Asset Organization (Folder Structure)
 
-### Directory Structure
-- **Sprites**: All image assets, organized by type
-- **Prefabs**: Reusable game objects
-- **Animations**: Animation clips, organized by object
-- **Materials**: Material instances
-- **Resources**: Assets loaded at runtime (optional)
-
-### Naming Consistency
-- Always use PascalCase for files (`CellView.prefab`)
-- Always use snake_case for sprites (`board_cells.png`)
-- Always include object type in name (`Cell_*`, `Chip_*`)
-- Avoid version numbers (use git instead)
-
-### Version Control
-- Include `.meta` files with assets
-- Exclude `Library/` folder
-- Commit artwork changes with code changes
-- Tag releases with art asset versions
+```
+Assets/
+│
+├─ Board/
+│  │
+│  ├─ Sprites/
+│  │  ├─ board_cells.png
+│  │  ├─ board_chips.png
+│  │  └─ board_backgrounds.png
+│  │
+│  ├─ Prefabs/
+│  │  ├─ CellView.prefab
+│  │  ├─ ChipView.prefab
+│  │  └─ BoardGridManager.prefab
+│  │
+│  ├─ Animations/
+│  │  ├─ Cell/
+│  │  │  ├─ CellView.controller
+│  │  │  ├─ Cell_HighlightEnter.anim
+│  │  │  ├─ Cell_HighlightExit.anim
+│  │  │  └─ Cell_PulseLoop.anim
+│  │  │
+│  │  └─ Chip/
+│  │     ├─ ChipView.controller
+│  │     ├─ Chip_Drop.anim
+│  │     ├─ Chip_Bump.anim
+│  │     └─ Chip_Spin.anim
+│  │
+│  └─ Materials/
+│     ├─ Cell_Default.mat
+│     ├─ Cell_Highlight.mat
+│     └─ Cell_Disabled.mat
+│
+├─ UI/
+│  │
+│  ├─ Sprites/
+│  │  ├─ ui_buttons.png (contains button sprites)
+│  │  └─ ui_icons.png
+│  │
+│  ├─ Prefabs/
+│  │  ├─ DiceButton.prefab
+│  │  ├─ BumpButton.prefab
+│  │  ├─ DeclareWinButton.prefab
+│  │  ├─ ScoreboardRow.prefab
+│  │  └─ NotificationPanel.prefab
+│  │
+│  ├─ Animations/
+│  │  ├─ Button_Press.anim
+│  │  ├─ Button_Hover.anim
+│  │  └─ Notification_FadeOut.anim
+│  │
+│  └─ Materials/
+│     ├─ UI_Button_Default.mat
+│     └─ UI_Text_Default.mat
+│
+└─ Audio/
+   ├─ SFX/
+   │  ├─ dice_roll.wav
+   │  ├─ bump.wav
+   │  └─ win.wav
+   │
+   └─ Music/
+      └─ gameplay_loop.mp3
+```
 
 ---
 
-## Performance Optimization
+## Import Settings Template
 
-### Sprite Optimization
-- **Compression**: Use PNG compression (RGB 16-bit or RGBA)
-- **Resolution**: 2x design resolution (will scale down)
-- **Pixel Perfect**: Use point sampling (no blur)
-- **Atlasing**: Combine related sprites in sheet
+### Image Import Settings (Standard)
+```
+Texture Type: Sprite (2D and UI)
+Sprite Mode: Multiple
+Pixels Per Unit: 100
+Sprite Pivot: Center
+Generate Mipmaps: Off
+Wrap Mode: Clamp
+Filter Mode: Point (no filtering)
+Compression: High Quality (or LZ4)
+Alpha Handling: Keep Alpha
+```
 
-### Material Optimization
-- **Shaders**: Use built-in shaders (fast)
-- **Texture Atlases**: Reduce draw calls
-- **Instancing**: Use material instancing for multiple chips
-- **Custom Shaders**: Only if necessary
-
-### Animation Optimization
-- **Baking**: Bake animation into mesh if static
-- **Keyframe Reduction**: Minimize keyframes (linear interpolation)
-- **Clip Reuse**: Use same animation for similar moves
-- **Disable When Offscreen**: Disable animators when not visible
+### Prefab Settings (Standard)
+```
+Drag on Canvas as UI element
+Or drag into 3D scene for world space
+Set up RectTransforms for proper sizing
+Add scripts and event handlers
+Test before saving as prefab
+```
 
 ---
 
-## Fallback & Placeholder Assets
+## Testing Checklist
 
-### Built-in Placeholders
-- **Missing Sprites**: Use Unity's default pink square
-- **Missing Materials**: Use default white material
-- **Missing Animations**: Use instant state changes (no animation)
-
-### Testing Without Art
-- **Colored Boxes**: Simple colored quads for development
-- **Debug Labels**: Text labels showing cell index
-- **Temporary Visuals**: Sufficient for gameplay testing
+- [ ] All sprites import without errors
+- [ ] Sprite names follow convention
+- [ ] Sprites render without bleeding/artifacts
+- [ ] Prefabs instantiate correctly
+- [ ] Materials apply correctly
+- [ ] Animations play at correct speed
+- [ ] Colors match design system
+- [ ] Resolution scales properly (1080 × 1920)
+- [ ] Safe area handling (notch, gesture areas)
+- [ ] No missing dependencies
+- [ ] File sizes reasonable (compress if needed)
 
 ---
 
 ## Related Documents
+
 - BOARD_ARCHITECTURE.md
 - INPUT_HANDLING.md
-- SPRINT_4_KICKOFF.md
+- UI_DESIGN_SYSTEM.md
 
 ---
 
-**Status**: Complete - Production Ready
+**Last Updated**: Nov 14, 2025  
+**Status**: Complete & Ready for Implementation
