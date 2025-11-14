@@ -10,6 +10,7 @@
 ## What We're Building
 
 The user interface layer—all buttons, text displays, menus, and popups that the player innaging teracts with during gameplay. This includes:
+
 - Dice roll button & animation
 - BUMP button (context-sensitive)
 - Scoreboard (live score updates)
@@ -398,6 +399,7 @@ Activate Placing phase buttons
 ## Unit Tests Required
 
 ### DiceRollButtonTests.cs
+
 ```
 - SetInteractable_EnablesButton()
 - OnButtonClicked_FiresEvent()
@@ -406,6 +408,7 @@ Activate Placing phase buttons
 ```
 
 ### ScoreboardDisplayTests.cs
+
 ```
 - Initialize_DisplaysBothPlayers()
 - UpdateScores_RefreshesText()
@@ -413,6 +416,7 @@ Activate Placing phase buttons
 ```
 
 ### PopupManagerTests.cs
+
 ```
 - ShowPenalty_DisplaysPenaltyPopup()
 - ShowPassTheChip_DisplaysTransfer()
@@ -421,6 +425,7 @@ Activate Placing phase buttons
 ```
 
 ### GameModeSelectionScreenTests.cs
+
 ```
 - Initialize_DisplaysAllModes()
 - OnModeSelected_HighlightsSelectedMode()
@@ -476,6 +481,7 @@ Canvas
 ## Next Sprint Preview (Sprint 6)
 
 Sprint 6 integrates all UI systems:
+
 - Main menu
 - Settings menu
 - Game flow (menu → mode select → gameplay)
