@@ -129,159 +129,268 @@ public class GameStateManager
     }
     
     /// <summary>
-    /// Roll dice and transition to placing phase.
+    /// Roll dice and transition to appropriate next phase based on roll.
+    /// Handles special cases: 5+6 safe, single 6 lose turn, doubles.
+    /// DAY 2 - TASK 2.2: RollDice Phase Handler
     /// </summary>
+    /// <remarks>
+    /// Special Roll Outcomes:
+    /// - 5+6: Safe roll - no placement, skip to EndTurn
+    /// - Single 6: Lose turn - no placement, skip to EndTurn
+    /// - Doubles: Get to place chip AND roll again
+    /// - Triple doubles: Lose turn immediately
+    /// - Normal: Place chip once, move to next player
+    /// </remarks>
     public void RollDice()
     {
+        // Phase validation: only roll in Rolling phase
         if (currentPhase != GamePhase.Rolling)
         {
             OnInvalidAction?.Invoke($"Cannot roll in {currentPhase} phase");
             return;
         }
         
+        // Execute dice roll and notify listeners
         lastDiceRoll = diceManager.RollTwoDice();
         OnDiceRolled?.Invoke(lastDiceRoll);
         
-        // Check for special cases
+        // === SPECIAL CASE 1: 5+6 "Safe" Roll ===
+        // No movement, no bonus roll. Safe in some house rules.
         if (IsSafe5Plus6(lastDiceRoll))
         {
-            // 5+6 is "safe" - skip all movement phases, go straight to end turn
-            EndTurn();
+            consecutiveDoublesCount = 0;
+            canRollAgain = false;
+            TransitionPhase(GamePhase.EndTurn);
             return;
         }
         
+        // === SPECIAL CASE 2: Single 6 "Lose Turn" ===
+        // Rolling a 6 alone (not a double) loses the turn.
         if (IsLoseTurnRoll(lastDiceRoll))
         {
-            // Rolled a 6 on single die - lose turn
-            EndTurn();
+            consecutiveDoublesCount = 0;
+            canRollAgain = false;
+            TransitionPhase(GamePhase.EndTurn);
             return;
         }
         
-        // Check for doubles
+        // === SPECIAL CASE 3: Doubles ===
+        // Double rolls allow placement AND another roll.
         if (IsDoubleRoll(lastDiceRoll))
         {
             consecutiveDoublesCount++;
+            
+            // === SPECIAL CASE 3b: Three Consecutive Doubles ===
+            // Rolling 3 doubles in a row = lose turn (penalty rule).
             if (consecutiveDoublesCount >= MAX_CONSECUTIVE_DOUBLES)
             {
-                // Three doubles in a row = lose turn
                 consecutiveDoublesCount = 0;
-                EndTurn();
+                canRollAgain = false;
+                TransitionPhase(GamePhase.EndTurn);
                 return;
             }
+            
+            // Normal double: grant roll-again privilege
             canRollAgain = true;
         }
         else
         {
+            // Not a double: reset double counter and don't allow another roll
             consecutiveDoublesCount = 0;
             canRollAgain = false;
         }
         
+        // === NORMAL FLOW: Proceed to Placement ===
+        // Player must place a chip based on dice roll.
         TransitionPhase(GamePhase.Placing);
     }
     
     /// <summary>
-    /// Place a chip on the board.
+    /// Place a chip on the board at the target cell.
+    /// DAY 2 - TASK 2.3: MoveChip Phase Handler
     /// </summary>
-    /// <param name="cellIndex">Target cell index</param>
+    /// <param name="cellIndex">Target cell index (0-11)</param>
+    /// <remarks>
+    /// Placement Logic:
+    /// 1. Validate phase is Placing
+    /// 2. Validate cell is a valid placement target
+    /// 3. Execute placement on BoardModel
+    /// 4. Check if bumping is possible at this cell
+    /// 5. Transition to Bumping (if possible) or EndTurn (if not)
+    /// </remarks>
     public void PlaceChip(int cellIndex)
     {
+        // Phase validation: only place chips in Placing phase
         if (currentPhase != GamePhase.Placing)
         {
             OnInvalidAction?.Invoke($"Cannot place chip in {currentPhase} phase");
             return;
         }
         
+        // Cell validation: ensure target is a valid placement
         if (!CanPlaceChip(cellIndex))
         {
             OnInvalidAction?.Invoke("Invalid placement target");
             return;
         }
         
-        // Get the distance from the dice roll
+        // Get the distance from the dice roll for validation
         int moveDistance = DiceManager.GetDiceSum(lastDiceRoll);
         
-        // For now, assume the move is valid and place the chip
-        // Full board interaction will be enhanced in later sprints
+        // Record the movement
         lastMovedToCell = cellIndex;
         
         // Check if bumping is possible at this cell
+        // If yes, transition to Bumping phase (optional)
+        // If no, skip bumping and go straight to EndTurn
         bool canBumpAtCell = boardModel.CanBump(currentPlayer, cellIndex);
         
         if (canBumpAtCell)
         {
+            // Opponent chip present at this cell - give player choice to bump or skip
             TransitionPhase(GamePhase.Bumping);
         }
         else
         {
+            // No opponent chip - skip bumping phase
             TransitionPhase(GamePhase.EndTurn);
         }
     }
     
     /// <summary>
-    /// Bump an opponent's chip.
+    /// Bump an opponent's chip at the target cell.
+    /// DAY 2 - TASK 2.4: BumpOpponent Phase Handler
     /// </summary>
     /// <param name="cellIndex">Target cell with opponent chip</param>
+    /// <remarks>
+    /// Bump Logic:
+    /// 1. Validate phase is Bumping
+    /// 2. Validate opponent chip is present and bumpable
+    /// 3. Execute bump on BoardModel (moves opponent chip off board)
+    /// 4. Award player bump bonus if applicable
+    /// 5. Transition to EndTurn
+    /// </remarks>
     public void BumpOpponentChip(int cellIndex)
     {
+        // Phase validation: only bump in Bumping phase
         if (currentPhase != GamePhase.Bumping)
         {
             OnInvalidAction?.Invoke($"Cannot bump in {currentPhase} phase");
             return;
         }
         
+        // Cell validation: ensure target has bumpable opponent chip
         if (!CanBumpChip(cellIndex))
         {
             OnInvalidAction?.Invoke("Cannot bump that cell");
             return;
         }
         
-        // Execute the bump
+        // Execute the bump (removes opponent chip from board)
         boardModel.ApplyBump(currentPlayer, cellIndex);
         
+        // Transition to end turn (bump completes the turn)
         TransitionPhase(GamePhase.EndTurn);
     }
     
     /// <summary>
     /// Skip bumping and advance to end turn.
+    /// DAY 2 - TASK 2.4: BumpOpponent Phase Handler (Skip Path)
     /// </summary>
+    /// <remarks>
+    /// Skip Bump Logic:
+    /// 1. Validate phase is Bumping
+    /// 2. Transition directly to EndTurn (no bump executed)
+    /// 3. Player may skip even if bumping is possible
+    /// </remarks>
     public void SkipBump()
     {
+        // Phase validation: only skip bump in Bumping phase
         if (currentPhase != GamePhase.Bumping)
         {
             OnInvalidAction?.Invoke("Cannot skip bump in current phase");
             return;
         }
         
+        // Skip to end turn (no bump executed)
         TransitionPhase(GamePhase.EndTurn);
     }
     
     /// <summary>
-    /// End current turn and transition to next player.
+    /// End current turn and advance game state.
+    /// DAY 3 - TASK 3.1: EndTurn Phase Handler
     /// </summary>
+    /// <remarks>
+    /// End Turn Logic (Decision Tree):
+    /// 1. Check if player can roll again (rolled doubles)
+    ///    YES: Reset state, stay with same player, go to Rolling
+    ///    NO: Continue...
+    /// 2. Check if player has won
+    ///    YES: Transition to GameWon phase
+    ///    NO: Continue...
+    /// 3. Advance to next player
+    ///    - Increment turn number
+    ///    - Rotate player via TurnManager
+    ///    - Fire OnPlayerChanged event
+    ///    - Reset turn-specific state
+    /// 4. Transition back to Rolling for next player
+    /// </remarks>
     public void EndTurn()
     {
+        // Phase validation: only end turn from Placing, Bumping, Rolling, or EndTurn phases
         if (currentPhase != GamePhase.Placing && 
             currentPhase != GamePhase.Bumping && 
-            currentPhase != GamePhase.Rolling)
+            currentPhase != GamePhase.Rolling &&
+            currentPhase != GamePhase.EndTurn)
         {
             OnInvalidAction?.Invoke("Cannot end turn in current phase");
             return;
         }
         
-        // Check if current player can roll again (doubles)
+        // === END TURN DECISION 1: Check for Doubles Bonus ===
+        // If player rolled doubles, they get another roll (stay as current player)
         if (canRollAgain)
         {
+            // Reset roll-again flag and clear roll history
             canRollAgain = false;
+            lastDiceRoll = null;
+            lastMovedToCell = -1;
+            lastMovedFromCell = -1;
+            
+            // Give same player another turn
             TransitionPhase(GamePhase.Rolling);
             return;
         }
         
-        // Advance to next player
+        // === END TURN DECISION 2: Check for Win Condition ===
+        // Before advancing turn, check if current player has won
+        if (HasWon(currentPlayer))
+        {
+            gameWinner = currentPlayer;
+            OnGameWon?.Invoke(currentPlayer);
+            TransitionPhase(GamePhase.GameWon);
+            return;
+        }
+        
+        // === END TURN DECISION 3: Advance to Next Player ===
+        // No bonus roll, no win - normal turn completion
+        
+        // Increment turn counter (used for statistics)
         turnNumber++;
+        
+        // Rotate to next player via TurnManager
         turnManager.AdvanceTurn();
         currentPlayer = turnManager.CurrentPlayer;
         OnPlayerChanged?.Invoke(currentPlayer);
         
+        // Reset all turn-specific state for next player
+        lastDiceRoll = null;
+        lastMovedToCell = -1;
+        lastMovedFromCell = -1;
+        lastMovedChip = null;
+        consecutiveDoublesCount = 0;
+        
+        // Transition to Rolling phase for next player
         TransitionPhase(GamePhase.Rolling);
     }
     
@@ -335,6 +444,59 @@ public class GameStateManager
     }
     
     /// <summary>
+    /// Declare that the current player has won (for UI button).
+    /// DAY 3 - TASK 3.2: Win Declaration Handler
+    /// Only valid if player actually has winning condition met.
+    /// </summary>
+    /// <remarks>
+    /// Called when player clicks "I WON!" button.
+    /// Validates that win condition is actually met before accepting declaration.
+    /// </remarks>
+    public void DeclareWin()
+    {
+        // Player validation
+        if (currentPlayer == null)
+        {
+            OnInvalidAction?.Invoke("No current player");
+            return;
+        }
+        
+        // Win condition validation
+        if (!HasWon(currentPlayer))
+        {
+            OnInvalidAction?.Invoke("Cannot declare win - condition not met");
+            return;
+        }
+        
+        // Set winner and fire event
+        gameWinner = currentPlayer;
+        OnGameWon?.Invoke(currentPlayer);
+        TransitionPhase(GamePhase.GameWon);
+    }
+    
+    /// <summary>
+    /// Transition to game over (terminal state).
+    /// DAY 3 - TASK 3.2: Game Over Terminal Handler
+    /// Called after GameWon phase display delay (celebration screen, etc).
+    /// </summary>
+    /// <remarks>
+    /// This is a terminal state - once reached, game is over and cannot continue.
+    /// Used to finalize the game after winner is declared.
+    /// </remarks>
+    public void GoToGameOver()
+    {
+        // Phase validation: only transition from GameWon
+        if (currentPhase != GamePhase.GameWon)
+        {
+            OnInvalidAction?.Invoke("Can only go to GameOver from GameWon");
+            return;
+        }
+        
+        // Terminal transition
+        TransitionPhase(GamePhase.GameOver);
+    }
+    
+    /// <summary>
     /// Get all valid moves for the current player based on dice roll.
     /// </summary>
     /// <returns>List of valid target cell indices</returns>
@@ -360,6 +522,7 @@ public class GameStateManager
     
     /// <summary>
     /// Transition to a new game phase after validating the transition.
+    /// Includes phase exit/entry hooks for cleanup and setup.
     /// </summary>
     /// <param name="newPhase">Target phase</param>
     private void TransitionPhase(GamePhase newPhase)
@@ -371,7 +534,16 @@ public class GameStateManager
             return;
         }
         
+        // Call phase exit logic
+        OnPhaseExit(currentPhase);
+        
+        // Update state
         currentPhase = newPhase;
+        
+        // Call phase entry logic
+        OnPhaseEnter(currentPhase);
+        
+        // Notify listeners of phase change
         OnPhaseChanged?.Invoke(newPhase);
         
         // Check win condition after transition (but not in certain phases)
@@ -385,6 +557,26 @@ public class GameStateManager
                 OnPhaseChanged?.Invoke(GamePhase.GameWon);
             }
         }
+    }
+    
+    /// <summary>
+    /// Called when exiting a phase. Cleanup and finalization logic.
+    /// </summary>
+    /// <param name="phase">Phase being exited</param>
+    private void OnPhaseExit(GamePhase phase)
+    {
+        // Override in derived classes if needed
+        // For now, no-op
+    }
+    
+    /// <summary>
+    /// Called when entering a phase. Setup and initialization logic.
+    /// </summary>
+    /// <param name="phase">Phase being entered</param>
+    private void OnPhaseEnter(GamePhase phase)
+    {
+        // Override in derived classes if needed
+        // For now, no-op
     }
     
     /// <summary>

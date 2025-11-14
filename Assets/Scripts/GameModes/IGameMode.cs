@@ -1,104 +1,107 @@
+using System;
+using UnityEngine;
+
 /// <summary>
-/// Interface that all Bump U Box game modes must implement.
-/// Defines the contract for custom rules, scoring, and win conditions per mode.
+/// Interface for game mode implementations.
+/// Each game mode can override rules, win conditions, and special cases.
+/// Defines the contract that all game modes must implement.
 /// </summary>
 public interface IGameMode
 {
-    /// <summary>
-    /// Gets the human-readable name of this game mode.
-    /// </summary>
+    // ============================================
+    // METADATA PROPERTIES
+    // ============================================
+    
+    /// <summary>Gets the short name of the game mode (e.g., "Bump5", "Krazy6")</summary>
     string ModeName { get; }
-
+    
+    /// <summary>Gets the long description (e.g., "Bump 5 in a Row")</summary>
+    string ModeLongName { get; }
+    
+    /// <summary>Gets the maximum number of players for this mode</summary>
+    int MaxPlayers { get; }
+    
+    // ============================================
+    // RULE CONFIGURATION PROPERTIES
+    // ============================================
+    
+    /// <summary>Does this mode use 5-in-a-row for win detection?</summary>
+    bool Use5InARow { get; }
+    
+    /// <summary>Should rolling 3 doubles in a row cause loss of turn?</summary>
+    bool UseTripleDoublesPenalty { get; }
+    
+    /// <summary>Is rolling 5+6 a "safe" roll (no placement)?</summary>
+    bool Use5Plus6Safe { get; }
+    
+    /// <summary>Does rolling a 6 lose the turn?</summary>
+    bool RollingASixLosesTurn { get; }
+    
+    /// <summary>Can opponent chips be bumped?</summary>
+    bool AllowBumping { get; }
+    
+    // ============================================
+    // WIN CONDITION CHECK
+    // ============================================
+    
     /// <summary>
-    /// Gets a brief description of this mode's rules.
-    /// </summary>
-    string ModeDescription { get; }
-
-    /// <summary>
-    /// Gets the unique ID for this mode (0-4 for 5 modes).
-    /// </summary>
-    int ModeID { get; }
-
-    /// <summary>
-    /// Called when a player rolls the dice.
-    /// Allows mode to process the roll and determine valid moves.
-    /// </summary>
-    /// <param name="player">Player who rolled</param>
-    /// <param name="diceRoll">Dice roll result [die1, die2] or [single]</param>
-    void OnDiceRolled(Player player, int[] diceRoll);
-
-    /// <summary>
-    /// Called when a player moves a chip.
-    /// Allows mode to apply scoring or trigger special actions.
-    /// </summary>
-    /// <param name="player">Player moving the chip</param>
-    /// <param name="fromCell">Source cell index</param>
-    /// <param name="toCell">Target cell index</param>
-    void OnChipMoved(Player player, int fromCell, int toCell);
-
-    /// <summary>
-    /// Called when a player bumps an opponent's chip.
-    /// Allows mode to apply scoring or special bump rules.
-    /// </summary>
-    /// <param name="bumpingPlayer">Player doing the bump</param>
-    /// <param name="bumpedPlayer">Player whose chip was bumped</param>
-    /// <param name="targetCell">Cell where bump occurred</param>
-    void OnBump(Player bumpingPlayer, Player bumpedPlayer, int targetCell);
-
-    /// <summary>
-    /// Checks if a player has won the game.
-    /// Different modes have different win conditions.
+    /// Check if the given player has met the win condition for this mode.
     /// </summary>
     /// <param name="player">Player to check</param>
-    /// <param name="board">Current board state</param>
+    /// <param name="board">Board state to check against</param>
     /// <returns>True if player has won</returns>
-    bool CheckWin(Player player, BoardModel board);
-
+    bool CheckWinCondition(Player player, BoardModel board);
+    
+    // ============================================
+    // SPECIAL RULES HOOKS
+    // ============================================
+    
     /// <summary>
-    /// Determines if a bump is allowed in this mode.
-    /// Some modes disable bumping entirely.
+    /// Called at the start of each turn.
+    /// Allows mode to apply any special initialization logic.
     /// </summary>
-    /// <param name="player">Player attempting bump</param>
-    /// <param name="targetCell">Target cell</param>
-    /// <param name="board">Current board state</param>
-    /// <returns>True if bump is allowed in this mode</returns>
-    bool IsBumpAllowed(Player player, int targetCell, BoardModel board);
-
+    void OnTurnStart(GameStateManager stateManager, Player currentPlayer);
+    
     /// <summary>
-    /// Gets the list of valid target cells after a dice roll.
-    /// Different modes may have different movement rules.
+    /// Called after dice are rolled.
+    /// Allows mode to modify how the roll is interpreted.
     /// </summary>
-    /// <param name="player">Player moving</param>
-    /// <param name="diceSum">Total from dice roll</param>
-    /// <param name="board">Current board state</param>
-    /// <returns>List of valid cell indices to move to</returns>
-    System.Collections.Generic.List<int> GetValidMoves(Player player, int diceSum, BoardModel board);
-
+    /// <param name="stateManager">Current game state</param>
+    /// <param name="rollResult">Dice roll (can be modified)</param>
+    void OnDiceRolled(GameStateManager stateManager, int[] rollResult);
+    
     /// <summary>
-    /// Determines if a player can roll again.
-    /// Typically true for doubles, false otherwise.
+    /// Called when a chip is about to be placed.
+    /// Allows mode to validate or modify placement.
     /// </summary>
-    /// <param name="diceRoll">Last dice roll</param>
-    /// <returns>True if player can roll again</returns>
-    bool CanRollAgain(int[] diceRoll);
-
+    /// <param name="stateManager">Current game state</param>
+    /// <param name="targetCell">Cell where chip will be placed</param>
+    /// <returns>True if placement is allowed</returns>
+    bool CanPlaceChip(GameStateManager stateManager, int targetCell);
+    
     /// <summary>
-    /// Applies mode-specific end-of-turn processing.
+    /// Called when bumping is about to occur.
+    /// Allows mode to override bump behavior (swap instead of remove, etc).
     /// </summary>
-    /// <param name="player">Player whose turn is ending</param>
-    void OnTurnEnd(Player player);
-
+    /// <param name="stateManager">Current game state</param>
+    /// <param name="bumperPlayer">Player doing the bumping</param>
+    /// <param name="targetCell">Cell with opponent chip</param>
+    /// <returns>True if bump should be applied</returns>
+    bool OnBumpAttempt(GameStateManager stateManager, Player bumperPlayer, int targetCell);
+    
     /// <summary>
-    /// Applies mode-specific start-of-game initialization.
+    /// Called when turn ends.
+    /// Allows mode to apply any special end-of-turn logic.
     /// </summary>
-    /// <param name="players">All players in the game</param>
-    /// <param name="board">Game board</param>
-    void Initialize(Player[] players, BoardModel board);
-
+    void OnTurnEnd(GameStateManager stateManager, Player currentPlayer);
+    
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    
     /// <summary>
-    /// Gets mode-specific rules as a formatted string.
-    /// Used for displaying rules in UI.
+    /// Called when game starts with this mode.
+    /// Allows mode to initialize any special state.
     /// </summary>
-    /// <returns>Rules text</returns>
-    string GetRulesText();
+    void Initialize(GameStateManager stateManager);
 }
