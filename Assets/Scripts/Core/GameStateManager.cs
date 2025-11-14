@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// Central game state machine managing turn flow and phase transitions.
@@ -8,17 +9,27 @@ using System.Collections.Generic;
 /// </summary>
 public class GameStateManager
 {
+    // Constants
+    private const int MAX_CONSECUTIVE_DOUBLES = 3;
+    
     // Core state
     private GamePhase currentPhase;
     private Player currentPlayer;
     private int[] lastDiceRoll;
     private int turnNumber;
+    private int consecutiveDoublesCount;
     
     // References
     private BoardModel boardModel;
     private TurnManager turnManager;
     private DiceManager diceManager;
-    private Player[] players;
+    private List<Player> players;
+    
+    // Turn state
+    private bool canRollAgain;
+    private Chip lastMovedChip;
+    private int lastMovedFromCell;
+    private int lastMovedToCell;
     
     // Events
     public event Action<GamePhase> OnPhaseChanged;
@@ -32,9 +43,10 @@ public class GameStateManager
     public Player CurrentPlayer => currentPlayer;
     public int[] LastDiceRoll => lastDiceRoll;
     public int TurnNumber => turnNumber;
+    public bool CanRollAgain => canRollAgain;
     
     /// <summary>
-    /// Initialize the game state manager with players and board.
+    /// Initialize the game state manager with two players.
     /// </summary>
     /// <param name="player1">First player</param>
     /// <param name="player2">Second player</param>
@@ -46,15 +58,20 @@ public class GameStateManager
             return;
         }
         
-        players = new[] { player1, player2 };
-        boardModel = new BoardModel();
-        turnManager = new TurnManager(2);
+        players = new List<Player> { player1, player2 };
+        boardModel = new BoardModel(player1, player2);
+        turnManager = new TurnManager(players);
         diceManager = new DiceManager();
         
         currentPhase = GamePhase.Setup;
-        currentPlayer = players[0];
+        currentPlayer = turnManager.CurrentPlayer;
         turnNumber = 0;
         lastDiceRoll = null;
+        consecutiveDoublesCount = 0;
+        canRollAgain = false;
+        lastMovedChip = null;
+        lastMovedFromCell = -1;
+        lastMovedToCell = -1;
     }
     
     /// <summary>
@@ -68,6 +85,7 @@ public class GameStateManager
             return;
         }
         
+        turnNumber = 1;
         TransitionPhase(GamePhase.Rolling);
     }
     
@@ -82,14 +100,41 @@ public class GameStateManager
             return;
         }
         
-        lastDiceRoll = diceManager.Roll();
+        lastDiceRoll = diceManager.RollTwoDice();
         OnDiceRolled?.Invoke(lastDiceRoll);
         
-        // Check for 6 (lose turn) or 5+6 (safe, skip)
-        if (IsLoseTurnRoll(lastDiceRoll))
+        // Check for special cases
+        if (IsSafe5Plus6(lastDiceRoll))
         {
+            // 5+6 is "safe" - skip all movement phases, go straight to end turn
             EndTurn();
             return;
+        }
+        
+        if (IsLoseTurnRoll(lastDiceRoll))
+        {
+            // Rolled a 6 on single die - lose turn
+            EndTurn();
+            return;
+        }
+        
+        // Check for doubles
+        if (IsDoubleRoll(lastDiceRoll))
+        {
+            consecutiveDoublesCount++;
+            if (consecutiveDoublesCount >= MAX_CONSECUTIVE_DOUBLES)
+            {
+                // Three doubles in a row = lose turn
+                consecutiveDoublesCount = 0;
+                EndTurn();
+                return;
+            }
+            canRollAgain = true;
+        }
+        else
+        {
+            consecutiveDoublesCount = 0;
+            canRollAgain = false;
         }
         
         TransitionPhase(GamePhase.Placing);
@@ -113,10 +158,24 @@ public class GameStateManager
             return;
         }
         
-        // Execute placement logic (will be enhanced in later sprints)
-        // For now, assume placement succeeds
+        // Get the distance from the dice roll
+        int moveDistance = DiceManager.GetDiceSum(lastDiceRoll);
         
-        TransitionPhase(GamePhase.Bumping);
+        // For now, assume the move is valid and place the chip
+        // Full board interaction will be enhanced in later sprints
+        lastMovedToCell = cellIndex;
+        
+        // Check if bumping is possible at this cell
+        bool canBumpAtCell = boardModel.CanBump(currentPlayer, cellIndex);
+        
+        if (canBumpAtCell)
+        {
+            TransitionPhase(GamePhase.Bumping);
+        }
+        else
+        {
+            TransitionPhase(GamePhase.EndTurn);
+        }
     }
     
     /// <summary>
@@ -137,7 +196,22 @@ public class GameStateManager
             return;
         }
         
-        // Execute bump logic (will be enhanced in later sprints)
+        // Execute the bump
+        boardModel.ApplyBump(currentPlayer, cellIndex);
+        
+        TransitionPhase(GamePhase.EndTurn);
+    }
+    
+    /// <summary>
+    /// Skip bumping and advance to end turn.
+    /// </summary>
+    public void SkipBump()
+    {
+        if (currentPhase != GamePhase.Bumping)
+        {
+            OnInvalidAction?.Invoke("Cannot skip bump in current phase");
+            return;
+        }
         
         TransitionPhase(GamePhase.EndTurn);
     }
@@ -147,15 +221,27 @@ public class GameStateManager
     /// </summary>
     public void EndTurn()
     {
-        if (currentPhase != GamePhase.Placing && currentPhase != GamePhase.Bumping && currentPhase != GamePhase.Rolling)
+        if (currentPhase != GamePhase.Placing && 
+            currentPhase != GamePhase.Bumping && 
+            currentPhase != GamePhase.Rolling &&
+            currentPhase != GamePhase.DiceResult)
         {
             OnInvalidAction?.Invoke("Cannot end turn in current phase");
             return;
         }
         
+        // Check if current player can roll again (doubles)
+        if (canRollAgain && currentPhase != GamePhase.DiceResult)
+        {
+            canRollAgain = false;
+            TransitionPhase(GamePhase.Rolling);
+            return;
+        }
+        
+        // Advance to next player
         turnNumber++;
-        turnManager.RotatePlayer();
-        currentPlayer = players[turnManager.CurrentPlayerIndex];
+        turnManager.AdvanceTurn();
+        currentPlayer = turnManager.CurrentPlayer;
         OnPlayerChanged?.Invoke(currentPlayer);
         
         TransitionPhase(GamePhase.Rolling);
@@ -173,7 +259,13 @@ public class GameStateManager
             return false;
         }
         
-        // Additional validation will be added in later sprints
+        // Cell must be empty or have opponent's chip (for bumping)
+        BoardCell targetCell = boardModel.Cells[cellIndex];
+        if (targetCell.HasChip && targetCell.Owner == currentPlayer)
+        {
+            return false; // Can't move to own chip
+        }
+        
         return true;
     }
     
@@ -189,8 +281,7 @@ public class GameStateManager
             return false;
         }
         
-        // Additional validation will be added in later sprints
-        return true;
+        return boardModel.CanBump(currentPlayer, cellIndex);
     }
     
     /// <summary>
@@ -199,8 +290,34 @@ public class GameStateManager
     /// <returns>True if win condition met</returns>
     public bool HasWon(Player player)
     {
-        // Will be enhanced with game mode specific logic in Sprint 3
-        return boardModel.Has5InARow(player);
+        if (player == null)
+            return false;
+            
+        return boardModel.Check5InARow(player);
+    }
+    
+    /// <summary>
+    /// Get all valid moves for the current player based on dice roll.
+    /// </summary>
+    /// <returns>List of valid target cell indices</returns>
+    public List<int> GetValidMoves()
+    {
+        List<int> validMoves = new List<int>();
+        
+        if (lastDiceRoll == null || lastDiceRoll.Length == 0)
+            return validMoves;
+        
+        // For now, return all non-own chips
+        // Full implementation will consider dice distance
+        for (int i = 0; i < BoardModel.BOARD_SIZE; i++)
+        {
+            if (CanPlaceChip(i))
+            {
+                validMoves.Add(i);
+            }
+        }
+        
+        return validMoves;
     }
     
     /// <summary>
@@ -212,12 +329,15 @@ public class GameStateManager
         currentPhase = newPhase;
         OnPhaseChanged?.Invoke(newPhase);
         
-        // Check win condition after transition
-        if (HasWon(currentPlayer))
+        // Check win condition after transition (but not in certain phases)
+        if (newPhase != GamePhase.Setup && newPhase != GamePhase.GameOver)
         {
-            OnGameWon?.Invoke(currentPlayer);
-            currentPhase = GamePhase.GameOver;
-            OnPhaseChanged?.Invoke(GamePhase.GameOver);
+            if (HasWon(currentPlayer))
+            {
+                OnGameWon?.Invoke(currentPlayer);
+                currentPhase = GamePhase.GameOver;
+                OnPhaseChanged?.Invoke(GamePhase.GameOver);
+            }
         }
     }
     
@@ -228,12 +348,37 @@ public class GameStateManager
     /// <returns>True if turn is lost</returns>
     private bool IsLoseTurnRoll(int[] roll)
     {
-        // Single die showing 6 = lose turn
-        if (roll.Length == 1 && roll[0] == 6)
-        {
-            return true;
-        }
+        if (roll == null || roll.Length == 0)
+            return false;
         
-        return false;
+        // Single die showing 6 = lose turn
+        // This is a baseline rule; modes may override
+        return roll.Length == 1 && roll[0] == 6;
+    }
+    
+    /// <summary>
+    /// Check if roll is a double (both dice show same value).
+    /// </summary>
+    /// <param name="roll">Dice roll result</param>
+    /// <returns>True if double</returns>
+    private bool IsDoubleRoll(int[] roll)
+    {
+        if (roll == null || roll.Length != 2)
+            return false;
+        
+        return roll[0] == roll[1];
+    }
+    
+    /// <summary>
+    /// Check if roll is the special 5+6 "safe" combination.
+    /// </summary>
+    /// <param name="roll">Dice roll result</param>
+    /// <returns>True if 5+6</returns>
+    private bool IsSafe5Plus6(int[] roll)
+    {
+        if (roll == null || roll.Length != 2)
+            return false;
+        
+        return (roll[0] == 5 && roll[1] == 6) || (roll[0] == 6 && roll[1] == 5);
     }
 }

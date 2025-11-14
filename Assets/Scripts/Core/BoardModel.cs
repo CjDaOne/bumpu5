@@ -8,7 +8,7 @@ using UnityEngine;
 /// </summary>
 public class BoardModel
 {
-    private const int BOARD_SIZE = 12;
+    public const int BOARD_SIZE = 12;
     private const int WINNING_ROW = 5;
 
     private BoardCell[] cells;
