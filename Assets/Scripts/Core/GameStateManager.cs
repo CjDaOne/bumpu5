@@ -223,15 +223,14 @@ public class GameStateManager
     {
         if (currentPhase != GamePhase.Placing && 
             currentPhase != GamePhase.Bumping && 
-            currentPhase != GamePhase.Rolling &&
-            currentPhase != GamePhase.DiceResult)
+            currentPhase != GamePhase.Rolling)
         {
             OnInvalidAction?.Invoke("Cannot end turn in current phase");
             return;
         }
         
         // Check if current player can roll again (doubles)
-        if (canRollAgain && currentPhase != GamePhase.DiceResult)
+        if (canRollAgain)
         {
             canRollAgain = false;
             TransitionPhase(GamePhase.Rolling);
@@ -330,13 +329,13 @@ public class GameStateManager
         OnPhaseChanged?.Invoke(newPhase);
         
         // Check win condition after transition (but not in certain phases)
-        if (newPhase != GamePhase.Setup && newPhase != GamePhase.GameOver)
+        if (newPhase != GamePhase.Setup && newPhase != GamePhase.GameWon && newPhase != GamePhase.GameOver)
         {
             if (HasWon(currentPlayer))
             {
                 OnGameWon?.Invoke(currentPlayer);
-                currentPhase = GamePhase.GameOver;
-                OnPhaseChanged?.Invoke(GamePhase.GameOver);
+                currentPhase = GamePhase.GameWon;
+                OnPhaseChanged?.Invoke(GamePhase.GameWon);
             }
         }
     }

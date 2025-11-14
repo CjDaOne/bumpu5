@@ -3,10 +3,11 @@
 /// </summary>
 public enum GamePhase
 {
-    Setup,          // Initial game setup
-    Rolling,        // Player rolls dice
-    Placing,        // Player places chip on board
-    Bumping,        // Optional: bump opponent chip
-    EndTurn,        // Turn wrapping (penalties, pass chip, etc.)
-    GameOver        // Win condition detected
+    Setup = 0,      // Initial game setup
+    Rolling = 1,    // Player rolls dice
+    Placing = 2,    // Player places chip on board
+    Bumping = 3,    // Optional: bump opponent chip
+    EndTurn = 4,    // Turn wrapping (penalties, pass chip, etc.)
+    GameWon = 5,    // Win condition detected, showing winner
+    GameOver = 6    // Final state, game complete
 }
