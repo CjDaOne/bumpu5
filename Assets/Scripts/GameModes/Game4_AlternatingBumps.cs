@@ -1,23 +1,28 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 /// <summary>
-/// Game1_Bump5 - The Classic Game Mode
+/// Game4_AlternatingBumps - Tactical Bumping Game Mode
 /// 
-/// Win Condition: Get 5 chips in a row (horizontal, vertical, or diagonal)
-/// Bumping: Enabled - bump opponent chips off the board
-/// Penalties: Standard - bumped players lose the chip
-/// Difficulty: Medium
+/// Win Condition: Get 5 chips in a row (same as Game1)
+/// Bumping: CONTROLLED - players take turns being the "bumper"
+/// Penalties: Variable - depends on who is allowed to bump
+/// Difficulty: Medium-Hard - requires tactical planning
 /// 
-/// This is the core game mode - the one that appears in most physical Bump5 games.
-/// Players take turns placing chips, trying to form 5 in a row while bumping
-/// opponent pieces when strategic.
+/// This mode adds a twist to the classic game:
+/// - Players alternate who has the right to bump
+/// - When it's your turn to bump, you're the only one who can bump
+/// - When it's not your turn, you cannot bump (even if beneficial)
+/// - Adds strategy layer: Is this the right time to use your bump?
 /// </summary>
-public class Game1_Bump5 : GameModeBase
+public class Game4_AlternatingBumps : GameModeBase
 {
     // Mode properties
-    public override string ModeName => "Bump 5";
-    public override string ModeDescription => "Get 5 chips in a row to win. Bump opponent chips off the board. Standard rules apply.";
+    public override string ModeName => "Alternating Bumps";
+    public override string ModeDescription => "Get 5 in a row to win. Bumping alternates between players each turn. Tactical mode.";
+    
+    // Game state tracking
+    private Player bumpingPlayer;  // Who currently has bump rights
+    private int bumpTurnCounter;   // Track which turn
     
     // ==================== LIFECYCLE ====================
     
@@ -27,7 +32,9 @@ public class Game1_Bump5 : GameModeBase
     public override void Initialize(GameStateManager gsm)
     {
         base.Initialize(gsm);
-        Debug.Log("[Game1_Bump5] Initialized");
+        bumpingPlayer = null;
+        bumpTurnCounter = 0;
+        Debug.Log("[Game4_AlternatingBumps] Initialized");
     }
     
     /// <summary>
@@ -36,7 +43,15 @@ public class Game1_Bump5 : GameModeBase
     public override void OnGameStart()
     {
         base.OnGameStart();
-        Debug.Log("[Game1_Bump5] Game started");
+        
+        // Start with first player having bump rights
+        if (gameState != null && gameState.Players != null && gameState.Players.Length > 0)
+        {
+            bumpingPlayer = gameState.Players[0];
+            bumpTurnCounter = 0;
+        }
+        
+        Debug.Log($"[Game4_AlternatingBumps] Game started - {bumpingPlayer?.name} has initial bump rights");
     }
     
     /// <summary>
@@ -45,30 +60,37 @@ public class Game1_Bump5 : GameModeBase
     public override void OnTurnStart(Player currentPlayer)
     {
         base.OnTurnStart(currentPlayer);
+        
+        // If the current player is different from bumping player, rotate bump rights
+        if (currentPlayer != bumpingPlayer)
+        {
+            bumpingPlayer = currentPlayer;
+            Debug.Log($"[Game4_AlternatingBumps] Bump rights now belong to {bumpingPlayer?.name}");
+        }
     }
     
     // ==================== MOVE VALIDATION ====================
     
     /// <summary>
-    /// Check if a move is valid in Game1_Bump5.
+    /// Check if a move is valid in Game4_AlternatingBumps.
     /// 
     /// Rules:
-    /// - Cell must be empty (no chips placed there)
-    /// - That's it - player can place on any empty cell
+    /// - Cell must be empty
+    /// - Player can place on any empty cell
     /// </summary>
     public override bool IsValidMove(Player player, int cellIndex)
     {
         // Validate cell index
         if (cellIndex < 0 || cellIndex > 11)
         {
-            Debug.LogWarning($"[Game1_Bump5] Invalid cell index: {cellIndex}");
+            Debug.LogWarning($"[Game4_AlternatingBumps] Invalid cell index: {cellIndex}");
             return false;
         }
         
         // Check if cell is empty
         if (!IsCellEmpty(cellIndex))
         {
-            Debug.Log($"[Game1_Bump5] Cell {cellIndex} is already occupied");
+            Debug.Log($"[Game4_AlternatingBumps] Cell {cellIndex} is already occupied");
             return false;
         }
         
@@ -81,34 +103,39 @@ public class Game1_Bump5 : GameModeBase
     public override void OnChipPlaced(Player player, int cellIndex)
     {
         base.OnChipPlaced(player, cellIndex);
-        
-        // In Game1, no special post-placement effects
-        // Just log it for debugging
+        Debug.Log($"[Game4_AlternatingBumps] {player.PlayerName} placed chip at {cellIndex}");
     }
     
     // ==================== BUMPING ====================
     
     /// <summary>
-    /// Check if a bump is allowed in Game1_Bump5.
+    /// Check if a bump is allowed in Game4_AlternatingBumps.
     /// 
     /// Rules:
-    /// - Bumping is always allowed
-    /// - Can bump any opponent chip on the board
-    /// - Cannot bump your own chips
+    /// - Only the current bumping player can bump
+    /// - The other player CANNOT bump, even if strategic
+    /// - Can bump any opponent chip
     /// </summary>
-    public override bool CanBump(Player bumpingPlayer, Player targetPlayer, int targetCell)
+    public override bool CanBump(Player bumpingPlayer_param, Player targetPlayer, int targetCell)
     {
-        // Can't bump yourself
-        if (bumpingPlayer == targetPlayer)
+        // Only the designated bumping player can bump
+        if (bumpingPlayer_param != bumpingPlayer)
         {
-            Debug.Log("[Game1_Bump5] Cannot bump your own chip");
+            Debug.Log($"[Game4_AlternatingBumps] {bumpingPlayer_param.PlayerName} cannot bump - not their bump turn");
+            return false;
+        }
+        
+        // Can't bump yourself
+        if (bumpingPlayer_param == targetPlayer)
+        {
+            Debug.Log("[Game4_AlternatingBumps] Cannot bump your own chip");
             return false;
         }
         
         // Target cell must have opponent's chip
         if (!IsCellOccupiedBy(targetCell, targetPlayer))
         {
-            Debug.Log($"[Game1_Bump5] Cell {targetCell} is not occupied by target player");
+            Debug.Log($"[Game4_AlternatingBumps] Cell {targetCell} is not occupied by target player");
             return false;
         }
         
@@ -117,37 +144,20 @@ public class Game1_Bump5 : GameModeBase
     
     /// <summary>
     /// Called when a bump occurs.
-    /// Applies Game1-specific penalties.
+    /// Applies Game4-specific effects.
     /// </summary>
-    public override void OnBumpOccurs(Player bumpingPlayer, Player bumpedPlayer)
+    public override void OnBumpOccurs(Player bumpingPlayer_param, Player bumpedPlayer)
     {
-        base.OnBumpOccurs(bumpingPlayer, bumpedPlayer);
-        
-        // In Game1, the bump penalty is simply:
-        // - Bumped chip is removed from the board (handled by GameStateManager)
-        // - No additional score penalties
-        
-        Debug.Log($"[Game1_Bump5] {bumpingPlayer.PlayerName} bumped {bumpedPlayer.PlayerName}");
+        base.OnBumpOccurs(bumpingPlayer_param, bumpedPlayer);
+        Debug.Log($"[Game4_AlternatingBumps] {bumpingPlayer_param.PlayerName} bumped {bumpedPlayer.PlayerName}");
     }
     
     // ==================== WIN CONDITION ====================
     
     /// <summary>
-    /// Check if a player has won in Game1_Bump5.
+    /// Check if a player has won in Game4_AlternatingBumps.
     /// 
-    /// Win Condition: 5 chips in a row (any direction)
-    /// 
-    /// Patterns to check:
-    /// - Horizontal: 5 chips in a row across the board
-    /// - Vertical: 5 chips in a column
-    /// - Diagonal: 5 chips diagonally
-    /// 
-    /// This requires knowing the board layout.
-    /// Assuming a 3x4 grid (12 cells total):
-    /// 
-    ///   0   1   2   3
-    ///   4   5   6   7
-    ///   8   9  10  11
+    /// Win Condition: 5 chips in a row (same as Game1)
     /// </summary>
     public override bool CheckWinCondition(Player player)
     {
@@ -157,19 +167,12 @@ public class Game1_Bump5 : GameModeBase
         int[] playerCells = GetCellsOccupiedBy(player);
         
         if (playerCells.Length < 5)
-            return false; // Can't have 5-in-a-row with less than 5 chips
+            return false;
         
         // Check all possible 5-in-a-row patterns
-        // Horizontal patterns
         if (CheckHorizontalWin(playerCells)) return true;
-        
-        // Vertical patterns
         if (CheckVerticalWin(playerCells)) return true;
-        
-        // Diagonal patterns (top-left to bottom-right)
         if (CheckDiagonalWinLR(playerCells)) return true;
-        
-        // Diagonal patterns (top-right to bottom-left)
         if (CheckDiagonalWinRL(playerCells)) return true;
         
         return false;
@@ -177,105 +180,60 @@ public class Game1_Bump5 : GameModeBase
     
     /// <summary>
     /// Check for horizontal 5-in-a-row.
-    /// Board layout (3x4 grid):
-    ///   0   1   2   3
-    ///   4   5   6   7
-    ///   8   9  10  11
     /// </summary>
     private bool CheckHorizontalWin(int[] playerCells)
     {
-        // Check each row for 5 in a row
-        // Row 1: Check patterns starting from 0, 1
         if (Contains(playerCells, 0) && Contains(playerCells, 1) && Contains(playerCells, 2) && Contains(playerCells, 3))
-            return true; // Pattern: 0-1-2-3
-        
-        // Row 2: Check patterns starting from 4, 5
+            return true;
         if (Contains(playerCells, 4) && Contains(playerCells, 5) && Contains(playerCells, 6) && Contains(playerCells, 7))
-            return true; // Pattern: 4-5-6-7
-        
-        // Row 3: Check patterns starting from 8, 9
+            return true;
         if (Contains(playerCells, 8) && Contains(playerCells, 9) && Contains(playerCells, 10) && Contains(playerCells, 11))
-            return true; // Pattern: 8-9-10-11
-        
+            return true;
         return false;
     }
     
     /// <summary>
     /// Check for vertical 5-in-a-row.
-    /// Board layout (3x4 grid):
-    ///   0   1   2   3
-    ///   4   5   6   7
-    ///   8   9  10  11
     /// </summary>
     private bool CheckVerticalWin(int[] playerCells)
     {
-        // Column 1: 0, 4, 8
         if (Contains(playerCells, 0) && Contains(playerCells, 4) && Contains(playerCells, 8))
             return true;
-        
-        // Column 2: 1, 5, 9
         if (Contains(playerCells, 1) && Contains(playerCells, 5) && Contains(playerCells, 9))
             return true;
-        
-        // Column 3: 2, 6, 10
         if (Contains(playerCells, 2) && Contains(playerCells, 6) && Contains(playerCells, 10))
             return true;
-        
-        // Column 4: 3, 7, 11
         if (Contains(playerCells, 3) && Contains(playerCells, 7) && Contains(playerCells, 11))
             return true;
-        
         return false;
     }
     
     /// <summary>
-    /// Check for diagonal 5-in-a-row (top-left to bottom-right).
-    /// Board layout (3x4 grid):
-    ///   0   1   2   3
-    ///   4   5   6   7
-    ///   8   9  10  11
+    /// Check for diagonal 5-in-a-row (left-right).
     /// </summary>
     private bool CheckDiagonalWinLR(int[] playerCells)
     {
-        // Diagonal 1: 0, 5, 10
         if (Contains(playerCells, 0) && Contains(playerCells, 5) && Contains(playerCells, 10))
             return true;
-        
-        // Diagonal 2: 1, 6, 11
         if (Contains(playerCells, 1) && Contains(playerCells, 6) && Contains(playerCells, 11))
             return true;
-        
-        // Diagonal 3: 4, 9
-        // (Only 2 cells, not a 5-in-a-row)
-        
         return false;
     }
     
     /// <summary>
-    /// Check for diagonal 5-in-a-row (top-right to bottom-left).
-    /// Board layout (3x4 grid):
-    ///   0   1   2   3
-    ///   4   5   6   7
-    ///   8   9  10  11
+    /// Check for diagonal 5-in-a-row (right-left).
     /// </summary>
     private bool CheckDiagonalWinRL(int[] playerCells)
     {
-        // Diagonal 1: 3, 6, 9
         if (Contains(playerCells, 3) && Contains(playerCells, 6) && Contains(playerCells, 9))
             return true;
-        
-        // Diagonal 2: 2, 5, 8
         if (Contains(playerCells, 2) && Contains(playerCells, 5) && Contains(playerCells, 8))
             return true;
-        
-        // Diagonal 3: 1, 4
-        // (Only 2 cells, not a 5-in-a-row)
-        
         return false;
     }
     
     /// <summary>
-    /// Helper: Check if an array contains a value.
+    /// Helper: Check if array contains value.
     /// </summary>
     private bool Contains(int[] array, int value)
     {
@@ -293,6 +251,6 @@ public class Game1_Bump5 : GameModeBase
     public override void OnGameEnd(Player winner)
     {
         base.OnGameEnd(winner);
-        Debug.Log($"[Game1_Bump5] Game ended! Winner: {winner.PlayerName}");
+        Debug.Log($"[Game4_AlternatingBumps] Game ended! Winner: {winner.PlayerName}");
     }
 }
