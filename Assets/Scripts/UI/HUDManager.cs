@@ -1,115 +1,125 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 /// <summary>
-/// HUDManager - Master orchestrator for all HUD elements (Heads-Up Display).
+/// HUDManager - Master controller for all HUD elements during gameplay.
 /// 
 /// Responsibilities:
-/// - Create and manage all HUD UI elements
-/// - Update HUD state based on game events
-/// - Coordinate button interactions
-/// - Display game information (current player, phase, scores)
-/// - Handle HUD visibility/layout based on game state
+/// - Initialize all HUD components on game start
+/// - Listen to GameStateManager events
+/// - Update HUD state based on game state
+/// - Coordinate button enable/disable based on game phase
+/// - Manage notifications, modals, and pause menu
 /// 
 /// Architecture:
-/// - Subscribes to GameStateManager events
-/// - Creates and manages DiceRollButton, BumpButton, DeclareWinButton
-/// - Updates ScoreboardDisplay with current scores
-/// - Manages PopupManager for notifications
-/// - Updates PhaseIndicator with current game phase
+/// - Subscribes to all GameStateManager events
+/// - Delegates to specialized controllers (ActionButtonController, ScoreboardController, etc.)
+/// - Maintains HUD state in sync with game state
+/// - Handles lifecycle (game start, pause, resume, game end)
 /// </summary>
 public class HUDManager : MonoBehaviour
 {
     // ============================================
-    // REFERENCES
+    // INSPECTOR PROPERTIES
     // ============================================
+    
+    [SerializeField]
+    private GameStateManager gameStateManager;
     
     [SerializeField]
     private Canvas hudCanvas;
     
     [SerializeField]
-    private GameStateManager gameStateManager;
-    
-    // ============================================
-    // HUD COMPONENTS
-    // ============================================
+    private Text phaseIndicatorText;
     
     [SerializeField]
-    private DiceRollButton diceRollButton;
+    private Button diceRollButton;
     
     [SerializeField]
-    private BumpButton bumpButton;
+    private Button bumpButton;
     
     [SerializeField]
-    private DeclareWinButton declareWinButton;
+    private Button declareWinButton;
     
     [SerializeField]
-    private ScoreboardDisplay scoreboardDisplay;
+    private Button pauseButton;
     
     [SerializeField]
-    private PopupManager popupManager;
+    private Transform scoresboardParent;
     
     [SerializeField]
-    private PhaseIndicator phaseIndicator;
+    private GameObject notificationPanelPrefab;
+    
+    [SerializeField]
+    private GameObject modalOverlayPrefab;
     
     // ============================================
     // INTERNAL STATE
     // ============================================
     
+    private ActionButtonController actionButtonController;
+    private ScoreboardController scoreboardController;
+    private NotificationController notificationController;
+    private ModalController modalController;
+    private PauseMenuController pauseMenuController;
+    
     private bool isInitialized = false;
-    private bool isHUDVisible = true;
+    private bool isGamePaused = false;
+    
+    // ============================================
+    // EVENTS
+    // ============================================
+    
+    public event System.Action<bool> OnPauseStateChanged;
+    
+    // ============================================
+    // PROPERTIES
+    // ============================================
+    
+    public bool IsInitialized => isInitialized;
+    public bool IsGamePaused => isGamePaused;
     
     // ============================================
     // LIFECYCLE
     // ============================================
     
-    /// <summary>Initialize the HUD system</summary>
-    public void Initialize(GameStateManager gsm)
+    /// <summary>Initialize HUD system with game state reference</summary>
+    public void Initialize(GameStateManager stateManager)
     {
-        if (gsm == null)
+        if (stateManager == null)
         {
-            Debug.LogError("[HUDManager] GameStateManager is null");
+            Debug.LogError("HUDManager.Initialize: gameStateManager is null");
             return;
         }
         
-        gameStateManager = gsm;
+        gameStateManager = stateManager;
         
-        // Ensure canvas exists
-        if (hudCanvas == null)
-        {
-            hudCanvas = GetComponent<Canvas>();
-        }
-        
-        // Initialize components
-        InitializeComponents();
+        // Initialize child controllers
+        InitializeActionButtonController();
+        InitializeScoreboardController();
+        InitializeNotificationController();
+        InitializeModalController();
+        InitializePauseMenuController();
         
         // Subscribe to game state events
         SubscribeToGameStateEvents();
         
         isInitialized = true;
-        Debug.Log("[HUDManager] HUD initialized successfully");
+        Debug.Log("HUDManager initialized successfully");
     }
     
-    /// <summary>Shutdown HUD system</summary>
+    /// <summary>Cleanup on shutdown</summary>
     public void Shutdown()
     {
-        UnsubscribeFromGameStateEvents();
-        
-        // Cleanup components
-        if (diceRollButton != null)
-            diceRollButton.Shutdown();
-        
-        if (bumpButton != null)
-            bumpButton.Shutdown();
-        
-        if (declareWinButton != null)
-            declareWinButton.Shutdown();
-        
-        if (scoreboardDisplay != null)
-            scoreboardDisplay.Shutdown();
-        
-        if (popupManager != null)
-            popupManager.Shutdown();
+        if (gameStateManager != null)
+        {
+            gameStateManager.OnPhaseChanged -= OnGameStatePhaseChanged;
+            gameStateManager.OnPlayerChanged -= OnGameStatePlayerChanged;
+            gameStateManager.OnDiceRolled -= OnGameStateDiceRolled;
+            gameStateManager.OnChipPlaced -= OnGameStateChipPlaced;
+            gameStateManager.OnGameWon -= OnGameStateGameWon;
+        }
         
         isInitialized = false;
     }
@@ -118,296 +128,200 @@ public class HUDManager : MonoBehaviour
     // INITIALIZATION
     // ============================================
     
-    /// <summary>Initialize all HUD components</summary>
-    private void InitializeComponents()
+    private void InitializeActionButtonController()
     {
-        // Dice Roll Button
-        if (diceRollButton == null)
-        {
-            diceRollButton = gameObject.AddComponent<DiceRollButton>();
-        }
-        diceRollButton.Initialize(gameStateManager, this);
+        if (actionButtonController == null)
+            actionButtonController = gameObject.AddComponent<ActionButtonController>();
         
-        // Bump Button
-        if (bumpButton == null)
-        {
-            bumpButton = gameObject.AddComponent<BumpButton>();
-        }
-        bumpButton.Initialize(gameStateManager, this);
-        
-        // Declare Win Button
-        if (declareWinButton == null)
-        {
-            declareWinButton = gameObject.AddComponent<DeclareWinButton>();
-        }
-        declareWinButton.Initialize(gameStateManager, this);
-        
-        // Scoreboard Display
-        if (scoreboardDisplay == null)
-        {
-            scoreboardDisplay = gameObject.AddComponent<ScoreboardDisplay>();
-        }
-        scoreboardDisplay.Initialize(gameStateManager);
-        
-        // Popup Manager
-        if (popupManager == null)
-        {
-            popupManager = gameObject.AddComponent<PopupManager>();
-        }
-        popupManager.Initialize();
-        
-        // Phase Indicator
-        if (phaseIndicator == null)
-        {
-            phaseIndicator = gameObject.AddComponent<PhaseIndicator>();
-        }
-        phaseIndicator.Initialize(gameStateManager);
+        actionButtonController.Initialize(gameStateManager, diceRollButton, bumpButton, declareWinButton);
     }
     
-    /// <summary>Subscribe to GameStateManager events</summary>
+    private void InitializeScoreboardController()
+    {
+        if (scoreboardController == null)
+            scoreboardController = gameObject.AddComponent<ScoreboardController>();
+        
+        scoreboardController.Initialize(gameStateManager, scoresboardParent);
+    }
+    
+    private void InitializeNotificationController()
+    {
+        if (notificationController == null)
+            notificationController = gameObject.AddComponent<NotificationController>();
+        
+        if (notificationPanelPrefab == null)
+            notificationPanelPrefab = CreateDefaultNotificationPanel();
+        
+        notificationController.Initialize(notificationPanelPrefab);
+    }
+    
+    private void InitializeModalController()
+    {
+        if (modalController == null)
+            modalController = gameObject.AddComponent<ModalController>();
+        
+        if (modalOverlayPrefab == null)
+            modalOverlayPrefab = CreateDefaultModalOverlay();
+        
+        modalController.Initialize(modalOverlayPrefab);
+    }
+    
+    private void InitializePauseMenuController()
+    {
+        if (pauseMenuController == null)
+            pauseMenuController = gameObject.AddComponent<PauseMenuController>();
+        
+        pauseMenuController.Initialize(gameStateManager, pauseButton);
+        pauseMenuController.OnPauseStateChanged += (isPaused) => { isGamePaused = isPaused; OnPauseStateChanged?.Invoke(isPaused); };
+    }
+    
+    // ============================================
+    // EVENT SUBSCRIPTION
+    // ============================================
+    
     private void SubscribeToGameStateEvents()
     {
         if (gameStateManager == null)
             return;
         
-        gameStateManager.OnPhaseChanged += HandlePhaseChanged;
-        gameStateManager.OnPlayerChanged += HandlePlayerChanged;
-        gameStateManager.OnGameStarted += HandleGameStarted;
-        gameStateManager.OnGameWon += HandleGameWon;
-        gameStateManager.OnDiceRolled += HandleDiceRolled;
-        gameStateManager.OnChipPlaced += HandleChipPlaced;
-        gameStateManager.OnChipBumped += HandleChipBumped;
+        gameStateManager.OnPhaseChanged += OnGameStatePhaseChanged;
+        gameStateManager.OnPlayerChanged += OnGameStatePlayerChanged;
+        gameStateManager.OnDiceRolled += OnGameStateDiceRolled;
+        gameStateManager.OnChipPlaced += OnGameStateChipPlaced;
+        gameStateManager.OnGameWon += OnGameStateGameWon;
     }
     
-    /// <summary>Unsubscribe from GameStateManager events</summary>
-    private void UnsubscribeFromGameStateEvents()
+    // ============================================
+    // GAME STATE HANDLERS
+    // ============================================
+    
+    private void OnGameStatePhaseChanged(GamePhase newPhase)
     {
-        if (gameStateManager == null)
+        UpdatePhaseIndicator(newPhase);
+        
+        if (actionButtonController != null)
+            actionButtonController.UpdateButtonStates(newPhase, gameStateManager.CurrentPlayer);
+    }
+    
+    private void OnGameStatePlayerChanged(Player newPlayer)
+    {
+        if (scoreboardController != null)
+            scoreboardController.UpdateCurrentPlayerHighlight(newPlayer);
+        
+        UpdatePhaseIndicator(gameStateManager.CurrentPhase);
+    }
+    
+    private void OnGameStateDiceRolled(int[] dice)
+    {
+        if (dice == null || dice.Length < 2)
             return;
         
-        gameStateManager.OnPhaseChanged -= HandlePhaseChanged;
-        gameStateManager.OnPlayerChanged -= HandlePlayerChanged;
-        gameStateManager.OnGameStarted -= HandleGameStarted;
-        gameStateManager.OnGameWon -= HandleGameWon;
-        gameStateManager.OnDiceRolled -= HandleDiceRolled;
-        gameStateManager.OnChipPlaced -= HandleChipPlaced;
-        gameStateManager.OnChipBumped -= HandleChipBumped;
+        int total = dice[0] + dice[1];
+        string message = $"Rolled: {dice[0]} + {dice[1]} = {total}";
+        
+        if (notificationController != null)
+            notificationController.ShowNotification(message, 3f);
+    }
+    
+    private void OnGameStateChipPlaced(int cellIndex, Player player)
+    {
+        string message = $"{player.PlayerName} placed on cell {cellIndex}";
+        
+        if (notificationController != null)
+            notificationController.ShowNotification(message, 2f);
+    }
+    
+    private void OnGameStateGameWon(Player winner)
+    {
+        string title = "Game Won!";
+        string message = $"{winner.PlayerName} has won the game!";
+        
+        if (modalController != null)
+            modalController.ShowWinModal(title, message, winner);
     }
     
     // ============================================
-    // EVENT HANDLERS
+    // HUD UPDATES
     // ============================================
     
-    /// <summary>Handle phase change event</summary>
-    private void HandlePhaseChanged(GamePhase newPhase)
+    private void UpdatePhaseIndicator(GamePhase phase)
     {
-        Debug.Log($"[HUDManager] Phase changed to {newPhase}");
-        
-        // Update phase indicator
-        if (phaseIndicator != null)
-        {
-            phaseIndicator.UpdatePhase(newPhase);
-        }
-        
-        // Update button visibility/enable state
-        UpdateButtonStates(newPhase);
-        
-        // Show phase notification
-        if (popupManager != null)
-        {
-            popupManager.ShowNotification($"Phase: {newPhase}");
-        }
-    }
-    
-    /// <summary>Handle player change event</summary>
-    private void HandlePlayerChanged(Player newPlayer)
-    {
-        Debug.Log($"[HUDManager] Current player changed to {newPlayer.PlayerName}");
-        
-        // Update scoreboard to highlight current player
-        if (scoreboardDisplay != null)
-        {
-            scoreboardDisplay.UpdateCurrentPlayer(newPlayer);
-        }
-        
-        // Show notification
-        if (popupManager != null)
-        {
-            popupManager.ShowNotification($"{newPlayer.PlayerName}'s Turn");
-        }
-    }
-    
-    /// <summary>Handle game started event</summary>
-    private void HandleGameStarted()
-    {
-        Debug.Log("[HUDManager] Game started");
-        
-        // Show initial state
-        if (scoreboardDisplay != null)
-        {
-            scoreboardDisplay.UpdateScores(gameStateManager.Players);
-        }
-        
-        // Show game mode info
-        if (popupManager != null && gameStateManager.CurrentGameMode != null)
-        {
-            popupManager.ShowNotification($"Game: {gameStateManager.CurrentGameMode.ModeName}");
-        }
-    }
-    
-    /// <summary>Handle game won event</summary>
-    private void HandleGameWon(Player winner)
-    {
-        Debug.Log($"[HUDManager] Game won by {winner.PlayerName}");
-        
-        // Show win notification with celebration
-        if (popupManager != null)
-        {
-            popupManager.ShowNotification($"🎉 {winner.PlayerName} wins! 🎉", PopupType.Celebration);
-        }
-        
-        // Disable all action buttons
-        if (diceRollButton != null)
-            diceRollButton.SetInteractable(false);
-        if (bumpButton != null)
-            bumpButton.SetInteractable(false);
-        if (declareWinButton != null)
-            declareWinButton.SetInteractable(false);
-    }
-    
-    /// <summary>Handle dice rolled event</summary>
-    private void HandleDiceRolled(int[] diceResult)
-    {
-        if (diceResult == null || diceResult.Length < 2)
+        if (phaseIndicatorText == null)
             return;
         
-        int total = diceResult[0] + diceResult[1];
-        Debug.Log($"[HUDManager] Dice rolled: {diceResult[0]} + {diceResult[1]} = {total}");
+        Player current = gameStateManager.CurrentPlayer;
+        string playerName = current != null ? current.PlayerName : "Unknown";
         
-        // Show dice roll notification
-        if (popupManager != null)
+        string phaseText = phase switch
         {
-            popupManager.ShowNotification($"🎲 {diceResult[0]} + {diceResult[1]} = {total}");
-        }
-    }
-    
-    /// <summary>Handle chip placed event</summary>
-    private void HandleChipPlaced(int cellIndex, Player player)
-    {
-        Debug.Log($"[HUDManager] Chip placed on cell {cellIndex} by {player.PlayerName}");
+            GamePhase.GameStart => "Game Starting...",
+            GamePhase.RollingDice => $"{playerName} - Rolling Phase",
+            GamePhase.Placing => $"{playerName} - Placing Phase",
+            GamePhase.Bumping => $"{playerName} - Bumping Phase",
+            GamePhase.EndTurn => $"{playerName} - End Turn",
+            GamePhase.Waiting => $"Waiting for {playerName}",
+            GamePhase.GameEnd => "Game Over",
+            _ => "Unknown Phase"
+        };
         
-        // Update scoreboard
-        if (scoreboardDisplay != null)
-        {
-            scoreboardDisplay.UpdateScores(gameStateManager.Players);
-        }
-    }
-    
-    /// <summary>Handle chip bumped event</summary>
-    private void HandleChipBumped(int cellIndex)
-    {
-        Debug.Log($"[HUDManager] Chip bumped from cell {cellIndex}");
-        
-        // Show bump notification
-        if (popupManager != null)
-        {
-            popupManager.ShowNotification("💥 Bump!", PopupType.Warning);
-        }
-        
-        // Update scoreboard
-        if (scoreboardDisplay != null)
-        {
-            scoreboardDisplay.UpdateScores(gameStateManager.Players);
-        }
+        phaseIndicatorText.text = phaseText;
     }
     
     // ============================================
-    // PUBLIC CONTROL METHODS
+    // PREFAB CREATION (FALLBACK)
     // ============================================
     
-    /// <summary>Show or hide the entire HUD</summary>
-    public void SetHUDVisible(bool visible)
+    private GameObject CreateDefaultNotificationPanel()
     {
-        if (hudCanvas != null)
-        {
-            hudCanvas.enabled = visible;
-            isHUDVisible = visible;
-            Debug.Log($"[HUDManager] HUD {(visible ? "shown" : "hidden")}");
-        }
+        GameObject panel = new GameObject("NotificationPanel");
+        panel.AddComponent<CanvasGroup>();
+        panel.AddComponent<Text>().text = "Notification";
+        return panel;
     }
     
-    /// <summary>Show a notification popup</summary>
-    public void ShowNotification(string message, PopupType type = PopupType.Info)
+    private GameObject CreateDefaultModalOverlay()
     {
-        if (popupManager != null)
-        {
-            popupManager.ShowNotification(message, type);
-        }
-    }
-    
-    /// <summary>Update button states based on current phase</summary>
-    private void UpdateButtonStates(GamePhase currentPhase)
-    {
-        switch (currentPhase)
-        {
-            case GamePhase.RollingDice:
-                if (diceRollButton != null)
-                    diceRollButton.SetInteractable(true);
-                if (bumpButton != null)
-                    bumpButton.SetInteractable(false);
-                if (declareWinButton != null)
-                    declareWinButton.SetInteractable(false);
-                break;
-            
-            case GamePhase.Placing:
-                if (diceRollButton != null)
-                    diceRollButton.SetInteractable(false);
-                if (bumpButton != null)
-                    bumpButton.SetInteractable(true);
-                if (declareWinButton != null)
-                    declareWinButton.SetInteractable(true);
-                break;
-            
-            case GamePhase.Bumping:
-                if (diceRollButton != null)
-                    diceRollButton.SetInteractable(false);
-                if (bumpButton != null)
-                    bumpButton.SetInteractable(true);
-                if (declareWinButton != null)
-                    declareWinButton.SetInteractable(true);
-                break;
-            
-            case GamePhase.EndTurn:
-                if (diceRollButton != null)
-                    diceRollButton.SetInteractable(false);
-                if (bumpButton != null)
-                    bumpButton.SetInteractable(false);
-                if (declareWinButton != null)
-                    declareWinButton.SetInteractable(false);
-                break;
-            
-            case GamePhase.GameStart:
-            case GamePhase.GameEnd:
-                if (diceRollButton != null)
-                    diceRollButton.SetInteractable(false);
-                if (bumpButton != null)
-                    bumpButton.SetInteractable(false);
-                if (declareWinButton != null)
-                    declareWinButton.SetInteractable(false);
-                break;
-        }
+        GameObject overlay = new GameObject("ModalOverlay");
+        overlay.AddComponent<Image>().color = new Color(0, 0, 0, 0.5f);
+        return overlay;
     }
     
     // ============================================
-    // PROPERTIES
+    // PUBLIC INTERFACE
     // ============================================
     
-    public bool IsInitialized => isInitialized;
-    public bool IsHUDVisible => isHUDVisible;
-    public DiceRollButton DiceRollButton => diceRollButton;
-    public BumpButton BumpButton => bumpButton;
-    public DeclareWinButton DeclareWinButton => declareWinButton;
-    public ScoreboardDisplay ScoreboardDisplay => scoreboardDisplay;
-    public PopupManager PopupManager => popupManager;
-    public PhaseIndicator PhaseIndicator => phaseIndicator;
+    /// <summary>Show a temporary notification message</summary>
+    public void ShowNotification(string message, float duration = 3f)
+    {
+        if (notificationController != null)
+            notificationController.ShowNotification(message, duration);
+    }
+    
+    /// <summary>Show an error notification</summary>
+    public void ShowError(string message, float duration = 3f)
+    {
+        if (notificationController != null)
+            notificationController.ShowError(message, duration);
+    }
+    
+    /// <summary>Show a success notification</summary>
+    public void ShowSuccess(string message, float duration = 3f)
+    {
+        if (notificationController != null)
+            notificationController.ShowSuccess(message, duration);
+    }
+    
+    /// <summary>Pause the game</summary>
+    public void PauseGame()
+    {
+        if (pauseMenuController != null)
+            pauseMenuController.ShowPauseMenu();
+    }
+    
+    /// <summary>Resume the game</summary>
+    public void ResumeGame()
+    {
+        if (pauseMenuController != null)
+            pauseMenuController.HidePauseMenu();
+    }
 }
