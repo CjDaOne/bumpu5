@@ -53,8 +53,7 @@ public class iOSBuildConfig
         // Performance
         enableManagedStripping = true,
         scriptBackend = "IL2CPP",
-        enableAppThinning = true,
-        enableBitcode = false, // Deprecated in newer Xcode
+        enableAppThinning = true
         
         // Audio
         compressionFormat = "ALAC", // Apple Lossless (better quality on Apple hardware)
@@ -208,7 +207,6 @@ public class iOSBuildSettings
     public bool enableManagedStripping;
     public string scriptBackend;
     public bool enableAppThinning;
-    public bool enableBitcode;
     
     // Audio
     public string compressionFormat;
