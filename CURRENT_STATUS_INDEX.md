@@ -17,8 +17,8 @@
 ## 🚀 For QA Team (Sprint 8 - Active)
 
 **CRITICAL - Read immediately**:
-1. **TEAM_DISPATCH_SPRINT8_QA_EXECUTE.md** ← Your execution orders
-2. **TEAM_STATUS_BRIEFING_NOV14.md** ← Your role and timeline
+1. **_docs/TEAMS/TEAM_DISPATCH_SPRINT8_QA_EXECUTE.md** ← Your execution orders
+2. **_docs/TEAMS/TEAM_STATUS_BRIEFING_NOV14.md** ← Your role and timeline
 3. **SPRINT_STATUS.md** ← Current metrics and next steps
 
 **Reference**:
@@ -40,9 +40,9 @@
 **You are available for bug fixes during Sprint 8**
 
 **Information**:
-1. **TEAM_STATUS_BRIEFING_NOV14.md** ← Your availability & expectations
+1. **_docs/TEAMS/TEAM_STATUS_BRIEFING_NOV14.md** ← Your availability & expectations
 2. **SPRINT_STATUS.md** ← Current project status
-3. **CODING_STANDARDS.md** ← Code quality requirements
+3. **_docs/STANDARDS/CODING_STANDARDS.md** ← Code quality requirements
 
 **Bug Fix SLA**:
 - CRITICAL: < 4 hours
@@ -81,9 +81,9 @@
 ## 📋 For Managing Engineer / Leadership
 
 **Full Project Assessment**:
-1. **PROJECT_READINESS_ASSESSMENT.md** ← GO/NO-GO decision
-2. **SPRINT_7_COMPLETION_REVIEW.md** ← Sprint 7 sign-off
-3. **TEAM_DISPATCH_SPRINT8_QA_EXECUTE.md** ← Sprint 8 orders issued
+1. **_docs/SPRINTS/PROJECT_READINESS_ASSESSMENT.md** ← GO/NO-GO decision
+2. **_docs/SPRINTS/SPRINT_7_COMPLETION_REVIEW.md** ← Sprint 7 sign-off
+3. **_docs/TEAMS/TEAM_DISPATCH_SPRINT8_QA_EXECUTE.md** ← Sprint 8 orders issued
 4. **SPRINT_STATUS.md** ← Real-time progress
 
 **Key Metrics**:
@@ -101,14 +101,30 @@
 
 ## 📁 Complete Document Structure
 
-### Root Level (Active)
+### Root Level (Active Operational)
 ```
-SPRINT_STATUS.md                    ← Real-time progress
-PROJECT_READINESS_ASSESSMENT.md     ← Full health check
-SPRINT_7_COMPLETION_REVIEW.md       ← Sprint 7 sign-off
-TEAM_DISPATCH_SPRINT8_QA_EXECUTE.md ← Sprint 8 orders
-TEAM_STATUS_BRIEFING_NOV14.md       ← Team briefing
-CURRENT_STATUS_INDEX.md             ← You are here
+SPRINT_STATUS.md              ← Real-time progress (primary navigation)
+CURRENT_STATUS_INDEX.md       ← Team navigation guide (you are here)
+GAME_MODES_RULES_SUMMARY.md   ← Game mode mechanics reference
+DOCUMENTATION_GUIDE.md        ← Documentation standards
+README.md                     ← Project overview
+CLEANUP_SUMMARY.md            ← Project cleanup status
+```
+
+### _docs/SPRINTS/ (Sprint Reviews & Assessments)
+```
+SPRINT_1_REVIEW.md
+SPRINT_2_FINAL_SIGNOFF.md
+SPRINT_3_CODE_REVIEW.md
+SPRINT_7_COMPLETION_REVIEW.md       ← Sprint 7 code review approval
+PROJECT_READINESS_ASSESSMENT.md     ← Full health check + GO decision
+```
+
+### _docs/TEAMS/ (Team Dispatch & Coordination)
+```
+TEAM_STATUS_BRIEFING_NOV14.md       ← Team assignments & status
+TEAM_DISPATCH_SPRINT8_QA_EXECUTE.md ← Sprint 8 execution orders
+TEAM_DISPATCH_SPRINT4_BOARD_*.md    ← Sprint 4 archive (reference)
 ```
 
 ### Code (Production Ready)
