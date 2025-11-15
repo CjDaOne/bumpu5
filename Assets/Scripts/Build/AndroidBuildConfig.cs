@@ -44,8 +44,8 @@ public class AndroidBuildConfig
         architectures = new[] { "ARM64" }, // Primary: ARM64 only for <100MB
         splitAPKByArchitecture = true,
         
-        // Graphics
-        graphicsAPI = "OpenGLES3",
+        // Graphics (Unity 6.0: Vulkan preferred, with OpenGLES3 fallback)
+        graphicsAPI = "Vulkan",
         enableGPUInstancing = true,
         enableDynamicResolution = true,
         
