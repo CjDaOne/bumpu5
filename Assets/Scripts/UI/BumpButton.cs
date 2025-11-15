@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// BumpButton - Context-sensitive button for bumping opponent chips.
@@ -17,7 +18,7 @@ public class BumpButton : MonoBehaviour
     // ============================================
     
     private Button button;
-    private Text buttonText;
+    private TextMeshProUGUI buttonText;
     private Image buttonImage;
     private GameStateManager gameStateManager;
     private HUDManager hudManager;

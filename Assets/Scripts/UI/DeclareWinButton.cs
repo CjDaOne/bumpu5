@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// DeclareWinButton - Button to declare victory when win condition is met.
@@ -17,7 +18,7 @@ public class DeclareWinButton : MonoBehaviour
     // ============================================
     
     private Button button;
-    private Text buttonText;
+    private TextMeshProUGUI buttonText;
     private Image buttonImage;
     private GameStateManager gameStateManager;
     private HUDManager hudManager;

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using System.Collections;
 
 /// <summary>
@@ -35,7 +36,7 @@ public class NotificationController : MonoBehaviour
     
     private GameObject currentNotification;
     private CanvasGroup canvasGroup;
-    private Text notificationText;
+    private TextMeshProUGUI notificationText;
     private Coroutine dismissCoroutine;
     private bool isInitialized = false;
     
@@ -117,10 +118,10 @@ public class NotificationController : MonoBehaviour
         
         currentNotification = Instantiate(notificationPrefab, notificationContainer);
         
-        // Setup text
-        notificationText = currentNotification.GetComponent<Text>();
+        // Setup text - Unity 6.0: Use TextMeshProUGUI
+        notificationText = currentNotification.GetComponent<TextMeshProUGUI>();
         if (notificationText == null)
-            notificationText = currentNotification.GetComponentInChildren<Text>();
+            notificationText = currentNotification.GetComponentInChildren<TextMeshProUGUI>();
         
         if (notificationText != null)
         {

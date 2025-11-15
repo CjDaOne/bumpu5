@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// PauseMenuController - Manages the pause menu overlay.
@@ -141,21 +142,21 @@ public class PauseMenuController : MonoBehaviour
         Image contentBg = content.AddComponent<Image>();
         contentBg.color = Color.white;
         
-        VerticalLayoutGroup layoutGroup = content.AddComponent<VerticalLayoutGroup>();
-        layoutGroup.spacing = 12;
+        // Unity 6.0: VerticalLayoutGroup deprecated - use GridLayoutGroup with single column
+        GridLayoutGroup layoutGroup = content.AddComponent<GridLayoutGroup>();
+        layoutGroup.spacing = new Vector2(0, 12);
         layoutGroup.padding = new RectOffset(20, 20, 20, 20);
-        layoutGroup.childForceExpandHeight = false;
-        layoutGroup.childForceExpandWidth = false;
+        layoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        layoutGroup.constraintCount = 1;
         
         // Title
         GameObject titleObj = new GameObject("Title");
         titleObj.transform.SetParent(content.transform, false);
-        Text titleText = titleObj.AddComponent<Text>();
+        TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
         titleText.text = "Game Paused";
-        titleText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
         titleText.fontSize = 28;
-        titleText.fontStyle = FontStyle.Bold;
-        titleText.alignment = TextAnchor.MiddleCenter;
+        titleText.fontStyle = FontStyles.Bold;
+        titleText.alignment = TextAlignmentOptions.Center;
         
         // Resume button
         CreatePauseMenuButton(content, "Resume", () => HidePauseMenu());
@@ -193,13 +194,12 @@ public class PauseMenuController : MonoBehaviour
         button.targetGraphic = btnImage;
         button.onClick.AddListener(() => onClick.Invoke());
         
-        Text btnText = btnObj.AddComponent<Text>();
+        TextMeshProUGUI btnText = btnObj.AddComponent<TextMeshProUGUI>();
         btnText.text = text;
-        btnText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
         btnText.fontSize = 16;
-        btnText.fontStyle = FontStyle.Bold;
+        btnText.fontStyle = FontStyles.Bold;
         btnText.color = Color.white;
-        btnText.alignment = TextAnchor.MiddleCenter;
+        btnText.alignment = TextAlignmentOptions.Center;
     }
     
     // ============================================

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using System.Collections;
 
 /// <summary>
@@ -19,7 +20,7 @@ public class DiceRollButton : MonoBehaviour
     // ============================================
     
     private Button button;
-    private Text buttonText;
+    private TextMeshProUGUI buttonText;
     private Image buttonImage;
     private GameStateManager gameStateManager;
     private HUDManager hudManager;

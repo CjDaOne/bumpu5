@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// BoardInputHandler - Dedicated input processing for the board system.
@@ -46,6 +47,11 @@ public class BoardInputHandler : MonoBehaviour
     private int lastTappedCell = -1;
     private bool isInputEnabled = true;
     private bool isInitialized = false;
+    
+    // Unity 6.0: New Input System actions
+    private InputAction rollDiceAction;
+    private InputAction bumpAction;
+    private InputAction winAction;
     
     // ============================================
     // EVENTS
@@ -98,8 +104,23 @@ public class BoardInputHandler : MonoBehaviour
         gameStateManager.OnPhaseChanged += HandlePhaseChanged;
         gameStateManager.OnGameWon += HandleGameWon;
         
+        // Initialize New Input System actions (Unity 6.0)
+        InitializeInputActions();
+        
         isInitialized = true;
         Debug.Log("BoardInputHandler initialized successfully");
+    }
+    
+    /// <summary>Initialize New Input System actions</summary>
+    private void InitializeInputActions()
+    {
+        rollDiceAction = new InputAction("RollDice", InputActionType.Button, "<Keyboard>/r");
+        bumpAction = new InputAction("Bump", InputActionType.Button, "<Keyboard>/b");
+        winAction = new InputAction("DeclareWin", InputActionType.Button, "<Keyboard>/w");
+        
+        rollDiceAction.Enable();
+        bumpAction.Enable();
+        winAction.Enable();
     }
     
     /// <summary>Cleanup on shutdown</summary>
@@ -115,6 +136,11 @@ public class BoardInputHandler : MonoBehaviour
             gameStateManager.OnPhaseChanged -= HandlePhaseChanged;
             gameStateManager.OnGameWon -= HandleGameWon;
         }
+        
+        // Cleanup New Input System actions (Unity 6.0)
+        rollDiceAction?.Disable();
+        bumpAction?.Disable();
+        winAction?.Disable();
         
         isInitialized = false;
     }
@@ -179,8 +205,10 @@ public class BoardInputHandler : MonoBehaviour
     /// <summary>Handle keyboard shortcuts</summary>
     private void HandleKeyboardInput()
     {
+        // Unity 6.0: New Input System - use InputAction instead of Input.GetKeyDown
+        
         // 'R' to roll dice (if in rolling phase)
-        if (Input.GetKeyDown(KeyCode.R))
+        if (rollDiceAction.triggered)
         {
             if (gameStateManager.CurrentPhase == GamePhase.RollingDice)
             {
@@ -189,7 +217,7 @@ public class BoardInputHandler : MonoBehaviour
         }
         
         // 'B' to bump (if in bumping phase)
-        if (Input.GetKeyDown(KeyCode.B))
+        if (bumpAction.triggered)
         {
             if (gameStateManager.CurrentPhase == GamePhase.Bumping)
             {
@@ -199,7 +227,7 @@ public class BoardInputHandler : MonoBehaviour
         }
         
         // 'W' to declare win (if player has won)
-        if (Input.GetKeyDown(KeyCode.W))
+        if (winAction.triggered)
         {
             Player currentPlayer = gameStateManager.CurrentPlayer;
             if (currentPlayer != null && gameStateManager.CurrentGameMode.CheckWinCondition(currentPlayer))

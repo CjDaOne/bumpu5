@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// ActionButtonController - Manages dice roll, bump, and declare win buttons.
@@ -170,7 +171,7 @@ public class ActionButtonController : MonoBehaviour
             buttonImage.color = color;
         }
         
-        Text buttonText = button.GetComponentInChildren<Text>();
+        TextMeshProUGUI buttonText = button.GetComponentInChildren<TextMeshProUGUI>();
         if (buttonText != null)
         {
             Color textColor = enabled ? Color.white : new Color(0.5f, 0.5f, 0.5f);

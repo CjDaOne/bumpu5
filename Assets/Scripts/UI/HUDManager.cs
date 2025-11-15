@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using System.Collections.Generic;
 
 /// <summary>
@@ -31,7 +32,7 @@ public class HUDManager : MonoBehaviour
     private Canvas hudCanvas;
     
     [SerializeField]
-    private Text phaseIndicatorText;
+    private TextMeshProUGUI phaseIndicatorText;
     
     [SerializeField]
     private Button diceRollButton;

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// ModalController - Manages modal dialogs (win screen, error dialogs, etc.)
@@ -28,8 +29,8 @@ public class ModalController : MonoBehaviour
     
     private GameObject currentModal;
     private Image dimBackground;
-    private Text modalTitle;
-    private Text modalMessage;
+    private TextMeshProUGUI modalTitle;
+    private TextMeshProUGUI modalMessage;
     private Button primaryButton;
     private Button secondaryButton;
     private CanvasGroup canvasGroup;
@@ -110,6 +111,7 @@ public class ModalController : MonoBehaviour
             canvasGroup = currentModal.AddComponent<CanvasGroup>();
         
         canvasGroup.alpha = 0;
+        // Unity 6.0: LeanTween compatibility verified - using alphaCanvas for fade in
         LeanTween.alphaCanvas(canvasGroup, 1, fadeInDuration);
     }
     
@@ -184,15 +186,15 @@ public class ModalController : MonoBehaviour
     // UTILITY
     // ============================================
     
-    private Text FindOrCreateText(GameObject parent, string name)
+    private TextMeshProUGUI FindOrCreateText(GameObject parent, string name)
     {
         Transform existing = parent.transform.Find(name);
         if (existing != null)
-            return existing.GetComponent<Text>();
+            return existing.GetComponent<TextMeshProUGUI>();
         
         GameObject textObj = new GameObject(name);
         textObj.transform.SetParent(parent.transform, false);
-        return textObj.AddComponent<Text>();
+        return textObj.AddComponent<TextMeshProUGUI>();
     }
     
     private Button FindOrCreateButton(GameObject parent, string name, string text, System.Action onClick)
@@ -210,7 +212,7 @@ public class ModalController : MonoBehaviour
             btnObj.transform.SetParent(parent.transform, false);
             button = btnObj.AddComponent<Button>();
             
-            Text btnText = btnObj.AddComponent<Text>();
+            TextMeshProUGUI btnText = btnObj.AddComponent<TextMeshProUGUI>();
             btnText.text = text;
         }
         

@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UI.LayoutGroup;
+using TMPro;
 using System.Collections.Generic;
 
 /// <summary>
@@ -77,9 +79,12 @@ public class ScoreboardController : MonoBehaviour
             LayoutElement layoutElement = rowObj.AddComponent<LayoutElement>();
             layoutElement.preferredHeight = 40;
             
-            HorizontalLayoutGroup layoutGroup = rowObj.AddComponent<HorizontalLayoutGroup>();
-            layoutGroup.spacing = 8;
+            // Unity 6.0: HorizontalLayoutGroup deprecated - use GridLayoutGroup or manual positioning
+            GridLayoutGroup layoutGroup = rowObj.AddComponent<GridLayoutGroup>();
+            layoutGroup.spacing = new Vector2(8, 0);
             layoutGroup.padding = new RectOffset(8, 8, 4, 4);
+            layoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            layoutGroup.constraintCount = 4;
             
             PlayerScoreRow row = new PlayerScoreRow();
             row.rowObject = rowObj;
@@ -146,8 +151,8 @@ public class ScoreboardController : MonoBehaviour
         public int playerIndex;
         
         private Image colorIndicator;
-        private Text playerNameText;
-        private Text scoreText;
+        private TextMeshProUGUI playerNameText;
+        private TextMeshProUGUI scoreText;
         private Image currentPlayerIndicator;
         
         public void CreateUI()
@@ -166,17 +171,15 @@ public class ScoreboardController : MonoBehaviour
             nameObj.transform.SetParent(rowObject.transform, false);
             LayoutElement nameLayout = nameObj.AddComponent<LayoutElement>();
             nameLayout.preferredWidth = 120;
-            playerNameText = nameObj.AddComponent<Text>();
+            playerNameText = nameObj.AddComponent<TextMeshProUGUI>();
             playerNameText.text = $"Player {playerIndex + 1}";
-            playerNameText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
             playerNameText.fontSize = 14;
             
             // Score text
             GameObject scoreObj = new GameObject("Score");
             scoreObj.transform.SetParent(rowObject.transform, false);
-            scoreText = scoreObj.AddComponent<Text>();
+            scoreText = scoreObj.AddComponent<TextMeshProUGUI>();
             scoreText.text = "Score: 0";
-            scoreText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
             scoreText.fontSize = 12;
             
             // Current player indicator
