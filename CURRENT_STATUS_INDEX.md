@@ -7,10 +7,14 @@
 
 ## 🎯 For Everyone
 
+**⚠️ CRITICAL UPDATE (Nov 14)**: Unity 6.0 compatibility audit completed
+
 **START HERE**: Read these in order
-1. **TEAM_STATUS_BRIEFING_NOV14.md** ← Team assignments & current status
-2. **PROJECT_READINESS_ASSESSMENT.md** ← Full project health assessment
-3. **SPRINT_STATUS.md** ← Real-time progress tracking
+1. **ME_UNITY6_COMPATIBILITY_BRIEFING.md** ← Executive summary (5 min read) ← READ FIRST
+2. **ME_UNITY6_COMPATIBILITY_DIRECTIVE.md** ← Binding team assignments
+3. **TEAM_STATUS_BRIEFING_NOV14.md** ← Team assignments & current status
+4. **PROJECT_READINESS_ASSESSMENT.md** ← Full project health assessment
+5. **SPRINT_STATUS.md** ← Real-time progress tracking
 
 ---
 
@@ -103,12 +107,21 @@
 
 ### Root Level (Active Operational)
 ```
-SPRINT_STATUS.md              ← Real-time progress (primary navigation)
-CURRENT_STATUS_INDEX.md       ← Team navigation guide (you are here)
-GAME_MODES_RULES_SUMMARY.md   ← Game mode mechanics reference
-DOCUMENTATION_GUIDE.md        ← Documentation standards
-README.md                     ← Project overview
-CLEANUP_SUMMARY.md            ← Project cleanup status
+SPRINT_STATUS.md                           ← Real-time progress (primary navigation)
+CURRENT_STATUS_INDEX.md                    ← Team navigation guide (you are here)
+ME_UNITY6_COMPATIBILITY_BRIEFING.md        ← Executive summary (NEW - READ FIRST)
+ME_UNITY6_COMPATIBILITY_DIRECTIVE.md       ← Binding team directive (NEW)
+GAME_MODES_RULES_SUMMARY.md                ← Game mode mechanics reference
+DOCUMENTATION_GUIDE.md                     ← Documentation standards
+README.md                                  ← Project overview
+CLEANUP_SUMMARY.md                         ← Project cleanup status
+```
+
+### _docs/STANDARDS/ (Code Quality & Compliance)
+```
+CODING_STANDARDS.md                         ← Code style, patterns, requirements
+UNITY_6_COMPATIBILITY_AUDIT.md              ← Detailed API audit (NEW)
+UNITY_6_COMPATIBILITY_FIXES.md              ← Progress tracking log (NEW)
 ```
 
 ### _docs/SPRINTS/ (Sprint Reviews & Assessments)
@@ -156,30 +169,39 @@ _docs/INDEX.md          ← Full navigation
 
 ---
 
-## 🎬 What's Happening Now (Nov 14)
+## 🎬 What's Happening Now (Nov 14, Updated)
 
 ✅ **Sprint 7 Complete** - All platform builds configured  
 🚀 **Sprint 8 Launched** - QA team initiating comprehensive testing  
-📊 **Project Status** - 87.5% complete, on track for Dec 15  
-🎯 **Next Milestone** - Phase 1 testing completion (Nov 20)
+⚠️ **CRITICAL**: Unity 6.0 compatibility audit complete - 15 files flagged for migration  
+📊 **Project Status** - 87.5% complete, on track for Dec 15 (WITH compatibility fixes)  
+🎯 **Next Milestone** - Teams complete Unity 6 migrations by Nov 17 EOD, Phase 1 testing Nov 16+
 
 ---
 
 ## 📅 What's Next
 
-**This Week**:
-- QA: Test framework setup (Nov 14-15)
-- Dev: Prepare for bug fixes (on-call)
-- Build: Monitor and validate
+**This Week (Nov 14-15)** - ⚠️ CRITICAL COMPATIBILITY WORK:
+- ⚠️ All Teams: Read compatibility briefing & directive (Nov 14)
+- ⚠️ UI Engineer: Prepare 9 files for Text/Layout migration (Nov 15)
+- ⚠️ Board Engineer: Prepare 3 files for Input System migration (Nov 15)
+- ⚠️ Build Engineer: Prepare 3 files for verification (Nov 15)
 
-**Next Week**:
-- QA: Phase 1 comprehensive testing (Nov 16-20)
+**Next Week (Nov 16-18)** - CRITICAL MIGRATIONS + QA TESTING:
+- 🔴 UI/Board Engineers: Complete critical migrations (Nov 16-17 EOD)
+- 🔴 Build Engineer: Complete verification (Nov 18 EOD)
+- 🟡 QA: Phase 1 testing proceeds (Nov 16-20, blocked until compatibility fixes committed)
+- Dev Teams: On-call for any immediate compatibility issues
+
+**Following Week (Nov 19-22)**:
+- Managing Engineer: Final compatibility gate review (Nov 19)
+- QA: Phase 1 testing completion (Nov 20)
+- Bug triage meeting (Nov 21-22)
 - Dev: Fix bugs as reported
 
-**Following Week**:
-- Bug triage meeting (Nov 21-22)
-- Dev: Fix bugs (Nov 23-29)
-- QA: Verify fixes (Nov 30-Dec 4)
+**Late November (Nov 23-Dec 4)**:
+- Bug fix iteration (Nov 23-29)
+- QA: Phase 2 testing & verification (Nov 30-Dec 4)
 
 **December**:
 - Build: Performance optimization (Dec 5-9)
