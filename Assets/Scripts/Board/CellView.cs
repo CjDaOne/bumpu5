@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using TMPro;
 
 /// <summary>
 /// CellView - Individual cell representation on the board.
@@ -31,7 +32,7 @@ public class CellView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
     private Image occupantIndicator;
     
     [SerializeField]
-    private Text chipCountDisplay;
+    private TextMeshProUGUI chipCountDisplay;
     
     [SerializeField]
     private Button clickArea;
