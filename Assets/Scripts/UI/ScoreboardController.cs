@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UI.LayoutGroup;
 using TMPro;
 using System.Collections.Generic;
 

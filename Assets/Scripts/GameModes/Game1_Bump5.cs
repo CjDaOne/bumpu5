@@ -151,7 +151,7 @@ public class Game1_Bump5 : GameModeBase
     /// </summary>
     public override bool CheckWinCondition(Player player)
     {
-        if (gameState == null || gameState.Board == null)
+        if (gameStateManager == null || gameStateManager.Board == null)
             return false;
         
         int[] playerCells = GetCellsOccupiedBy(player);

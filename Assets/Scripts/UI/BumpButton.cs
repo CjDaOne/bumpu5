@@ -59,7 +59,7 @@ public class BumpButton : MonoBehaviour
         }
         
         // Get text and image components
-        buttonText = GetComponentInChildren<Text>();
+        buttonText = GetComponentInChildren<TextMeshProUGUI>();
         buttonImage = GetComponent<Image>();
         
         // Subscribe to button click
@@ -109,11 +109,12 @@ public class BumpButton : MonoBehaviour
         }
         
         // Check if current game mode allows bumping
-        if (!gameStateManager.CurrentGameMode.AllowBumping)
+        // Note: AllowBumping property removed from IGameMode, relying on CanBump check later
+        /*if (!gameStateManager.CurrentGameMode.AllowBumping)
         {
             Debug.Log("[BumpButton] Bumping not allowed in this game mode");
             return;
-        }
+        }*/
         
         Debug.Log("[BumpButton] Bump action triggered");
         
@@ -133,7 +134,7 @@ public class BumpButton : MonoBehaviour
         
         if (gameStateManager != null && gameStateManager.CurrentGameMode != null)
         {
-            canBump = canBump && gameStateManager.CurrentGameMode.AllowBumping;
+            // canBump = canBump && gameStateManager.CurrentGameMode.AllowBumping;
         }
         
         SetInteractable(canBump);
@@ -168,14 +169,14 @@ public class BumpButton : MonoBehaviour
     /// <summary>Show popup to select bump target</summary>
     private void ShowBumpSelectionPopup()
     {
-        if (hudManager == null || hudManager.PopupManager == null)
+        if (hudManager == null)
         {
-            Debug.LogWarning("[BumpButton] Cannot show popup - no PopupManager");
+            Debug.LogWarning("[BumpButton] Cannot show popup - no HUDManager");
             return;
         }
         
         // Show popup with instructions
-        hudManager.ShowNotification("Click on opponent chip to bump", PopupType.Info);
+        hudManager.ShowNotification("Click on opponent chip to bump", 2f);
     }
     
     /// <summary>Process bump target selection</summary>
@@ -187,7 +188,13 @@ public class BumpButton : MonoBehaviour
         selectedCellIndex = cellIndex;
         
         // Get cell occupant
-        Player targetPlayer = gameStateManager.GetPlayerAtCell(cellIndex);
+        Player targetPlayer = null;
+        if (gameStateManager.Board != null)
+        {
+            var cell = gameStateManager.Board.GetCell(cellIndex);
+            if (cell != null) targetPlayer = cell.Occupant; // Changed from Owner to Occupant if needed, or Owner
+        }
+        
         if (targetPlayer == null)
         {
             Debug.Log("[BumpButton] Cell is empty");
@@ -212,7 +219,7 @@ public class BumpButton : MonoBehaviour
             Debug.Log("[BumpButton] Cannot bump this cell");
             if (hudManager != null)
             {
-                hudManager.ShowNotification("Cannot bump this chip", PopupType.Warning);
+                hudManager.ShowNotification("Cannot bump this chip", 2f);
             }
         }
     }

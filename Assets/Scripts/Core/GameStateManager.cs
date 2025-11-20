@@ -24,6 +24,7 @@ public class GameStateManager
     private TurnManager turnManager;
     private DiceManager diceManager;
     private List<Player> players;
+    private IGameMode currentGameMode; // Added for UI support
     
     // Turn state
     private bool canRollAgain;
@@ -41,6 +42,8 @@ public class GameStateManager
     public event Action<Player> OnPlayerChanged;
     public event Action<Player> OnGameWon;
     public event Action<string> OnInvalidAction;
+    public event Action<Player, int> OnChipPlaced; // Added for UI support
+    public event Action<int> OnChipBumped; // Added for Board support
     
     // Properties
     public GamePhase CurrentPhase => currentPhase;
@@ -49,20 +52,56 @@ public class GameStateManager
     public int TurnNumber => turnNumber;
     public bool CanRollAgain => canRollAgain;
     public Player GameWinner => gameWinner;
+    public Player GameWinner => gameWinner;
+    public BoardModel Board => boardModel;
+    public IGameMode CurrentGameMode => currentGameMode; // Added for UI support
     
     /// <summary>
-    /// Initialize the game state manager with two players.
+    /// Return to the main menu scene.
     /// </summary>
+    public void ReturnToMenu()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+    }
+
+    /// <summary>
+    /// End the game with a winner.
+    /// </summary>
+    public void EndGame(Player winner)
+    {
+        gameWinner = winner;
+        TransitionPhase(GamePhase.GameWon);
+        OnGameWon?.Invoke(winner);
+        
+        if (currentGameMode != null)
+        {
+            currentGameMode.OnGameEnd(winner);
+        }
+    }
+
+    /// <summary>
+    /// Set the current game mode.
+    /// </summary>
+    public void SetGameMode(IGameMode mode)
+    {
+        currentGameMode = mode;
+    }
+    
+    /// <summary>
+    /// Initialize the game state manager with game mode and two players.
+    /// </summary>
+    /// <param name="mode">The game mode to play</param>
     /// <param name="player1">First player</param>
     /// <param name="player2">Second player</param>
-    public void Initialize(Player player1, Player player2)
+    public void Initialize(IGameMode mode, Player player1, Player player2)
     {
-        if (player1 == null || player2 == null)
+        if (player1 == null || player2 == null) // Allow mode to be null for legacy tests
         {
             OnInvalidAction?.Invoke("Players cannot be null");
             return;
         }
         
+        currentGameMode = mode;
         players = new List<Player> { player1, player2 };
         boardModel = new BoardModel(player1, player2);
         turnManager = new TurnManager(players);
@@ -81,6 +120,14 @@ public class GameStateManager
         
         // Initialize phase transition validation table
         InitializePhaseTransitions();
+    }
+
+    /// <summary>
+    /// Initialize the game state manager with two players (Legacy/Test support).
+    /// </summary>
+    public void Initialize(Player player1, Player player2)
+    {
+        Initialize(null, player1, player2);
     }
     
     /// <summary>
@@ -240,6 +287,9 @@ public class GameStateManager
         // Record the movement
         lastMovedToCell = cellIndex;
         
+        // Notify listeners of chip placement
+        OnChipPlaced?.Invoke(currentPlayer, cellIndex);
+        
         // Check if bumping is possible at this cell
         // If yes, transition to Bumping phase (optional)
         // If no, skip bumping and go straight to EndTurn
@@ -288,6 +338,9 @@ public class GameStateManager
         
         // Execute the bump (removes opponent chip from board)
         boardModel.ApplyBump(currentPlayer, cellIndex);
+        
+        // Notify listeners
+        OnChipBumped?.Invoke(cellIndex);
         
         // Transition to end turn (bump completes the turn)
         TransitionPhase(GamePhase.EndTurn);
@@ -439,6 +492,11 @@ public class GameStateManager
     {
         if (player == null)
             return false;
+            
+        if (currentGameMode != null)
+        {
+            return currentGameMode.CheckWinCondition(player);
+        }
             
         return boardModel.Check5InARow(player);
     }

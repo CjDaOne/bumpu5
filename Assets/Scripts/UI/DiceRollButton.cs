@@ -64,7 +64,7 @@ public class DiceRollButton : MonoBehaviour
         }
         
         // Get text and image components
-        buttonText = GetComponentInChildren<Text>();
+        buttonText = GetComponentInChildren<TextMeshProUGUI>();
         buttonImage = GetComponent<Image>();
         
         // Subscribe to button click

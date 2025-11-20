@@ -17,137 +17,156 @@ using UnityEngine;
 /// - Your chip moves to cell X (where opponent was)
 /// - Opponent's chip moves to cell Y (where your chip came from)
 /// </summary>
-public class Game3_PassTheChip : IGameMode
+public class Game3_PassTheChip : GameModeBase
 {
     // ============================================
     // METADATA PROPERTIES
     // ============================================
     
-    public string ModeName => "PassTheChip";
-    public string ModeLongName => "Pass The Chip";
-    public int MaxPlayers => 2;
+    public override string ModeName => "Pass The Chip";
+    public override string ModeDescription => "Swap chips instead of bumping! Get 5 in a row to win.";
     
     // ============================================
-    // RULE CONFIGURATION PROPERTIES
-    // ============================================
-    
-    public bool Use5InARow => true;
-    public bool UseTripleDoublesPenalty => true;
-    public bool Use5Plus6Safe => true;
-    public bool RollingASixLosesTurn => true;
-    public bool AllowBumping => false;  // No bumping in this mode - swap instead
-    
-    // Track the last chip movement for swap calculations
-    private int lastChipSourceCell = -1;
-    private Player lastChipMovingPlayer = null;
-    
-    // ============================================
-    // WIN CONDITION CHECK
+    // INITIALIZATION
     // ============================================
     
     /// <summary>
-    /// Checks if the given player has won by getting 5 chips in a row.
+    /// Initialize the game mode.
     /// </summary>
-    public bool CheckWinCondition(Player player, BoardModel board)
+    public override void Initialize(GameStateManager gsm)
     {
-        if (player == null || board == null)
+        base.Initialize(gsm);
+        Debug.Log("[Game3_PassTheChip] Initialized - Swapping enabled");
+    }
+    
+    /// <summary>
+    /// Called when game starts.
+    /// </summary>
+    public override void OnGameStart()
+    {
+        base.OnGameStart();
+        Debug.Log("[Game3_PassTheChip] Game started - Swap instead of bump!");
+    }
+    
+    /// <summary>
+    /// Called at the start of each player's turn.
+    /// </summary>
+    public override void OnTurnStart(Player currentPlayer)
+    {
+        base.OnTurnStart(currentPlayer);
+        // PassTheChip - no special turn start logic
+    }
+    
+    // ============================================
+    // MOVE VALIDATION
+    // ============================================
+    
+    /// <summary>
+    /// Check if a move is valid in PassTheChip.
+    /// 
+    /// Rules:
+    /// - Cell must be empty (no chips placed there)
+    /// - Player can place on any empty cell
+    /// </summary>
+    public override bool IsValidMove(Player player, int cellIndex)
+    {
+        // Validate cell index
+        if (cellIndex < 0 || cellIndex > 11)
+        {
+            Debug.LogWarning($"[Game3_PassTheChip] Invalid cell index: {cellIndex}");
             return false;
+        }
         
-        // Delegate to BoardModel's 5-in-a-row detection
-        return board.Check5InARow(player);
-    }
-    
-    // ============================================
-    // SPECIAL RULES HOOKS
-    // ============================================
-    
-    /// <summary>
-    /// Called at the start of each turn.
-    /// Reset chip tracking for this turn.
-    /// </summary>
-    public void OnTurnStart(GameStateManager stateManager, Player currentPlayer)
-    {
-        // Reset tracking for new turn
-        lastChipSourceCell = -1;
-        lastChipMovingPlayer = null;
-    }
-    
-    /// <summary>
-    /// Called after dice are rolled.
-    /// No special roll processing needed.
-    /// </summary>
-    public void OnDiceRolled(GameStateManager stateManager, int[] rollResult)
-    {
-        // No special roll processing
-    }
-    
-    /// <summary>
-    /// Called when a chip is about to be placed.
-    /// Track where the chip is coming from for swap logic.
-    /// </summary>
-    public bool CanPlaceChip(GameStateManager stateManager, int targetCell)
-    {
-        // Store the current chip position before moving
-        // Note: This would need coordination with GameStateManager to know source cell
-        // For now, allow the placement
+        // Check if cell is empty
+        if (!IsCellEmpty(cellIndex))
+        {
+            Debug.Log($"[Game3_PassTheChip] Cell {cellIndex} is already occupied");
+            return false;
+        }
+        
         return true;
     }
     
     /// <summary>
-    /// Called when bumping is about to occur.
-    /// Instead of removing opponent chip, swap positions.
+    /// Called after a chip is placed.
     /// </summary>
-    public bool OnBumpAttempt(GameStateManager stateManager, Player bumperPlayer, int targetCell)
+    public override void OnChipPlaced(Player player, int cellIndex)
     {
-        if (stateManager == null || bumperPlayer == null || lastChipSourceCell < 0)
+        base.OnChipPlaced(player, cellIndex);
+        // No special post-placement effects
+    }
+    
+    // ============================================
+    // BUMPING (SWAPPING)
+    // ============================================
+    
+    /// <summary>
+    /// Check if a "bump" (swap) is allowed in PassTheChip.
+    /// 
+    /// Rules:
+    /// - Swapping is allowed instead of bumping
+    /// - Can swap with any opponent chip
+    /// - Cannot swap your own chips
+    /// </summary>
+    public override bool CanBump(Player bumpingPlayer, Player targetPlayer, int targetCell)
+    {
+        // In PassTheChip, we swap instead of bump
+        // Same validation as bump, but different action
+        
+        // Can't swap with yourself
+        if (bumpingPlayer == targetPlayer)
+        {
+            Debug.Log("[Game3_PassTheChip] Cannot swap your own chip");
+            return false;
+        }
+        
+        // Target cell must have opponent's chip
+        if (!IsCellOccupiedBy(targetCell, targetPlayer))
+        {
+            Debug.Log($"[Game3_PassTheChip] Cell {targetCell} is not occupied by target player");
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /// <summary>
+    /// Called when a "bump" (swap) occurs.
+    /// In PassTheChip, we swap positions instead of removing the chip.
+    /// </summary>
+    public override void OnBumpOccurs(Player bumpingPlayer, Player bumpedPlayer)
+    {
+        base.OnBumpOccurs(bumpingPlayer, bumpedPlayer);
+        
+        // Note: The actual swap logic would be handled by GameStateManager
+        // This hook just logs the action
+        Debug.Log($"[Game3_PassTheChip] {bumpingPlayer.PlayerName} swapped with {bumpedPlayer.PlayerName}");
+    }
+    
+    // ============================================
+    // WIN CONDITION
+    // ============================================
+    
+    /// <summary>
+    /// Check if a player has won in PassTheChip.
+    /// 
+    /// Win Condition: 5 chips in a row
+    /// </summary>
+    public override bool CheckWinCondition(Player player)
+    {
+        if (gameStateManager == null || gameStateManager.Board == null)
             return false;
         
-        // Implement swap logic
-        // Note: This would need BoardModel support for GetChipAt, RemoveChip, PlaceChip
-        // For now, return false to indicate we handled the bump (mode-specific)
-        return false;  // Return false = "I handled it, don't do standard bump"
+        // Use BoardModel's 5-in-a-row detection
+        return gameStateManager.Board.Check5InARow(player);
     }
     
     /// <summary>
-    /// Called when turn ends.
-    /// Clean up tracking.
+    /// Called when game ends.
     /// </summary>
-    public void OnTurnEnd(GameStateManager stateManager, Player currentPlayer)
+    public override void OnGameEnd(Player winner)
     {
-        // Clean up tracking
-        lastChipSourceCell = -1;
-        lastChipMovingPlayer = null;
-    }
-    
-    /// <summary>
-    /// Called when game starts with this mode.
-    /// Initialize tracking state.
-    /// </summary>
-    public void Initialize(GameStateManager stateManager)
-    {
-        // Initialize tracking
-        lastChipSourceCell = -1;
-        lastChipMovingPlayer = null;
-    }
-    
-    /// <summary>
-    /// Helper method to execute chip swap.
-    /// Swaps positions between two players' chips.
-    /// </summary>
-    private void SwapChips(Player player1, int cell1, Player player2, int cell2, BoardModel board)
-    {
-        if (board == null)
-            return;
-        
-        // This would need BoardModel support:
-        // 1. Remove chip from cell2 (opponent's chip)
-        // 2. Place player1's chip at cell2
-        // 3. Place opponent's chip at cell1
-        // 
-        // Pseudocode:
-        // Chip opponentChip = board.GetChipAt(cell2);
-        // board.RemoveChip(cell2);
-        // board.PlaceChip(cell2, player1Chip);
-        // board.PlaceChip(cell1, opponentChip);
+        base.OnGameEnd(winner);
+        Debug.Log($"[Game3_PassTheChip] Game ended! Winner: {winner.PlayerName}");
     }
 }

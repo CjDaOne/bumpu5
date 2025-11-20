@@ -111,8 +111,8 @@ public class ModalController : MonoBehaviour
             canvasGroup = currentModal.AddComponent<CanvasGroup>();
         
         canvasGroup.alpha = 0;
-        // Unity 6.0: LeanTween compatibility verified - using alphaCanvas for fade in
-        LeanTween.alphaCanvas(canvasGroup, 1, fadeInDuration);
+        // Replaced missing LeanTween with Coroutine
+        StartCoroutine(FadeCanvasGroup(canvasGroup, 0f, 1f, fadeInDuration));
     }
     
     /// <summary>Setup modal content and buttons</summary>
@@ -146,19 +146,31 @@ public class ModalController : MonoBehaviour
         
         if (canvasGroup != null)
         {
-            LeanTween.alphaCanvas(canvasGroup, 0, fadeInDuration)
-                .setOnComplete(() =>
-                {
-                    if (currentModal != null)
-                        Destroy(currentModal);
-                    currentModal = null;
-                });
+            StartCoroutine(FadeCanvasGroup(canvasGroup, 1f, 0f, fadeInDuration, () =>
+            {
+                if (currentModal != null)
+                    Destroy(currentModal);
+                currentModal = null;
+            }));
         }
         else
         {
             Destroy(currentModal);
             currentModal = null;
         }
+    }
+
+    private System.Collections.IEnumerator FadeCanvasGroup(CanvasGroup cg, float start, float end, float duration, System.Action onComplete = null)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            cg.alpha = Mathf.Lerp(start, end, elapsed / duration);
+            yield return null;
+        }
+        cg.alpha = end;
+        onComplete?.Invoke();
     }
     
     // ============================================

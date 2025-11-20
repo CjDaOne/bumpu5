@@ -22,7 +22,6 @@ public abstract class GameModeBase : IGameMode
 {
     // Protected state references accessible to derived classes
     protected GameStateManager gameStateManager;
-    protected GameState gameState;
     
     /// <summary>
     /// Display name of this game mode.
@@ -46,7 +45,6 @@ public abstract class GameModeBase : IGameMode
     public virtual void Initialize(GameStateManager gsm)
     {
         gameStateManager = gsm;
-        gameState = gsm.GetGameState();
         
         // Log initialization for debugging
         Debug.Log($"[GameMode] {ModeName} initialized");
@@ -128,11 +126,11 @@ public abstract class GameModeBase : IGameMode
     /// </summary>
     protected bool IsCellEmpty(int cellIndex)
     {
-        if (gameState == null || gameState.Board == null)
+        if (gameStateManager == null || gameStateManager.Board == null)
             return false;
             
-        BoardCell cell = gameState.Board.GetCell(cellIndex);
-        return cell != null && !cell.IsOccupied;
+        BoardCell cell = gameStateManager.Board.GetCell(cellIndex);
+        return cell != null && !cell.Is_Occupied;
     }
     
     /// <summary>
@@ -141,11 +139,11 @@ public abstract class GameModeBase : IGameMode
     /// </summary>
     protected bool IsCellOccupiedBy(int cellIndex, Player player)
     {
-        if (gameState == null || gameState.Board == null)
+        if (gameStateManager == null || gameStateManager.Board == null)
             return false;
             
-        BoardCell cell = gameState.Board.GetCell(cellIndex);
-        return cell != null && cell.IsOccupied && cell.OccupiedBy == player;
+        BoardCell cell = gameStateManager.Board.GetCell(cellIndex);
+        return cell != null && cell.Is_Occupied && cell.Owner == player;
     }
     
     /// <summary>
@@ -154,10 +152,10 @@ public abstract class GameModeBase : IGameMode
     /// </summary>
     protected BoardCell GetCell(int cellIndex)
     {
-        if (gameState == null || gameState.Board == null)
+        if (gameStateManager == null || gameStateManager.Board == null)
             return null;
             
-        return gameState.Board.GetCell(cellIndex);
+        return gameStateManager.Board.GetCell(cellIndex);
     }
     
     /// <summary>

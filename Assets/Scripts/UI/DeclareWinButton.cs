@@ -62,7 +62,7 @@ public class DeclareWinButton : MonoBehaviour
         }
         
         // Get text and image components
-        buttonText = GetComponentInChildren<Text>();
+        buttonText = GetComponentInChildren<TextMeshProUGUI>();
         buttonImage = GetComponent<Image>();
         
         // Subscribe to button click
@@ -145,7 +145,7 @@ public class DeclareWinButton : MonoBehaviour
             Debug.Log("[DeclareWinButton] Win condition not met");
             if (hudManager != null)
             {
-                hudManager.ShowNotification("Win condition not met", PopupType.Warning);
+                hudManager.ShowNotification("Win condition not met", 2f);
             }
         }
     }
@@ -199,7 +199,7 @@ public class DeclareWinButton : MonoBehaviour
     }
     
     /// <summary>Called when chip is placed</summary>
-    private void OnChipPlaced(int cellIndex, Player player)
+    private void OnChipPlaced(Player player, int cellIndex)
     {
         // Check win condition after placement
         CheckWinCondition();

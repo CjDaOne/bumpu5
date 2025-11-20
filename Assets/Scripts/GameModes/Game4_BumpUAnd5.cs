@@ -16,120 +16,247 @@ using UnityEngine;
 /// Players who like both modes can play them together!
 /// Hybrid game combining the favorable rolling rules from Krazy6 with the bumping mechanics of Bump5.
 /// </summary>
-public class Game4_BumpUAnd5 : IGameMode
+public class Game4_BumpUAnd5 : GameModeBase
 {
     // ============================================
     // METADATA PROPERTIES
     // ============================================
     
-    public string ModeName => "BumpUAnd5";
-    public string ModeLongName => "Bump U & 5";
-    public int MaxPlayers => 2;
+    public override string ModeName => "Bump U & 5";
+    public override string ModeDescription => "Hybrid mode combining Bump5 bumping mechanics with Krazy6 favorable rolling rules. Win by getting 5 chips in a row.";
     
     // ============================================
-    // RULE CONFIGURATION PROPERTIES
-    // ============================================
-    
-    public bool Use5InARow => true;
-    public bool UseTripleDoublesPenalty => true;
-    public bool Use5Plus6Safe => true;
-    public bool RollingASixLosesTurn => false;  // From Krazy6 - rolling 6 is GOOD
-    public bool AllowBumping => true;           // From Bump5 - bumping enabled
-    
-    // ============================================
-    // WIN CONDITION CHECK
+    // LIFECYCLE
     // ============================================
     
     /// <summary>
-    /// Checks if the given player has won by getting 5 chips in a row.
-    /// Hybrid mode uses standard 5-in-a-row win condition.
+    /// Initialize the game mode.
     /// </summary>
-    public bool CheckWinCondition(Player player, BoardModel board)
+    public override void Initialize(GameStateManager gsm)
     {
-        if (player == null || board == null)
+        base.Initialize(gsm);
+        Debug.Log("[Game4_BumpUAnd5] Initialized - Hybrid mode active");
+    }
+    
+    /// <summary>
+    /// Called when game starts.
+    /// </summary>
+    public override void OnGameStart()
+    {
+        base.OnGameStart();
+        Debug.Log("[Game4_BumpUAnd5] Game started - Rolling 6s is beneficial!");
+    }
+    
+    /// <summary>
+    /// Called at the start of each player's turn.
+    /// </summary>
+    public override void OnTurnStart(Player currentPlayer)
+    {
+        base.OnTurnStart(currentPlayer);
+    }
+    
+    // ============================================
+    // MOVE VALIDATION
+    // ============================================
+    
+    /// <summary>
+    /// Check if a move is valid in Game4_BumpUAnd5.
+    /// 
+    /// Rules (same as Bump5):
+    /// - Cell must be empty (no chips placed there)
+    /// - Player can place on any empty cell
+    /// </summary>
+    public override bool IsValidMove(Player player, int cellIndex)
+    {
+        // Validate cell index
+        if (cellIndex < 0 || cellIndex > 11)
+        {
+            Debug.LogWarning($"[Game4_BumpUAnd5] Invalid cell index: {cellIndex}");
+            return false;
+        }
+        
+        // Check if cell is empty
+        if (!IsCellEmpty(cellIndex))
+        {
+            Debug.Log($"[Game4_BumpUAnd5] Cell {cellIndex} is already occupied");
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /// <summary>
+    /// Called after a chip is placed.
+    /// </summary>
+    public override void OnChipPlaced(Player player, int cellIndex)
+    {
+        base.OnChipPlaced(player, cellIndex);
+        // No special post-placement effects in hybrid mode
+    }
+    
+    // ============================================
+    // BUMPING
+    // ============================================
+    
+    /// <summary>
+    /// Check if a bump is allowed in Game4_BumpUAnd5.
+    /// 
+    /// Rules (same as Bump5):
+    /// - Bumping is always allowed (from Bump5)
+    /// - Can bump any opponent chip on the board
+    /// - Cannot bump your own chips
+    /// </summary>
+    public override bool CanBump(Player bumpingPlayer, Player targetPlayer, int targetCell)
+    {
+        // Can't bump yourself
+        if (bumpingPlayer == targetPlayer)
+        {
+            Debug.Log("[Game4_BumpUAnd5] Cannot bump your own chip");
+            return false;
+        }
+        
+        // Target cell must have opponent's chip
+        if (!IsCellOccupiedBy(targetCell, targetPlayer))
+        {
+            Debug.Log($"[Game4_BumpUAnd5] Cell {targetCell} is not occupied by target player");
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /// <summary>
+    /// Called when a bump occurs.
+    /// Applies Game4-specific behavior (standard bump from Bump5).
+    /// </summary>
+    public override void OnBumpOccurs(Player bumpingPlayer, Player bumpedPlayer)
+    {
+        base.OnBumpOccurs(bumpingPlayer, bumpedPlayer);
+        
+        // In Game4, bump penalty is the same as Game1:
+        // - Bumped chip is removed from the board (handled by GameStateManager)
+        // - No additional score penalties
+        
+        Debug.Log($"[Game4_BumpUAnd5] {bumpingPlayer.PlayerName} bumped {bumpedPlayer.PlayerName}");
+    }
+    
+    // ============================================
+    // WIN CONDITION
+    // ============================================
+    
+    /// <summary>
+    /// Check if a player has won in Game4_BumpUAnd5.
+    /// 
+    /// Win Condition: 5 chips in a row (same as Bump5)
+    /// 
+    /// Board layout (3x4 grid):
+    ///   0   1   2   3
+    ///   4   5   6   7
+    ///   8   9  10  11
+    /// </summary>
+    public override bool CheckWinCondition(Player player)
+    {
+        if (gameStateManager == null || gameStateManager.Board == null)
             return false;
         
-        // Delegate to BoardModel's 5-in-a-row detection
-        return board.Check5InARow(player);
-    }
-    
-    // ============================================
-    // SPECIAL RULES HOOKS
-    // ============================================
-    
-    /// <summary>
-    /// Called at the start of each turn.
-    /// No special initialization needed.
-    /// </summary>
-    public void OnTurnStart(GameStateManager stateManager, Player currentPlayer)
-    {
-        // Hybrid mode - no special turn start logic
+        int[] playerCells = GetCellsOccupiedBy(player);
+        
+        if (playerCells.Length < 5)
+            return false; // Can't have 5-in-a-row with less than 5 chips
+        
+        // Check all possible 5-in-a-row patterns
+        if (CheckHorizontalWin(playerCells)) return true;
+        if (CheckVerticalWin(playerCells)) return true;
+        if (CheckDiagonalWinLR(playerCells)) return true;
+        if (CheckDiagonalWinRL(playerCells)) return true;
+        
+        return false;
     }
     
     /// <summary>
-    /// Called after dice are rolled.
-    /// Hybrid mode: Apply Krazy6's rolling bonus logic.
-    /// Rolling a 6 is good (no turn loss), similar to Krazy6.
+    /// Check for horizontal 5-in-a-row.
     /// </summary>
-    public void OnDiceRolled(GameStateManager stateManager, int[] rollResult)
+    private bool CheckHorizontalWin(int[] playerCells)
     {
-        if (rollResult == null || rollResult.Length < 2)
-            return;
+        if (Contains(playerCells, 0) && Contains(playerCells, 1) && Contains(playerCells, 2) && Contains(playerCells, 3))
+            return true;
         
-        // Check if we rolled any 6s
-        bool hasSingleSix = (rollResult[0] == 6 && rollResult[1] != 6) || 
-                           (rollResult[1] == 6 && rollResult[0] != 6);
-        bool hasDouble6 = (rollResult[0] == 6 && rollResult[1] == 6);
+        if (Contains(playerCells, 4) && Contains(playerCells, 5) && Contains(playerCells, 6) && Contains(playerCells, 7))
+            return true;
         
-        // Hybrid mode benefits from rolling 6s (like Krazy6)
-        // No turn loss due to RollingASixLosesTurn property
+        if (Contains(playerCells, 8) && Contains(playerCells, 9) && Contains(playerCells, 10) && Contains(playerCells, 11))
+            return true;
         
-        // Note: Bonus movement/tokens would be applied here if tracked
-        if (hasDouble6)
+        return false;
+    }
+    
+    /// <summary>
+    /// Check for vertical 5-in-a-row.
+    /// </summary>
+    private bool CheckVerticalWin(int[] playerCells)
+    {
+        if (Contains(playerCells, 0) && Contains(playerCells, 4) && Contains(playerCells, 8))
+            return true;
+        
+        if (Contains(playerCells, 1) && Contains(playerCells, 5) && Contains(playerCells, 9))
+            return true;
+        
+        if (Contains(playerCells, 2) && Contains(playerCells, 6) && Contains(playerCells, 10))
+            return true;
+        
+        if (Contains(playerCells, 3) && Contains(playerCells, 7) && Contains(playerCells, 11))
+            return true;
+        
+        return false;
+    }
+    
+    /// <summary>
+    /// Check for diagonal 5-in-a-row (top-left to bottom-right).
+    /// </summary>
+    private bool CheckDiagonalWinLR(int[] playerCells)
+    {
+        if (Contains(playerCells, 0) && Contains(playerCells, 5) && Contains(playerCells, 10))
+            return true;
+        
+        if (Contains(playerCells, 1) && Contains(playerCells, 6) && Contains(playerCells, 11))
+            return true;
+        
+        return false;
+    }
+    
+    /// <summary>
+    /// Check for diagonal 5-in-a-row (top-right to bottom-left).
+    /// </summary>
+    private bool CheckDiagonalWinRL(int[] playerCells)
+    {
+        if (Contains(playerCells, 3) && Contains(playerCells, 6) && Contains(playerCells, 9))
+            return true;
+        
+        if (Contains(playerCells, 2) && Contains(playerCells, 5) && Contains(playerCells, 8))
+            return true;
+        
+        return false;
+    }
+    
+    /// <summary>
+    /// Helper: Check if an array contains a value.
+    /// </summary>
+    private bool Contains(int[] array, int value)
+    {
+        foreach (int item in array)
         {
-            // Double 6 grants extra bonus
+            if (item == value)
+                return true;
         }
-        else if (hasSingleSix)
-        {
-            // Single 6 grants bonus
-        }
+        return false;
     }
     
     /// <summary>
-    /// Called when a chip is about to be placed.
-    /// Hybrid mode - allows all placements.
+    /// Called when game ends.
     /// </summary>
-    public bool CanPlaceChip(GameStateManager stateManager, int targetCell)
+    public override void OnGameEnd(Player winner)
     {
-        // Hybrid mode - allow placement
-        return true;
-    }
-    
-    /// <summary>
-    /// Called when bumping is about to occur.
-    /// Hybrid mode: Use Bump5's bump logic (remove opponent chip).
-    /// </summary>
-    public bool OnBumpAttempt(GameStateManager stateManager, Player bumperPlayer, int targetCell)
-    {
-        // Hybrid mode - standard bump behavior from Bump5
-        return true;
-    }
-    
-    /// <summary>
-    /// Called when turn ends.
-    /// No special end-of-turn logic needed.
-    /// </summary>
-    public void OnTurnEnd(GameStateManager stateManager, Player currentPlayer)
-    {
-        // Hybrid mode - no special end-of-turn logic
-    }
-    
-    /// <summary>
-    /// Called when game starts with this mode.
-    /// Initialize the game state if needed.
-    /// </summary>
-    public void Initialize(GameStateManager stateManager)
-    {
-        // Hybrid mode - no special initialization
+        base.OnGameEnd(winner);
+        Debug.Log($"[Game4_BumpUAnd5] Game ended! Winner: {winner.PlayerName}");
     }
 }

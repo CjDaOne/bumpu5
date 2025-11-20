@@ -50,6 +50,17 @@ public class Player
     }
 
     /// <summary>
+    /// Alias for Name - used by UI components.
+    /// </summary>
+    public string PlayerName => name;
+
+    /// <summary>
+    /// Alias for PlayerIndex - used by UI components.
+    /// Returns 1-based player number (1, 2, etc.)
+    /// </summary>
+    public int PlayerNumber => playerIndex + 1;
+
+    /// <summary>
     /// Initializes a new Player instance.
     /// </summary>
     /// <param name="index">Player index (0 or 1)</param>

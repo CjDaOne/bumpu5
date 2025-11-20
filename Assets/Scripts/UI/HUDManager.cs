@@ -224,7 +224,7 @@ public class HUDManager : MonoBehaviour
             notificationController.ShowNotification(message, 3f);
     }
     
-    private void OnGameStateChipPlaced(int cellIndex, Player player)
+    private void OnGameStateChipPlaced(Player player, int cellIndex)
     {
         string message = $"{player.PlayerName} placed on cell {cellIndex}";
         

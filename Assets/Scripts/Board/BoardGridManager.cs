@@ -193,8 +193,9 @@ public class BoardGridManager : MonoBehaviour
         OnCellSelected?.Invoke(cellIndex);
         
         // Attempt to place chip at this cell
-        if (gameStateManager.TryPlaceChip(cellIndex))
+        if (gameStateManager.CanPlaceChip(cellIndex))
         {
+            gameStateManager.PlaceChip(cellIndex);
             Debug.Log($"Chip placed on cell {cellIndex}");
         }
         else
@@ -426,7 +427,7 @@ public class BoardGridManager : MonoBehaviour
     }
     
     /// <summary>Handler for chip placed events</summary>
-    private void OnGameStateChipPlaced(int cellIndex, Player player)
+    private void OnGameStateChipPlaced(Player player, int cellIndex)
     {
         Debug.Log($"BoardGridManager: Chip placed on cell {cellIndex} by {player.PlayerName}");
         
