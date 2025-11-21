@@ -154,9 +154,9 @@ public class BoardGridManager : MonoBehaviour
             cell.transform.localPosition = cellPosition;
             
             // Subscribe to cell events
-            cell.OnClicked += () => HandleCellClicked(i);
-            cell.OnHovered += () => HandleCellHovered(i);
-            cell.OnExited += () => HandleCellExited(i);
+            cell.OnClicked += (c) => HandleCellClicked(i);
+            cell.OnHovered += (c) => HandleCellHovered(i);
+            cell.OnExited += (c) => HandleCellExited(i);
             
             Debug.Log($"Created cell {i} at position {cellPosition}");
         }

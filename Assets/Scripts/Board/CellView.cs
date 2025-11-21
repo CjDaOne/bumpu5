@@ -268,7 +268,7 @@ public class CellView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         if (canvasGroup != null)
         {
             canvasGroup.alpha = 0f;
-            LeanTween.alphaCanvas(canvasGroup, 1f, 0.3f);
+            StartCoroutine(FadeCanvasGroup(canvasGroup, 0f, 1f, 0.3f));
         }
     }
     
@@ -278,12 +278,7 @@ public class CellView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         // Scale pop and fade out
         if (occupantIndicator != null)
         {
-            LeanTween.scale(occupantIndicator.gameObject, Vector3.one * 1.2f, 0.1f)
-                .setEase(LeanTweenType.easeOutQuad)
-                .setOnComplete(() =>
-                {
-                    LeanTween.alphaCanvas(occupantIndicator.GetComponent<CanvasGroup>() ?? occupantIndicator.gameObject.AddComponent<CanvasGroup>(), 0f, 0.2f);
-                });
+            StartCoroutine(BumpAnimation(occupantIndicator));
         }
     }
     
@@ -293,11 +288,72 @@ public class CellView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         // Pulse effect
         if (cellBackground != null)
         {
-            LeanTween.scale(gameObject, Vector3.one * 1.1f, 0.1f)
-                .setEase(LeanTweenType.easeOutQuad)
-                .setLoopCount(2)
-                .setLoopType(LeanTweenType.pingPong);
+            StartCoroutine(PulseAnimation(transform));
         }
+    }
+
+    private System.Collections.IEnumerator FadeCanvasGroup(CanvasGroup cg, float start, float end, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            cg.alpha = Mathf.Lerp(start, end, elapsed / duration);
+            yield return null;
+        }
+        cg.alpha = end;
+    }
+
+    private System.Collections.IEnumerator BumpAnimation(Image target)
+    {
+        float duration = 0.1f;
+        float elapsed = 0f;
+        Vector3 startScale = Vector3.one;
+        Vector3 endScale = Vector3.one * 1.2f;
+        
+        // Scale up
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            target.transform.localScale = Vector3.Lerp(startScale, endScale, elapsed / duration);
+            yield return null;
+        }
+        
+        // Fade out
+        CanvasGroup cg = target.GetComponent<CanvasGroup>();
+        if (cg == null) cg = target.gameObject.AddComponent<CanvasGroup>();
+        
+        yield return StartCoroutine(FadeCanvasGroup(cg, 1f, 0f, 0.2f));
+        
+        // Reset
+        target.transform.localScale = Vector3.one;
+        cg.alpha = 1f;
+    }
+
+    private System.Collections.IEnumerator PulseAnimation(Transform target)
+    {
+        float duration = 0.1f;
+        Vector3 startScale = Vector3.one;
+        Vector3 endScale = Vector3.one * 1.1f;
+        
+        // Scale up
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            target.localScale = Vector3.Lerp(startScale, endScale, elapsed / duration);
+            yield return null;
+        }
+        
+        // Scale down
+        elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            target.localScale = Vector3.Lerp(endScale, startScale, elapsed / duration);
+            yield return null;
+        }
+        target.localScale = startScale;
     }
     
     // ============================================
