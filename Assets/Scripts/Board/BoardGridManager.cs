@@ -3,10 +3,10 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 
 /// <summary>
-/// BoardGridManager - Master controller for the visual 12-cell board system.
+/// BoardGridManager - Master controller for the visual board system.
 /// 
 /// Responsibilities:
-/// - Create and manage 12 cell GameObjects in circular layout
+/// - Create and manage cell GameObjects in grid layout
 /// - Handle cell input/interaction
 /// - Update visual board state based on game logic
 /// - Display valid move highlighting
@@ -44,7 +44,7 @@ public class BoardGridManager : MonoBehaviour
     // INTERNAL STATE
     // ============================================
     
-    private CellView[] cells = new CellView[12];
+    private CellView[] cells = new CellView[BoardModel.BOARD_SIZE];
     private GameStateManager gameStateManager;
     private ChipVisualizer chipVisualizer;
     private ValidMoveHighlighter moveHighlighter;
@@ -131,7 +131,7 @@ public class BoardGridManager : MonoBehaviour
     // BOARD CREATION
     // ============================================
     
-    /// <summary>Create all 12 cell GameObjects in circular layout</summary>
+    /// <summary>Create all cell GameObjects in 5x5 grid layout</summary>
     private void CreateBoardLayout()
     {
         if (cellPrefab == null)
@@ -140,7 +140,14 @@ public class BoardGridManager : MonoBehaviour
             return;
         }
         
-        for (int i = 0; i < 12; i++)
+        int boardSize = gameStateManager.Board.BOARD_SIZE;
+        // Resize cells array if needed
+        if (cells.Length != boardSize)
+        {
+            cells = new CellView[boardSize];
+        }
+        
+        for (int i = 0; i < boardSize; i++)
         {
             // Instantiate cell prefab
             CellView cell = Instantiate(cellPrefab, boardParent);
@@ -149,32 +156,38 @@ public class BoardGridManager : MonoBehaviour
             // Initialize cell
             cell.Initialize(i);
             
-            // Position cell in circular layout
+            // Position cell in grid layout
             Vector3 cellPosition = GetCellPosition(i);
             cell.transform.localPosition = cellPosition;
             
             // Subscribe to cell events
-            cell.OnClicked += (c) => HandleCellClicked(i);
-            cell.OnHovered += (c) => HandleCellHovered(i);
-            cell.OnExited += (c) => HandleCellExited(i);
+            // Capture index for closure
+            int index = i;
+            cell.OnClicked += (c) => HandleCellClicked(index);
+            cell.OnHovered += (c) => HandleCellHovered(index);
+            cell.OnExited += (c) => HandleCellExited(index);
             
-            Debug.Log($"Created cell {i} at position {cellPosition}");
+            // Debug.Log($"Created cell {i} at position {cellPosition}");
         }
     }
     
-    /// <summary>Calculate world position of a cell in circular layout</summary>
+    /// <summary>Calculate world position of a cell in 5x5 grid layout</summary>
     private Vector3 GetCellPosition(int cellIndex)
     {
-        if (cellIndex < 0 || cellIndex >= 12)
+        int boardSize = gameStateManager.Board.BOARD_SIZE;
+        if (cellIndex < 0 || cellIndex >= boardSize)
             return Vector3.zero;
+            
+        int gridSize = 5; // Hardcoded for now, or get from BoardModel
+        int row = cellIndex / gridSize;
+        int col = cellIndex % gridSize;
         
-        // Calculate angle for this cell (divide 360° by 12)
-        float angle = (cellIndex / 12f) * 360f;
-        float radians = angle * Mathf.Deg2Rad;
+        // Center the grid
+        // Offset: (gridSize - 1) * cellSize / 2
+        float offset = (gridSize - 1) * cellSize / 2f;
         
-        // Calculate position on circle
-        float x = boardCenterPosition.x + Mathf.Cos(radians) * cellRadius;
-        float y = boardCenterPosition.y + Mathf.Sin(radians) * cellRadius;
+        float x = (col * cellSize) - offset + boardCenterPosition.x;
+        float y = (row * -cellSize) + offset + boardCenterPosition.y; // -y for rows going down
         
         return new Vector3(x, y, 0);
     }
@@ -253,7 +266,7 @@ public class BoardGridManager : MonoBehaviour
     /// <summary>Update display of a single cell based on current board state</summary>
     public void UpdateCellDisplay(int cellIndex, Player occupant)
     {
-        if (cellIndex < 0 || cellIndex >= 12)
+        if (cells == null || cellIndex < 0 || cellIndex >= cells.Length)
             return;
         
         if (cells[cellIndex] == null)
@@ -276,12 +289,13 @@ public class BoardGridManager : MonoBehaviour
         if (board == null)
             return;
         
-        for (int i = 0; i < 12; i++)
+        int boardSize = BoardModel.BOARD_SIZE;
+        for (int i = 0; i < boardSize; i++)
         {
             BoardCell boardCell = board.GetCell(i);
             if (boardCell != null)
             {
-                UpdateCellDisplay(i, boardCell.Occupant);
+                UpdateCellDisplay(i, boardCell.Owner);
             }
         }
     }
@@ -289,7 +303,8 @@ public class BoardGridManager : MonoBehaviour
     /// <summary>Clear all cells (no occupants)</summary>
     public void ClearBoard()
     {
-        for (int i = 0; i < 12; i++)
+        if (cells == null) return;
+        for (int i = 0; i < cells.Length; i++)
         {
             if (cells[i] != null)
             {
@@ -317,7 +332,7 @@ public class BoardGridManager : MonoBehaviour
         // Highlight each valid cell
         foreach (int cellIndex in validCells)
         {
-            if (cellIndex >= 0 && cellIndex < 12 && cells[cellIndex] != null)
+            if (cellIndex >= 0 && cellIndex < cells.Length && cells[cellIndex] != null)
             {
                 cells[cellIndex].SetHighlighted(true);
             }
@@ -327,7 +342,8 @@ public class BoardGridManager : MonoBehaviour
     /// <summary>Clear valid move highlighting</summary>
     public void ClearValidMoves()
     {
-        for (int i = 0; i < 12; i++)
+        if (cells == null) return;
+        for (int i = 0; i < cells.Length; i++)
         {
             if (cells[i] != null)
             {
@@ -344,7 +360,7 @@ public class BoardGridManager : MonoBehaviour
     /// <summary>Animate chip placement on a cell</summary>
     public void AnimateChipPlacement(int cellIndex, Player player)
     {
-        if (cellIndex < 0 || cellIndex >= 12)
+        if (cells == null || cellIndex < 0 || cellIndex >= cells.Length)
             return;
         
         if (chipVisualizer != null)
@@ -356,7 +372,7 @@ public class BoardGridManager : MonoBehaviour
     /// <summary>Animate chip being bumped from a cell</summary>
     public void AnimateChipBump(int cellIndex)
     {
-        if (cellIndex < 0 || cellIndex >= 12)
+        if (cells == null || cellIndex < 0 || cellIndex >= cells.Length)
             return;
         
         if (chipVisualizer != null)

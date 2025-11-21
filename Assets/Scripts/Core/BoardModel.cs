@@ -21,6 +21,15 @@ public class BoardModel
     public BoardCell[] Cells => cells;
 
     /// <summary>
+    /// Gets a specific cell by index.
+    /// </summary>
+    public BoardCell GetCell(int index)
+    {
+        if (index < 0 || index >= BOARD_SIZE) return null;
+        return cells[index];
+    }
+
+    /// <summary>
     /// Gets all players in the game.
     /// </summary>
     public Player[] Players => players;
