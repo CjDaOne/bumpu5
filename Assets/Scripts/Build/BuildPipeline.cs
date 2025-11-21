@@ -143,7 +143,7 @@ public class BuildPipelineManager
     {
         Debug.Log($"[BuildPipelineManager] Building for {platform}...");
         
-        BuildConfig config = platform switch
+        BuildPipeline.BuildConfig config = platform switch
         {
             "WebGL" => BuildPipeline.WEBGL_CONFIG,
             "Android" => BuildPipeline.ANDROID_CONFIG,
@@ -174,7 +174,7 @@ public class BuildPipelineManager
     /// <summary>Validate build size and performance</summary>
     public static bool ValidateBuild(string platform, long buildSizeBytes, float loadTimeSeconds)
     {
-        BuildConfig config = platform switch
+        BuildPipeline.BuildConfig config = platform switch
         {
             "WebGL" => BuildPipeline.WEBGL_CONFIG,
             "Android" => BuildPipeline.ANDROID_CONFIG,

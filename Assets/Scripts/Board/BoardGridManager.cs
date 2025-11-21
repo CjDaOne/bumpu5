@@ -140,7 +140,7 @@ public class BoardGridManager : MonoBehaviour
             return;
         }
         
-        int boardSize = gameStateManager.Board.BOARD_SIZE;
+        int boardSize = BoardModel.BOARD_SIZE;
         // Resize cells array if needed
         if (cells.Length != boardSize)
         {
@@ -174,7 +174,7 @@ public class BoardGridManager : MonoBehaviour
     /// <summary>Calculate world position of a cell in 5x5 grid layout</summary>
     private Vector3 GetCellPosition(int cellIndex)
     {
-        int boardSize = gameStateManager.Board.BOARD_SIZE;
+        int boardSize = BoardModel.BOARD_SIZE;
         if (cellIndex < 0 || cellIndex >= boardSize)
             return Vector3.zero;
             

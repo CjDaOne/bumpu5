@@ -73,7 +73,7 @@ public class Game2_Krazy6 : GameModeBase
     public override bool IsValidMove(Player player, int cellIndex)
     {
         // Validate cell index against dynamic board size
-        if (cellIndex < 0 || cellIndex >= gameStateManager.Board.BOARD_SIZE)
+        if (cellIndex < 0 || cellIndex >= BoardModel.BOARD_SIZE)
         {
             Debug.LogWarning($"[Game2_Krazy6] Invalid cell index: {cellIndex}");
             return false;

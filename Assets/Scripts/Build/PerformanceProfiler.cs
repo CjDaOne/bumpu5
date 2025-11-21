@@ -128,7 +128,7 @@ public class PerformanceProfiler : MonoBehaviour
         {
             timestamp = DateTime.Now,
             targetFrameRate = targets.targetFrameRate,
-            targetMemoryMB = targets.targetMemoryMB
+            targetMemoryMB = (int)targets.targetMemoryMB
         };
         
         if (metricsHistory.Count == 0)

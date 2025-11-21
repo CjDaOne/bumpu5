@@ -59,7 +59,7 @@ public class Game1_Bump5 : GameModeBase
     public override bool IsValidMove(Player player, int cellIndex)
     {
         // Validate cell index against dynamic board size
-        if (cellIndex < 0 || cellIndex >= gameStateManager.Board.BOARD_SIZE)
+        if (cellIndex < 0 || cellIndex >= BoardModel.BOARD_SIZE)
         {
             Debug.LogWarning($"[Game1_Bump5] Invalid cell index: {cellIndex}");
             return false;
@@ -159,7 +159,7 @@ public class Game1_Bump5 : GameModeBase
         if (gameStateManager == null || gameStateManager.Board == null)
             return false;
         
-        // Use BoardModel's 5-in-a-row detection which handles the 5x5 grid
+        int boardSize = BoardModel.BOARD_SIZE; // Use BoardModel's 5-in-a-row detection which handles the 5x5 grid
         return gameStateManager.Board.Check5InARow(player);
     }
     

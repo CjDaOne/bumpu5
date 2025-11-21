@@ -72,7 +72,7 @@ public class Game4_BumpUAnd5 : GameModeBase
     public override bool IsValidMove(Player player, int cellIndex)
     {
         // Validate cell index against dynamic board size
-        if (cellIndex < 0 || cellIndex >= gameStateManager.Board.BOARD_SIZE)
+        if (cellIndex < 0 || cellIndex >= BoardModel.BOARD_SIZE)
         {
             Debug.LogWarning($"[Game4_BumpUAnd5] Invalid cell index: {cellIndex}");
             return false;

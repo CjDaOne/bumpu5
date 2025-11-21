@@ -135,7 +135,7 @@ public class Game5_Solitary : GameModeBase
 
     public override bool IsValidMove(Player player, int cellIndex)
     {
-        if (cellIndex < 0 || cellIndex >= gameStateManager.Board.BOARD_SIZE) return false;
+        if (cellIndex < 0 || cellIndex >= BoardModel.BOARD_SIZE) return false;
         return IsCellEmpty(cellIndex);
     }
 
@@ -151,7 +151,7 @@ public class Game5_Solitary : GameModeBase
 
         // Win if board is full (25 chips)
         int totalChips = 0;
-        for (int i = 0; i < gameStateManager.Board.BOARD_SIZE; i++)
+        for (int i = 0; i < BoardModel.BOARD_SIZE; i++)
         {
             if (!IsCellEmpty(i)) totalChips++;
         }

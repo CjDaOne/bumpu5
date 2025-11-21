@@ -94,7 +94,7 @@ public abstract class GameModeBase : IGameMode
     {
         if (gameStateManager == null || gameStateManager.Board == null)
             return new int[0];
-        int boardSize = gameStateManager.Board.BOARD_SIZE;
+        int boardSize = BoardModel.BOARD_SIZE;
         List<int> occupied = new List<int>();
         for (int i = 0; i < boardSize; i++)
         {
@@ -108,7 +108,7 @@ public abstract class GameModeBase : IGameMode
     {
         if (gameStateManager == null || gameStateManager.Board == null)
             return 0;
-        int boardSize = gameStateManager.Board.BOARD_SIZE;
+        int boardSize = BoardModel.BOARD_SIZE;
         int count = 0;
         for (int i = 0; i < boardSize; i++)
         {
