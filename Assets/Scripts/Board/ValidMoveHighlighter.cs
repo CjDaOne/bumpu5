@@ -110,8 +110,8 @@ public class ValidMoveHighlighter : MonoBehaviour
         // Linear search for player's chip
         for (int i = 0; i < 12; i++)
         {
-            BoardCell cell = board.GetCell(i);
-            if (cell != null && cell.Occupant == player)
+            BoardCell cell = board.Cells[i];
+            if (cell != null && cell.Owner == player)
             {
                 return i;
             }
@@ -131,7 +131,7 @@ public class ValidMoveHighlighter : MonoBehaviour
         if (board == null)
             return false;
         
-        BoardCell targetCell = board.GetCell(cellIndex);
+        BoardCell targetCell = board.Cells[cellIndex];
         if (targetCell == null)
             return false;
         
@@ -141,7 +141,7 @@ public class ValidMoveHighlighter : MonoBehaviour
             return false;
         
         // Can't place on own chip
-        if (targetCell.Occupant == currentPlayer)
+        if (targetCell.Owner == currentPlayer)
             return false;
         
         // If empty, always valid
@@ -151,7 +151,7 @@ public class ValidMoveHighlighter : MonoBehaviour
         // Target has opponent chip
         // Check if bumping is allowed in current game mode
         IGameMode gameMode = gameStateManager.CurrentGameMode;
-        if (gameMode != null && gameMode.AllowBumping)
+        if (gameMode != null && gameMode.CanBump(currentPlayer, cellIndex))
             return true;
         
         // Bumping not allowed in this mode

@@ -20,7 +20,7 @@ public class UITests
     {
         // Create game state
         gameStateGameObject = new GameObject("GameStateManager");
-        gameStateManager = gameStateGameObject.AddComponent<GameStateManager>();
+        gameStateManager = new GameStateManager();
         
         // Create HUD
         hudGameObject = new GameObject("HUDManager");
@@ -92,7 +92,7 @@ public class UITests
         GameObject btnObj = new GameObject("DiceRollButton");
         Button diceBtn = btnObj.AddComponent<Button>();
         
-        ActionButtonController actionController = gameStateManager.gameObject.AddComponent<ActionButtonController>();
+        ActionButtonController actionController = gameStateGameObject.AddComponent<ActionButtonController>();
         actionController.Initialize(gameStateManager, diceBtn, null, null);
         
         // Act & Assert - should be enabled only during rolling
@@ -110,7 +110,7 @@ public class UITests
         GameObject btnObj = new GameObject("BumpButton");
         Button bumpBtn = btnObj.AddComponent<Button>();
         
-        ActionButtonController actionController = gameStateManager.gameObject.AddComponent<ActionButtonController>();
+        ActionButtonController actionController = gameStateGameObject.AddComponent<ActionButtonController>();
         actionController.Initialize(gameStateManager, null, bumpBtn, null);
         
         // Act
@@ -130,7 +130,7 @@ public class UITests
         GameObject btnObj = new GameObject("DeclareWinButton");
         Button winBtn = btnObj.AddComponent<Button>();
         
-        ActionButtonController actionController = gameStateManager.gameObject.AddComponent<ActionButtonController>();
+        ActionButtonController actionController = gameStateGameObject.AddComponent<ActionButtonController>();
         actionController.Initialize(gameStateManager, null, null, winBtn);
         
         // Act
@@ -148,7 +148,7 @@ public class UITests
     public void Notifications_ShowNotification_DisplaysMessage()
     {
         // Arrange
-        NotificationController notifController = gameStateManager.gameObject.AddComponent<NotificationController>();
+        NotificationController notifController = gameStateGameObject.AddComponent<NotificationController>();
         notifController.Initialize(null);
         
         // Act
@@ -162,7 +162,7 @@ public class UITests
     public void Notifications_ShowSuccess_DisplaysGreen()
     {
         // Arrange
-        NotificationController notifController = gameStateManager.gameObject.AddComponent<NotificationController>();
+        NotificationController notifController = gameStateGameObject.AddComponent<NotificationController>();
         notifController.Initialize(null);
         
         // Act
@@ -176,7 +176,7 @@ public class UITests
     public void Notifications_ShowError_DisplaysRed()
     {
         // Arrange
-        NotificationController notifController = gameStateManager.gameObject.AddComponent<NotificationController>();
+        NotificationController notifController = gameStateGameObject.AddComponent<NotificationController>();
         notifController.Initialize(null);
         
         // Act
@@ -190,7 +190,7 @@ public class UITests
     public void Notifications_ShowWarning_DisplaysYellow()
     {
         // Arrange
-        NotificationController notifController = gameStateManager.gameObject.AddComponent<NotificationController>();
+        NotificationController notifController = gameStateGameObject.AddComponent<NotificationController>();
         notifController.Initialize(null);
         
         // Act
@@ -204,7 +204,7 @@ public class UITests
     public void Notifications_Clear_RemovesCurrentNotification()
     {
         // Arrange
-        NotificationController notifController = gameStateManager.gameObject.AddComponent<NotificationController>();
+        NotificationController notifController = gameStateGameObject.AddComponent<NotificationController>();
         notifController.Initialize(null);
         notifController.ShowNotification("Test");
         
@@ -223,7 +223,7 @@ public class UITests
     public void Modal_ShowWinModal_DisplaysWinInformation()
     {
         // Arrange
-        ModalController modalController = gameStateManager.gameObject.AddComponent<ModalController>();
+        ModalController modalController = gameStateGameObject.AddComponent<ModalController>();
         modalController.Initialize(null);
         
         // Act
@@ -237,7 +237,7 @@ public class UITests
     public void Modal_ShowLossModal_DisplaysLossInformation()
     {
         // Arrange
-        ModalController modalController = gameStateManager.gameObject.AddComponent<ModalController>();
+        ModalController modalController = gameStateGameObject.AddComponent<ModalController>();
         modalController.Initialize(null);
         
         // Act
@@ -251,7 +251,7 @@ public class UITests
     public void Modal_ShowErrorModal_DisplaysError()
     {
         // Arrange
-        ModalController modalController = gameStateManager.gameObject.AddComponent<ModalController>();
+        ModalController modalController = gameStateGameObject.AddComponent<ModalController>();
         modalController.Initialize(null);
         
         // Act
@@ -265,7 +265,7 @@ public class UITests
     public void Modal_HideModal_RemovesModalFromDisplay()
     {
         // Arrange
-        ModalController modalController = gameStateManager.gameObject.AddComponent<ModalController>();
+        ModalController modalController = gameStateGameObject.AddComponent<ModalController>();
         modalController.Initialize(null);
         modalController.ShowWinModal("Victory!", "Player1 won", player1);
         
@@ -284,7 +284,7 @@ public class UITests
     public void PauseMenu_ShowPauseMenu_SetsPausedState()
     {
         // Arrange
-        PauseMenuController pauseController = gameStateManager.gameObject.AddComponent<PauseMenuController>();
+        PauseMenuController pauseController = gameStateGameObject.AddComponent<PauseMenuController>();
         pauseController.Initialize(gameStateManager, null);
         
         // Act
@@ -298,7 +298,7 @@ public class UITests
     public void PauseMenu_HidePauseMenu_ClearsPausedState()
     {
         // Arrange
-        PauseMenuController pauseController = gameStateManager.gameObject.AddComponent<PauseMenuController>();
+        PauseMenuController pauseController = gameStateGameObject.AddComponent<PauseMenuController>();
         pauseController.Initialize(gameStateManager, null);
         pauseController.ShowPauseMenu();
         
@@ -313,7 +313,7 @@ public class UITests
     public void PauseMenu_TogglePause_AlternatesBetweenStates()
     {
         // Arrange
-        PauseMenuController pauseController = gameStateManager.gameObject.AddComponent<PauseMenuController>();
+        PauseMenuController pauseController = gameStateGameObject.AddComponent<PauseMenuController>();
         pauseController.Initialize(gameStateManager, null);
         
         Assert.IsFalse(pauseController.IsPaused);
@@ -330,7 +330,7 @@ public class UITests
     public void PauseMenu_OnPauseStateChanged_FiresEvent()
     {
         // Arrange
-        PauseMenuController pauseController = gameStateManager.gameObject.AddComponent<PauseMenuController>();
+        PauseMenuController pauseController = gameStateGameObject.AddComponent<PauseMenuController>();
         pauseController.Initialize(gameStateManager, null);
         
         bool eventFired = false;
@@ -352,7 +352,7 @@ public class UITests
     {
         // Arrange
         GameObject parentObj = new GameObject("ScoreboardParent");
-        ScoreboardController scoreboardController = gameStateManager.gameObject.AddComponent<ScoreboardController>();
+        ScoreboardController scoreboardController = gameStateGameObject.AddComponent<ScoreboardController>();
         
         // Act
         scoreboardController.Initialize(gameStateManager, parentObj.transform);
@@ -366,7 +366,7 @@ public class UITests
     {
         // Arrange
         GameObject parentObj = new GameObject("ScoreboardParent");
-        ScoreboardController scoreboardController = gameStateManager.gameObject.AddComponent<ScoreboardController>();
+        ScoreboardController scoreboardController = gameStateGameObject.AddComponent<ScoreboardController>();
         scoreboardController.Initialize(gameStateManager, parentObj.transform);
         
         // Act
@@ -381,7 +381,7 @@ public class UITests
     {
         // Arrange
         GameObject parentObj = new GameObject("ScoreboardParent");
-        ScoreboardController scoreboardController = gameStateManager.gameObject.AddComponent<ScoreboardController>();
+        ScoreboardController scoreboardController = gameStateGameObject.AddComponent<ScoreboardController>();
         scoreboardController.Initialize(gameStateManager, parentObj.transform);
         
         // Act - simulate game won event

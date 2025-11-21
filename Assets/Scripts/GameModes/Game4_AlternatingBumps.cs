@@ -45,13 +45,13 @@ public class Game4_AlternatingBumps : GameModeBase
         base.OnGameStart();
         
         // Start with first player having bump rights
-        if (gameState != null && gameState.Players != null && gameState.Players.Length > 0)
+        if (gameStateManager != null && gameStateManager.Players != null && gameStateManager.Players.Length > 0)
         {
-            bumpingPlayer = gameState.Players[0];
+            bumpingPlayer = gameStateManager.Players[0];
             bumpTurnCounter = 0;
         }
         
-        Debug.Log($"[Game4_AlternatingBumps] Game started - {bumpingPlayer?.name} has initial bump rights");
+        Debug.Log($"[Game4_AlternatingBumps] Game started - {bumpingPlayer?.PlayerName} has initial bump rights");
     }
     
     /// <summary>
@@ -65,7 +65,7 @@ public class Game4_AlternatingBumps : GameModeBase
         if (currentPlayer != bumpingPlayer)
         {
             bumpingPlayer = currentPlayer;
-            Debug.Log($"[Game4_AlternatingBumps] Bump rights now belong to {bumpingPlayer?.name}");
+            Debug.Log($"[Game4_AlternatingBumps] Bump rights now belong to {bumpingPlayer?.PlayerName}");
         }
     }
     
@@ -161,21 +161,10 @@ public class Game4_AlternatingBumps : GameModeBase
     /// </summary>
     public override bool CheckWinCondition(Player player)
     {
-        if (gameState == null || gameState.Board == null)
+        if (gameStateManager == null || gameStateManager.Board == null)
             return false;
         
-        int[] playerCells = GetCellsOccupiedBy(player);
-        
-        if (playerCells.Length < 5)
-            return false;
-        
-        // Check all possible 5-in-a-row patterns
-        if (CheckHorizontalWin(playerCells)) return true;
-        if (CheckVerticalWin(playerCells)) return true;
-        if (CheckDiagonalWinLR(playerCells)) return true;
-        if (CheckDiagonalWinRL(playerCells)) return true;
-        
-        return false;
+        return gameStateManager.Board.Check5InARow(player);
     }
     
     /// <summary>

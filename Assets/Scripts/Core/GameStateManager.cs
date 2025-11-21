@@ -52,7 +52,6 @@ public class GameStateManager
     public int TurnNumber => turnNumber;
     public bool CanRollAgain => canRollAgain;
     public Player GameWinner => gameWinner;
-    public Player GameWinner => gameWinner;
     public BoardModel Board => boardModel;
     public IGameMode CurrentGameMode => currentGameMode; // Added for UI support
     
