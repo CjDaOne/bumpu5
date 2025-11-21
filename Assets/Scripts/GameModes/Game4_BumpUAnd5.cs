@@ -187,4 +187,20 @@ public class Game4_BumpUAnd5 : GameModeBase
         base.OnGameEnd(winner);
         Debug.Log($"[Game4_BumpUAnd5] Game ended! Winner: {winner.PlayerName}");
     }
+
+    /// <summary>
+    /// Check if a bump is allowed in Game4_BumpUAnd5.
+    /// </summary>
+    // 11/21/2025 AI-Tag: This was created with the help of Assistant, a Unity Artificial Intelligence product.
+    public override bool CanBump(Player bumpingPlayer, Player targetPlayer, int targetCell)
+    {
+        if (IsCellOccupiedBy(targetCell, targetPlayer))
+        {
+            Debug.Log($"[Game4_BumpUAnd5] Bump allowed: {bumpingPlayer.PlayerName} can bump {targetPlayer.PlayerName} at cell {targetCell}");
+            return true;
+        }
+
+        Debug.Log($"[Game4_BumpUAnd5] Bump not allowed: Cell {targetCell} is not occupied by {targetPlayer.PlayerName}");
+        return false;
+    }
 }

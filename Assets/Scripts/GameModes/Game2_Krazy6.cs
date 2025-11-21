@@ -30,15 +30,6 @@ public class Game2_Krazy6 : GameModeBase
     // ============================================
     
     /// <summary>
-    /// Initialize the game mode.
-    /// </summary>
-    public override void Initialize(GameStateManager gsm)
-    {
-        base.Initialize(gsm);
-        Debug.Log("[Game2_Krazy6] Initialized - 6s are good!");
-    }
-    
-    /// <summary>
     /// Called when game starts.
     /// </summary>
     public override void OnGameStart()
@@ -138,6 +129,10 @@ public class Game2_Krazy6 : GameModeBase
         return false;
     }
 
+    /// <summary>
+    /// Initialize the game mode and subscribe to dice roll events.
+    /// </summary>
+    // 11/21/2025 AI-Tag: This was created with the help of Assistant, a Unity Artificial Intelligence product.
     public override void Initialize(GameStateManager gsm)
     {
         base.Initialize(gsm);
@@ -183,5 +178,21 @@ public class Game2_Krazy6 : GameModeBase
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Check if a bump is allowed in Krazy6.
+    /// </summary>
+    // 11/21/2025 AI-Tag: This was created with the help of Assistant, a Unity Artificial Intelligence product.
+    public override bool CanBump(Player bumpingPlayer, Player targetPlayer, int targetCell)
+    {
+        if (IsCellOccupiedBy(targetCell, targetPlayer))
+        {
+            Debug.Log($"[Game2_Krazy6] Bump allowed: {bumpingPlayer.PlayerName} can bump {targetPlayer.PlayerName} at cell {targetCell}");
+            return true;
+        }
+
+        Debug.Log($"[Game2_Krazy6] Bump not allowed: Cell {targetCell} is not occupied by {targetPlayer.PlayerName}");
+        return false;
     }
 }

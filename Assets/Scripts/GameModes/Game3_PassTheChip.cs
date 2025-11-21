@@ -134,4 +134,44 @@ public class Game3_PassTheChip : GameModeBase
         base.OnGameEnd(winner);
         Debug.Log($"[Game3_PassTheChip] Game ended! Winner: {winner.PlayerName}");
     }
+
+    /// <summary>
+    /// Check if a swap is allowed in PassTheChip.
+    /// Instead of bumping, we swap chips.
+    /// </summary>
+    // 11/21/2025 AI-Tag: This was created with the help of Assistant, a Unity Artificial Intelligence product.
+    public override bool CanBump(Player bumpingPlayer, Player targetPlayer, int targetCell)
+    {
+        if (IsCellOccupiedBy(targetCell, targetPlayer))
+        {
+            int bumpingPlayerCell = GetCellOccupiedBy(bumpingPlayer);
+            SwapChips(bumpingPlayerCell, targetCell);
+            Debug.Log($"[Game3_PassTheChip] Chips swapped between {bumpingPlayer.PlayerName} and {targetPlayer.PlayerName}");
+            return true;
+        }
+
+        Debug.Log($"[Game3_PassTheChip] Swap not allowed: Cell {targetCell} is not occupied by {targetPlayer.PlayerName}");
+        return false;
+    }
+
+    /// <summary>
+    /// Swap chips at two cells.
+    /// </summary>
+    private void SwapChips(int cellA, int cellB)
+    {
+        BoardCell chipA = GetCell(cellA);
+        BoardCell chipB = GetCell(cellB);
+
+        if (chipA != null && chipB != null)
+        {
+            Player tempPlayer = chipA.OccupiedBy;
+            chipA.Clear();
+            chipB.Clear();
+
+            chipA.PlaceChip(chipB.OccupiedBy);
+            chipB.PlaceChip(tempPlayer);
+
+            Debug.Log($"[Game3_PassTheChip] Swapped chips between cells {cellA} and {cellB}");
+        }
+    }
 }
