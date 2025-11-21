@@ -71,8 +71,9 @@ public class ValidMoveHighlighter : MonoBehaviour
         if (gameStateManager == null || gameStateManager.Board == null)
             return new int[0];
         
-        // Simple movement: move forward diceRoll cells (modulo 12)
-        int targetCell = (fromCell + diceRoll) % 12;
+        // Simple movement: move forward diceRoll cells (modulo BOARD_SIZE)
+        int boardSize = BoardModel.BOARD_SIZE;
+        int targetCell = (fromCell + diceRoll) % boardSize;
         
         // Validate target
         if (IsValidTarget(targetCell))
@@ -108,7 +109,8 @@ public class ValidMoveHighlighter : MonoBehaviour
             return -1;
         
         // Linear search for player's chip
-        for (int i = 0; i < 12; i++)
+        int boardSize = BoardModel.BOARD_SIZE;
+        for (int i = 0; i < boardSize; i++)
         {
             BoardCell cell = board.Cells[i];
             if (cell != null && cell.Owner == player)
@@ -124,7 +126,7 @@ public class ValidMoveHighlighter : MonoBehaviour
     private bool IsValidTarget(int cellIndex)
     {
         // Validate bounds
-        if (cellIndex < 0 || cellIndex >= 12)
+        if (cellIndex < 0 || cellIndex >= BoardModel.BOARD_SIZE)
             return false;
         
         BoardModel board = gameStateManager.Board;
@@ -151,7 +153,8 @@ public class ValidMoveHighlighter : MonoBehaviour
         // Target has opponent chip
         // Check if bumping is allowed in current game mode
         IGameMode gameMode = gameStateManager.CurrentGameMode;
-        if (gameMode != null && gameMode.CanBump(currentPlayer, cellIndex))
+        Player targetPlayer = targetCell.Owner;
+        if (gameMode != null && gameMode.CanBump(currentPlayer, targetPlayer, cellIndex))
             return true;
         
         // Bumping not allowed in this mode

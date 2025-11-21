@@ -68,10 +68,13 @@ public class Game3_PassTheChip : GameModeBase
     /// - Cell must be empty (no chips placed there)
     /// - Player can place on any empty cell
     /// </summary>
+    /// <summary>
+    /// Check if a move is valid in PassTheChip.
+    /// </summary>
     public override bool IsValidMove(Player player, int cellIndex)
     {
-        // Validate cell index
-        if (cellIndex < 0 || cellIndex > 11)
+        // Validate cell index against dynamic board size
+        if (cellIndex < 0 || cellIndex >= gameStateManager.Board.BOARD_SIZE)
         {
             Debug.LogWarning($"[Game3_PassTheChip] Invalid cell index: {cellIndex}");
             return false;
@@ -86,79 +89,41 @@ public class Game3_PassTheChip : GameModeBase
         
         return true;
     }
-    
-    /// <summary>
-    /// Called after a chip is placed.
-    /// </summary>
-    public override void OnChipPlaced(Player player, int cellIndex)
-    {
-        base.OnChipPlaced(player, cellIndex);
-        // No special post-placement effects
-    }
-    
-    // ============================================
-    // BUMPING (SWAPPING)
-    // ============================================
-    
-    /// <summary>
-    /// Check if a "bump" (swap) is allowed in PassTheChip.
-    /// 
-    /// Rules:
-    /// - Swapping is allowed instead of bumping
-    /// - Can swap with any opponent chip
-    /// - Cannot swap your own chips
-    /// </summary>
-    public override bool CanBump(Player bumpingPlayer, Player targetPlayer, int targetCell)
-    {
-        // In PassTheChip, we swap instead of bump
-        // Same validation as bump, but different action
-        
-        // Can't swap with yourself
-        if (bumpingPlayer == targetPlayer)
-        {
-            Debug.Log("[Game3_PassTheChip] Cannot swap your own chip");
-            return false;
-        }
-        
-        // Target cell must have opponent's chip
-        if (!IsCellOccupiedBy(targetCell, targetPlayer))
-        {
-            Debug.Log($"[Game3_PassTheChip] Cell {targetCell} is not occupied by target player");
-            return false;
-        }
-        
-        return true;
-    }
-    
-    /// <summary>
-    /// Called when a "bump" (swap) occurs.
-    /// In PassTheChip, we swap positions instead of removing the chip.
-    /// </summary>
-    public override void OnBumpOccurs(Player bumpingPlayer, Player bumpedPlayer)
-    {
-        base.OnBumpOccurs(bumpingPlayer, bumpedPlayer);
-        
-        // Note: The actual swap logic would be handled by GameStateManager
-        // This hook just logs the action
-        Debug.Log($"[Game3_PassTheChip] {bumpingPlayer.PlayerName} swapped with {bumpedPlayer.PlayerName}");
-    }
-    
-    // ============================================
-    // WIN CONDITION
-    // ============================================
-    
+
     /// <summary>
     /// Check if a player has won in PassTheChip.
-    /// 
-    /// Win Condition: 5 chips in a row
+    /// Win Condition: Center #5 node (index 12) is surrounded by 8 chips.
     /// </summary>
     public override bool CheckWinCondition(Player player)
     {
         if (gameStateManager == null || gameStateManager.Board == null)
             return false;
+            
+        // Center node is at (2,2) which is index 12 in a 5x5 grid
+        int centerIndex = 12;
         
-        // Use BoardModel's 5-in-a-row detection
-        return gameStateManager.Board.Check5InARow(player);
+        // Check if center is #5 (it should be based on generation, but we assume it is)
+        // We just check if the 8 neighbors are occupied.
+        
+        // Neighbors of 12:
+        // Row 1: 6, 7, 8
+        // Row 2: 11, 13
+        // Row 3: 16, 17, 18
+        int[] neighbors = new int[] { 6, 7, 8, 11, 13, 16, 17, 18 };
+        
+        foreach (int neighbor in neighbors)
+        {
+            // If any neighbor is empty, win condition not met
+            if (IsCellEmpty(neighbor))
+                return false;
+        }
+        
+        // All 8 neighbors are occupied.
+        // Does the player need to be the one who placed the last one?
+        // The method checks if *player* won.
+        // Usually called for the current player.
+        // If the condition is met, the current player (who placed the last chip) wins.
+        return true;
     }
     
     /// <summary>

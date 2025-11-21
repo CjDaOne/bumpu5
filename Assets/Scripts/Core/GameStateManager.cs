@@ -212,7 +212,8 @@ public class GameStateManager
         
         // === SPECIAL CASE 2: Single 6 "Lose Turn" ===
         // Rolling a 6 alone (not a double) loses the turn.
-        if (IsLoseTurnRoll(lastDiceRoll))
+        // Delegated to GameMode (Krazy6 overrides this)
+        if (currentGameMode != null && currentGameMode.IsLoseTurnRoll(lastDiceRoll))
         {
             consecutiveDoublesCount = 0;
             canRollAgain = false;

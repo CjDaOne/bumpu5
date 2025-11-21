@@ -26,6 +26,16 @@ public class BoardCell
     }
 
     /// <summary>
+    /// Alias for Owner to maintain compatibility.
+    /// </summary>
+    public Player Occupant => owner;
+
+    /// <summary>
+    /// The number value of this cell (1-5).
+    /// </summary>
+    public int Number { get; set; }
+
+    /// <summary>
     /// Gets or sets the chip currently occupying this cell (null if empty).
     /// </summary>
     public Chip CurrentChip

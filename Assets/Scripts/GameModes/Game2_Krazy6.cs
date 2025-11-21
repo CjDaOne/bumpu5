@@ -67,10 +67,13 @@ public class Game2_Krazy6 : GameModeBase
     /// - Cell must be empty (no chips placed there)
     /// - Player can place on any empty cell
     /// </summary>
+    /// <summary>
+    /// Check if a move is valid in Krazy6.
+    /// </summary>
     public override bool IsValidMove(Player player, int cellIndex)
     {
-        // Validate cell index
-        if (cellIndex < 0 || cellIndex > 11)
+        // Validate cell index against dynamic board size
+        if (cellIndex < 0 || cellIndex >= gameStateManager.Board.BOARD_SIZE)
         {
             Debug.LogWarning($"[Game2_Krazy6] Invalid cell index: {cellIndex}");
             return false;
@@ -85,80 +88,100 @@ public class Game2_Krazy6 : GameModeBase
         
         return true;
     }
-    
-    /// <summary>
-    /// Called after a chip is placed.
-    /// </summary>
-    public override void OnChipPlaced(Player player, int cellIndex)
-    {
-        base.OnChipPlaced(player, cellIndex);
-        // No special post-placement effects in Krazy6
-    }
-    
-    // ============================================
-    // BUMPING
-    // ============================================
-    
-    /// <summary>
-    /// Check if a bump is allowed in Krazy6.
-    /// 
-    /// Rules (same as Bump5):
-    /// - Bumping is always allowed
-    /// - Can bump any opponent chip on the board
-    /// - Cannot bump your own chips
-    /// </summary>
-    public override bool CanBump(Player bumpingPlayer, Player targetPlayer, int targetCell)
-    {
-        // Can't bump yourself
-        if (bumpingPlayer == targetPlayer)
-        {
-            Debug.Log("[Game2_Krazy6] Cannot bump your own chip");
-            return false;
-        }
-        
-        // Target cell must have opponent's chip
-        if (!IsCellOccupiedBy(targetCell, targetPlayer))
-        {
-            Debug.Log($"[Game2_Krazy6] Cell {targetCell} is not occupied by target player");
-            return false;
-        }
-        
-        return true;
-    }
-    
-    /// <summary>
-    /// Called when a bump occurs.
-    /// </summary>
-    public override void OnBumpOccurs(Player bumpingPlayer, Player bumpedPlayer)
-    {
-        base.OnBumpOccurs(bumpingPlayer, bumpedPlayer);
-        Debug.Log($"[Game2_Krazy6] {bumpingPlayer.PlayerName} bumped {bumpedPlayer.PlayerName}");
-    }
-    
-    // ============================================
-    // WIN CONDITION
-    // ============================================
-    
+
     /// <summary>
     /// Check if a player has won in Krazy6.
-    /// 
-    /// Win Condition: 5 chips in a row (same as Bump5)
+    /// Win Condition: 6 chips on the board (and roll a 6 - simplified to just 6 chips for now).
     /// </summary>
     public override bool CheckWinCondition(Player player)
     {
         if (gameStateManager == null || gameStateManager.Board == null)
             return false;
         
-        // Use BoardModel's 5-in-a-row detection
-        return gameStateManager.Board.Check5InARow(player);
+        // Check for 6 chips on the board
+        int chipCount = GetChipCountForPlayer(player);
+        return chipCount >= 6;
+    }
+
+    /// <summary>
+    /// Custom roll logic for Krazy 6.
+    /// </summary>
+    public override bool IsLoseTurnRoll(int[] roll)
+    {
+        if (roll == null || roll.Length == 0) return false;
+        
+        bool hasSix = (roll[0] == 6 || (roll.Length > 1 && roll[1] == 6));
+        int chipCount = GetChipCountForPlayer(gameStateManager.CurrentPlayer); // This might be tricky if CurrentPlayer is not set yet? 
+        // GameStateManager calls IsLoseTurnRoll inside RollDice, where CurrentPlayer IS valid.
+        
+        // Rule 1: A #6 is required to start putting chips on the board.
+        if (chipCount == 0 && !hasSix)
+        {
+            Debug.Log("[Game2_Krazy6] Need a 6 to start!");
+            return true; // Lose turn
+        }
+        
+        // Rule 2: If <= 5 chips and roll 6, BUMPED by 6 (penalty).
+        if (chipCount <= 5 && hasSix)
+        {
+            Debug.Log("[Game2_Krazy6] Bumped by the 6! Lose turn and chip.");
+            return true; // Lose turn (and chip removal handled in OnDiceRolled)
+        }
+        
+        // Rule 3: If > 5 chips and roll 6, GOOD ROLL (Bonus).
+        if (chipCount > 5 && hasSix)
+        {
+            Debug.Log("[Game2_Krazy6] Good 6! Bonus turn.");
+            return false; // Don't lose turn
+        }
+        
+        return false;
+    }
+
+    public override void Initialize(GameStateManager gsm)
+    {
+        base.Initialize(gsm);
+        if (gameStateManager != null)
+        {
+            gameStateManager.OnDiceRolled += HandleDiceRoll;
+        }
+        Debug.Log("[Game2_Krazy6] Initialized - 6s are tricky!");
     }
     
-    /// <summary>
-    /// Called when game ends.
-    /// </summary>
     public override void OnGameEnd(Player winner)
     {
         base.OnGameEnd(winner);
+        if (gameStateManager != null)
+        {
+            gameStateManager.OnDiceRolled -= HandleDiceRoll;
+        }
         Debug.Log($"[Game2_Krazy6] Game ended! Winner: {winner.PlayerName}");
+    }
+
+    private void HandleDiceRoll(int[] roll)
+    {
+        if (roll == null) return;
+        
+        bool hasSix = (roll[0] == 6 || (roll.Length > 1 && roll[1] == 6));
+        Player currentPlayer = gameStateManager.CurrentPlayer;
+        int chipCount = GetChipCountForPlayer(currentPlayer);
+        
+        // Rule: If <= 5 chips and roll 6, remove a chip.
+        if (chipCount > 0 && chipCount <= 5 && hasSix)
+        {
+            // Remove a chip. We'll remove the first one we find for now.
+            // Ideally we'd let the user choose, but that requires UI/Phase support.
+            int[] occupied = GetCellsOccupiedBy(currentPlayer);
+            if (occupied.Length > 0)
+            {
+                int cellToRemove = occupied[occupied.Length - 1]; // Remove last one (highest index) as a heuristic
+                BoardCell cell = GetCell(cellToRemove);
+                if (cell != null)
+                {
+                    cell.Clear();
+                    Debug.Log($"[Game2_Krazy6] Penalty: Removed chip at {cellToRemove}");
+                }
+            }
+        }
     }
 }

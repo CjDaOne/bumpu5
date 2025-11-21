@@ -149,6 +149,11 @@ public interface IGameMode
     bool CheckWinCondition(Player player);
     
     /// <summary>
+    /// Check if the dice roll results in a lost turn.
+    /// </summary>
+    bool IsLoseTurnRoll(int[] roll);
+
+    /// <summary>
     /// Called when the game ends (after CheckWinCondition returns true for a player).
     /// Execute mode-specific cleanup and finalization.
     /// 
