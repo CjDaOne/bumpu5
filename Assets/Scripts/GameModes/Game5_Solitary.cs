@@ -1,264 +1,173 @@
-using System;
 using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
-/// Game Mode 5: Solitary (Single-Player Puzzle Mode)
+/// Game Mode 5: Solitary
 /// 
 /// Rules:
-/// - Single player mode
-/// - Goal: Place chips to create 5-in-a-row as fast as possible
-/// - Rolling: Normal dice rolls
-/// - Win: Get 5 in a row
-/// - Tracking: Best time, fewest rolls, etc.
-/// - No opponent bumping
-/// 
-/// Why This Mode?
-/// Puzzle mode - relax and try to achieve 5-in-a-row. Can be timed.
+/// - Win: Fill the entire board (25 chips).
+/// - Rolling a 6: Your "OPPONENT". Removes the last chip placed.
+/// - Double 6s: Remove the last two chips placed.
+/// - 5+6: Cancels the removal (Safe roll).
+/// - Bumping: No opponent bumping (Solitary).
 /// </summary>
 public class Game5_Solitary : GameModeBase
 {
-    // ============================================
-    // METADATA PROPERTIES
-    // ============================================
-    
+    // Stack to track placement history for removal logic
+    private Stack<int> placementHistory = new Stack<int>();
+
     public override string ModeName => "Solitary";
-    public override string ModeDescription => "Single-player puzzle mode. Place chips to get 5 in a row as fast as possible. Track your time and roll count!";
-    
-    // ============================================
-    // TRACKING STATE
-    // ============================================
-    
-    private int rollCount = 0;
-    private DateTime startTime = DateTime.MinValue;
-    
-    /// <summary>Gets the number of rolls made so far in this game.</summary>
-    public int RollCount => rollCount;
-    
-    /// <summary>Gets the elapsed time since game started.</summary>
-    public TimeSpan ElapsedTime
-    {
-        get
-        {
-            if (startTime == DateTime.MinValue)
-                return TimeSpan.Zero;
-            return DateTime.Now - startTime;
-        }
-    }
-    
-    // ============================================
-    // LIFECYCLE
-    // ============================================
-    
-    /// <summary>
-    /// Initialize the game mode.
-    /// Track roll count and elapsed time.
-    /// </summary>
+    public override string ModeDescription => "Fill the board! Rolling a 6 removes the last placed chip. Double 6s remove two.";
+
     public override void Initialize(GameStateManager gsm)
     {
         base.Initialize(gsm);
-        rollCount = 0;
-        startTime = DateTime.Now;
-        Debug.Log("[Game5_Solitary] Initialized - Single player mode");
+        
+        // Subscribe to events
+        if (gameStateManager != null)
+        {
+            gameStateManager.OnDiceRolled += HandleDiceRoll;
+            // We need to track placements. 
+            // GameStateManager fires OnChipPlaced event.
+            // But we can also override OnChipPlaced method.
+        }
+        Debug.Log("[Game5_Solitary] Initialized");
     }
-    
-    /// <summary>
-    /// Called when game starts.
-    /// </summary>
+
     public override void OnGameStart()
     {
         base.OnGameStart();
-        Debug.Log("[Game5_Solitary] Game started - Race against time!");
+        placementHistory.Clear();
+        Debug.Log("[Game5_Solitary] Game started - Watch out for 6s!");
     }
     
-    /// <summary>
-    /// Called at the start of each turn.
-    /// </summary>
-    public override void OnTurnStart(Player currentPlayer)
-    {
-        base.OnTurnStart(currentPlayer);
-    }
-    
-    // ============================================
-    // MOVE VALIDATION
-    // ============================================
-    
-    /// <summary>
-    /// Check if a move is valid in Game5_Solitary.
-    /// 
-    /// Rules (same as Bump5):
-    /// - Cell must be empty (no chips placed there)
-    /// - Player can place on any empty cell
-    /// </summary>
-    public override bool IsValidMove(Player player, int cellIndex)
-    {
-        // Validate cell index
-        if (cellIndex < 0 || cellIndex > 11)
-        {
-            Debug.LogWarning($"[Game5_Solitary] Invalid cell index: {cellIndex}");
-            return false;
-        }
-        
-        // Check if cell is empty
-        if (!IsCellEmpty(cellIndex))
-        {
-            Debug.Log($"[Game5_Solitary] Cell {cellIndex} is already occupied");
-            return false;
-        }
-        
-        return true;
-    }
-    
-    /// <summary>
-    /// Called after a chip is placed.
-    /// </summary>
     public override void OnChipPlaced(Player player, int cellIndex)
     {
         base.OnChipPlaced(player, cellIndex);
-        // No special post-placement effects in solitary mode
+        placementHistory.Push(cellIndex);
+        Debug.Log($"[Game5_Solitary] Chip placed at {cellIndex}. History count: {placementHistory.Count}");
     }
-    
-    // ============================================
-    // BUMPING (DISABLED IN SOLITARY)
-    // ============================================
-    
-    /// <summary>
-    /// Check if a bump is allowed in Game5_Solitary.
-    /// 
-    /// Rules: Bumping is never allowed (single player mode).
-    /// </summary>
+
+    private void HandleDiceRoll(int[] roll)
+    {
+        if (roll == null || roll.Length != 2) return;
+
+        int d1 = roll[0];
+        int d2 = roll[1];
+        
+        bool hasSix = (d1 == 6 || d2 == 6);
+        bool isDoubleSix = (d1 == 6 && d2 == 6);
+        bool hasFive = (d1 == 5 || d2 == 5);
+        
+        // Rule: 5+6 cancels the bump (removal)
+        if (hasSix && hasFive)
+        {
+            Debug.Log("[Game5_Solitary] 5+6 rolled! Removal cancelled.");
+            return;
+        }
+
+        // Rule: Double 6 removes last two chips
+        if (isDoubleSix)
+        {
+            Debug.Log("[Game5_Solitary] Double 6! Removing last 2 chips.");
+            RemoveLastChip();
+            RemoveLastChip();
+            return;
+        }
+
+        // Rule: Single 6 removes last chip
+        if (hasSix)
+        {
+            Debug.Log("[Game5_Solitary] Single 6! Removing last chip.");
+            RemoveLastChip();
+            return;
+        }
+    }
+
+    private void RemoveLastChip()
+    {
+        if (placementHistory.Count > 0)
+        {
+            int lastIndex = placementHistory.Pop();
+            BoardCell cell = GetCell(lastIndex);
+            if (cell != null && cell.Is_Occupied)
+            {
+                cell.Clear();
+                Debug.Log($"[Game5_Solitary] Removed chip at {lastIndex}");
+            }
+            else
+            {
+                // Chip might have been removed already? (Shouldn't happen in Solitary)
+                Debug.LogWarning($"[Game5_Solitary] History pointed to {lastIndex} but it was empty.");
+            }
+        }
+        else
+        {
+            Debug.Log("[Game5_Solitary] No chips to remove.");
+        }
+    }
+
+    public override bool IsLoseTurnRoll(int[] roll)
+    {
+        if (roll == null || roll.Length == 0) return false;
+        
+        int d1 = roll[0];
+        int d2 = (roll.Length > 1) ? roll[1] : 0;
+        
+        bool hasSix = (d1 == 6 || d2 == 6);
+        bool hasFive = (d1 == 5 || d2 == 5);
+        
+        // 5+6 is Safe (handled by GameStateManager as Safe5Plus6), so we can return false or true?
+        // GameStateManager checks IsSafe5Plus6 BEFORE IsLoseTurnRoll.
+        // So if it's 5+6, this method won't even be called (or result ignored).
+        // But for safety:
+        if (hasSix && hasFive) return false; // Safe roll, not a "Lose Turn" penalty (just end of turn)
+
+        // Double 6 is a penalty in Solitary (remove 2 chips), so it SHOULD lose the turn (no placement).
+        if (d1 == 6 && d2 == 6) return true;
+
+        // Single 6 is a penalty (remove 1 chip), so it SHOULD lose the turn.
+        if (hasSix) return true;
+
+        return false;
+    }
+
+    public override bool IsValidMove(Player player, int cellIndex)
+    {
+        if (cellIndex < 0 || cellIndex >= gameStateManager.Board.BOARD_SIZE) return false;
+        return IsCellEmpty(cellIndex);
+    }
+
     public override bool CanBump(Player bumpingPlayer, Player targetPlayer, int targetCell)
     {
-        // Single player - bumping not allowed
+        // No bumping in Solitary (unless we consider the Dice bumping the player)
         return false;
     }
-    
-    /// <summary>
-    /// Called when a bump occurs (should never happen in solitary).
-    /// </summary>
-    public override void OnBumpOccurs(Player bumpingPlayer, Player bumpedPlayer)
-    {
-        base.OnBumpOccurs(bumpingPlayer, bumpedPlayer);
-        Debug.LogWarning("[Game5_Solitary] Bump occurred in single-player mode (should not happen)");
-    }
-    
-    // ============================================
-    // WIN CONDITION
-    // ============================================
-    
-    /// <summary>
-    /// Check if a player has won in Game5_Solitary.
-    /// 
-    /// Win Condition: 5 chips in a row (same as Bump5)
-    /// 
-    /// Board layout (3x4 grid):
-    ///   0   1   2   3
-    ///   4   5   6   7
-    ///   8   9  10  11
-    /// </summary>
+
     public override bool CheckWinCondition(Player player)
     {
-        if (gameState == null || gameState.Board == null)
-            return false;
-        
-        int[] playerCells = GetCellsOccupiedBy(player);
-        
-        if (playerCells.Length < 5)
-            return false; // Can't have 5-in-a-row with less than 5 chips
-        
-        // Check all possible 5-in-a-row patterns
-        if (CheckHorizontalWin(playerCells)) return true;
-        if (CheckVerticalWin(playerCells)) return true;
-        if (CheckDiagonalWinLR(playerCells)) return true;
-        if (CheckDiagonalWinRL(playerCells)) return true;
-        
-        return false;
-    }
-    
-    /// <summary>
-    /// Check for horizontal 5-in-a-row.
-    /// </summary>
-    private bool CheckHorizontalWin(int[] playerCells)
-    {
-        if (Contains(playerCells, 0) && Contains(playerCells, 1) && Contains(playerCells, 2) && Contains(playerCells, 3))
-            return true;
-        
-        if (Contains(playerCells, 4) && Contains(playerCells, 5) && Contains(playerCells, 6) && Contains(playerCells, 7))
-            return true;
-        
-        if (Contains(playerCells, 8) && Contains(playerCells, 9) && Contains(playerCells, 10) && Contains(playerCells, 11))
-            return true;
-        
-        return false;
-    }
-    
-    /// <summary>
-    /// Check for vertical 5-in-a-row.
-    /// </summary>
-    private bool CheckVerticalWin(int[] playerCells)
-    {
-        if (Contains(playerCells, 0) && Contains(playerCells, 4) && Contains(playerCells, 8))
-            return true;
-        
-        if (Contains(playerCells, 1) && Contains(playerCells, 5) && Contains(playerCells, 9))
-            return true;
-        
-        if (Contains(playerCells, 2) && Contains(playerCells, 6) && Contains(playerCells, 10))
-            return true;
-        
-        if (Contains(playerCells, 3) && Contains(playerCells, 7) && Contains(playerCells, 11))
-            return true;
-        
-        return false;
-    }
-    
-    /// <summary>
-    /// Check for diagonal 5-in-a-row (top-left to bottom-right).
-    /// </summary>
-    private bool CheckDiagonalWinLR(int[] playerCells)
-    {
-        if (Contains(playerCells, 0) && Contains(playerCells, 5) && Contains(playerCells, 10))
-            return true;
-        
-        if (Contains(playerCells, 1) && Contains(playerCells, 6) && Contains(playerCells, 11))
-            return true;
-        
-        return false;
-    }
-    
-    /// <summary>
-    /// Check for diagonal 5-in-a-row (top-right to bottom-left).
-    /// </summary>
-    private bool CheckDiagonalWinRL(int[] playerCells)
-    {
-        if (Contains(playerCells, 3) && Contains(playerCells, 6) && Contains(playerCells, 9))
-            return true;
-        
-        if (Contains(playerCells, 2) && Contains(playerCells, 5) && Contains(playerCells, 8))
-            return true;
-        
-        return false;
-    }
-    
-    /// <summary>
-    /// Helper: Check if an array contains a value.
-    /// </summary>
-    private bool Contains(int[] array, int value)
-    {
-        foreach (int item in array)
+        if (gameStateManager == null || gameStateManager.Board == null) return false;
+
+        // Win if board is full (25 chips)
+        int totalChips = 0;
+        for (int i = 0; i < gameStateManager.Board.BOARD_SIZE; i++)
         {
-            if (item == value)
-                return true;
+            if (!IsCellEmpty(i)) totalChips++;
         }
-        return false;
+        
+        return totalChips >= 25;
     }
     
-    /// <summary>
-    /// Called when game ends.
-    /// Log final statistics.
-    /// </summary>
+    // Unsubscribe on destroy? GameMode is not a MonoBehaviour, but we should clean up.
+    // We don't have a Destroy method in interface.
+    // We can unsubscribe in OnGameEnd?
     public override void OnGameEnd(Player winner)
     {
         base.OnGameEnd(winner);
-        Debug.Log($"[Game5_Solitary] Game ended! Rolls: {rollCount}, Time: {ElapsedTime.TotalSeconds:F2}s");
+        if (gameStateManager != null)
+        {
+            gameStateManager.OnDiceRolled -= HandleDiceRoll;
+        }
     }
 }

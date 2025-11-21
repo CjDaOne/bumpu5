@@ -66,10 +66,13 @@ public class Game4_BumpUAnd5 : GameModeBase
     /// - Cell must be empty (no chips placed there)
     /// - Player can place on any empty cell
     /// </summary>
+    /// <summary>
+    /// Check if a move is valid in Game4_BumpUAnd5.
+    /// </summary>
     public override bool IsValidMove(Player player, int cellIndex)
     {
-        // Validate cell index
-        if (cellIndex < 0 || cellIndex > 11)
+        // Validate cell index against dynamic board size
+        if (cellIndex < 0 || cellIndex >= gameStateManager.Board.BOARD_SIZE)
         {
             Debug.LogWarning($"[Game4_BumpUAnd5] Invalid cell index: {cellIndex}");
             return false;
@@ -84,93 +87,18 @@ public class Game4_BumpUAnd5 : GameModeBase
         
         return true;
     }
-    
-    /// <summary>
-    /// Called after a chip is placed.
-    /// </summary>
-    public override void OnChipPlaced(Player player, int cellIndex)
-    {
-        base.OnChipPlaced(player, cellIndex);
-        // No special post-placement effects in hybrid mode
-    }
-    
-    // ============================================
-    // BUMPING
-    // ============================================
-    
-    /// <summary>
-    /// Check if a bump is allowed in Game4_BumpUAnd5.
-    /// 
-    /// Rules (same as Bump5):
-    /// - Bumping is always allowed (from Bump5)
-    /// - Can bump any opponent chip on the board
-    /// - Cannot bump your own chips
-    /// </summary>
-    public override bool CanBump(Player bumpingPlayer, Player targetPlayer, int targetCell)
-    {
-        // Can't bump yourself
-        if (bumpingPlayer == targetPlayer)
-        {
-            Debug.Log("[Game4_BumpUAnd5] Cannot bump your own chip");
-            return false;
-        }
-        
-        // Target cell must have opponent's chip
-        if (!IsCellOccupiedBy(targetCell, targetPlayer))
-        {
-            Debug.Log($"[Game4_BumpUAnd5] Cell {targetCell} is not occupied by target player");
-            return false;
-        }
-        
-        return true;
-    }
-    
-    /// <summary>
-    /// Called when a bump occurs.
-    /// Applies Game4-specific behavior (standard bump from Bump5).
-    /// </summary>
-    public override void OnBumpOccurs(Player bumpingPlayer, Player bumpedPlayer)
-    {
-        base.OnBumpOccurs(bumpingPlayer, bumpedPlayer);
-        
-        // In Game4, bump penalty is the same as Game1:
-        // - Bumped chip is removed from the board (handled by GameStateManager)
-        // - No additional score penalties
-        
-        Debug.Log($"[Game4_BumpUAnd5] {bumpingPlayer.PlayerName} bumped {bumpedPlayer.PlayerName}");
-    }
-    
-    // ============================================
-    // WIN CONDITION
-    // ============================================
-    
+
     /// <summary>
     /// Check if a player has won in Game4_BumpUAnd5.
-    /// 
-    /// Win Condition: 5 chips in a row (same as Bump5)
-    /// 
-    /// Board layout (3x4 grid):
-    ///   0   1   2   3
-    ///   4   5   6   7
-    ///   8   9  10  11
+    /// Win Condition: 5 chips on the game board in any order.
     /// </summary>
     public override bool CheckWinCondition(Player player)
     {
         if (gameStateManager == null || gameStateManager.Board == null)
             return false;
         
-        int[] playerCells = GetCellsOccupiedBy(player);
-        
-        if (playerCells.Length < 5)
-            return false; // Can't have 5-in-a-row with less than 5 chips
-        
-        // Check all possible 5-in-a-row patterns
-        if (CheckHorizontalWin(playerCells)) return true;
-        if (CheckVerticalWin(playerCells)) return true;
-        if (CheckDiagonalWinLR(playerCells)) return true;
-        if (CheckDiagonalWinRL(playerCells)) return true;
-        
-        return false;
+        int chipCount = GetChipCountForPlayer(player);
+        return chipCount >= 5;
     }
     
     /// <summary>
