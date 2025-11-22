@@ -41,9 +41,9 @@ public class Game5_SurvivalMode : GameModeBase
         base.Initialize(gsm);
         
         // Initialize score tracking for all players
-        if (gameState != null && gameState.Players != null)
+        if (gameStateManager != null && gameStateManager.Players != null)
         {
-            playerScores = new int[gameState.Players.Length];
+            playerScores = new int[gameStateManager.Players.Count];
             for (int i = 0; i < playerScores.Length; i++)
             {
                 playerScores[i] = 0;
@@ -92,7 +92,7 @@ public class Game5_SurvivalMode : GameModeBase
     public override bool IsValidMove(Player player, int cellIndex)
     {
         // Validate cell index
-        if (cellIndex < 0 || cellIndex > 11)
+        if (cellIndex < 0 || cellIndex >= BoardModel.BOARD_SIZE)
         {
             Debug.LogWarning($"[Game5_SurvivalMode] Invalid cell index: {cellIndex}");
             return false;
@@ -196,13 +196,13 @@ public class Game5_SurvivalMode : GameModeBase
     /// </summary>
     private void AddPoints(Player player, int points)
     {
-        if (playerScores == null || gameState == null || gameState.Players == null)
+        if (playerScores == null || gameStateManager == null || gameStateManager.Players == null)
             return;
-        
-        // Find the player's index
-        for (int i = 0; i < gameState.Players.Length; i++)
+            
+        // Find player index
+        for (int i = 0; i < gameStateManager.Players.Count; i++)
         {
-            if (gameState.Players[i] == player)
+            if (gameStateManager.Players[i] == player)
             {
                 playerScores[i] += points;
                 break;
@@ -215,13 +215,13 @@ public class Game5_SurvivalMode : GameModeBase
     /// </summary>
     private int GetPlayerScore(Player player)
     {
-        if (playerScores == null || gameState == null || gameState.Players == null)
+        if (playerScores == null || gameStateManager == null || gameStateManager.Players == null)
             return 0;
-        
-        // Find the player's index
-        for (int i = 0; i < gameState.Players.Length; i++)
+            
+        // Find player index
+        for (int i = 0; i < gameStateManager.Players.Count; i++)
         {
-            if (gameState.Players[i] == player)
+            if (gameStateManager.Players[i] == player)
             {
                 return playerScores[i];
             }

@@ -96,75 +96,17 @@ public class Game4_BumpUAnd5 : GameModeBase
     {
         if (gameStateManager == null || gameStateManager.Board == null)
             return false;
-        
-        int chipCount = GetChipCountForPlayer(player);
-        return chipCount >= 5;
+            
+        return gameStateManager.Board.Check5InARow(player);
     }
     
     /// <summary>
-    /// Check for horizontal 5-in-a-row.
+    /// Check for 5-in-a-row.
     /// </summary>
-    private bool CheckHorizontalWin(int[] playerCells)
-    {
-        if (Contains(playerCells, 0) && Contains(playerCells, 1) && Contains(playerCells, 2) && Contains(playerCells, 3))
-            return true;
-        
-        if (Contains(playerCells, 4) && Contains(playerCells, 5) && Contains(playerCells, 6) && Contains(playerCells, 7))
-            return true;
-        
-        if (Contains(playerCells, 8) && Contains(playerCells, 9) && Contains(playerCells, 10) && Contains(playerCells, 11))
-            return true;
-        
-        return false;
-    }
-    
-    /// <summary>
-    /// Check for vertical 5-in-a-row.
-    /// </summary>
-    private bool CheckVerticalWin(int[] playerCells)
-    {
-        if (Contains(playerCells, 0) && Contains(playerCells, 4) && Contains(playerCells, 8))
-            return true;
-        
-        if (Contains(playerCells, 1) && Contains(playerCells, 5) && Contains(playerCells, 9))
-            return true;
-        
-        if (Contains(playerCells, 2) && Contains(playerCells, 6) && Contains(playerCells, 10))
-            return true;
-        
-        if (Contains(playerCells, 3) && Contains(playerCells, 7) && Contains(playerCells, 11))
-            return true;
-        
-        return false;
-    }
-    
-    /// <summary>
-    /// Check for diagonal 5-in-a-row (top-left to bottom-right).
-    /// </summary>
-    private bool CheckDiagonalWinLR(int[] playerCells)
-    {
-        if (Contains(playerCells, 0) && Contains(playerCells, 5) && Contains(playerCells, 10))
-            return true;
-        
-        if (Contains(playerCells, 1) && Contains(playerCells, 6) && Contains(playerCells, 11))
-            return true;
-        
-        return false;
-    }
-    
-    /// <summary>
-    /// Check for diagonal 5-in-a-row (top-right to bottom-left).
-    /// </summary>
-    private bool CheckDiagonalWinRL(int[] playerCells)
-    {
-        if (Contains(playerCells, 3) && Contains(playerCells, 6) && Contains(playerCells, 9))
-            return true;
-        
-        if (Contains(playerCells, 2) && Contains(playerCells, 5) && Contains(playerCells, 8))
-            return true;
-        
-        return false;
-    }
+    private bool CheckHorizontalWin(int[] playerCells) => false; // Deprecated
+    private bool CheckVerticalWin(int[] playerCells) => false; // Deprecated
+    private bool CheckDiagonalWinLR(int[] playerCells) => false; // Deprecated
+    private bool CheckDiagonalWinRL(int[] playerCells) => false; // Deprecated
     
     /// <summary>
     /// Helper: Check if an array contains a value.

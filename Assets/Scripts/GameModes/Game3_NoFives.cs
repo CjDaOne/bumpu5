@@ -59,7 +59,7 @@ public class Game3_NoFives : GameModeBase
     public override bool IsValidMove(Player player, int cellIndex)
     {
         // Validate cell index
-        if (cellIndex < 0 || cellIndex > 11)
+        if (cellIndex < 0 || cellIndex >= BoardModel.BOARD_SIZE)
         {
             Debug.LogWarning($"[Game3_NoFives] Invalid cell index: {cellIndex}");
             return false;
@@ -212,52 +212,38 @@ public class Game3_NoFives : GameModeBase
         // Check all possible 5-in-a-row patterns
         if (CheckHorizontalWin(opponentCells)) return true;
         if (CheckVerticalWin(opponentCells)) return true;
-        if (CheckDiagonalWinLR(opponentCells)) return true;
-        if (CheckDiagonalWinRL(opponentCells)) return true;
+        if (Check5x5Win(opponentCells)) return true;
         
         return false;
     }
     
-    /// <summary>
-    /// Check for horizontal 5-in-a-row.
-    /// </summary>
-    private bool CheckHorizontalWin(int[] cells)
+    private bool Check5x5Win(int[] p)
     {
-        if (Contains(cells, 0) && Contains(cells, 1) && Contains(cells, 2) && Contains(cells, 3))
-            return true;
-        if (Contains(cells, 4) && Contains(cells, 5) && Contains(cells, 6) && Contains(cells, 7))
-            return true;
-        if (Contains(cells, 8) && Contains(cells, 9) && Contains(cells, 10) && Contains(cells, 11))
-            return true;
+        // Horizontal
+        for (int r = 0; r < 5; r++) {
+            if (HasAll(p, r*5, r*5+1, r*5+2, r*5+3, r*5+4)) return true;
+        }
+        // Vertical
+        for (int c = 0; c < 5; c++) {
+            if (HasAll(p, c, c+5, c+10, c+15, c+20)) return true;
+        }
+        // Diagonal
+        if (HasAll(p, 0, 6, 12, 18, 24)) return true;
+        if (HasAll(p, 4, 8, 12, 16, 20)) return true;
+        
         return false;
     }
     
-    /// <summary>
-    /// Check for vertical 5-in-a-row.
-    /// </summary>
-    private bool CheckVerticalWin(int[] cells)
+    private bool HasAll(int[] source, params int[] targets)
     {
-        if (Contains(cells, 0) && Contains(cells, 4) && Contains(cells, 8))
-            return true;
-        if (Contains(cells, 1) && Contains(cells, 5) && Contains(cells, 9))
-            return true;
-        if (Contains(cells, 2) && Contains(cells, 6) && Contains(cells, 10))
-            return true;
-        if (Contains(cells, 3) && Contains(cells, 7) && Contains(cells, 11))
-            return true;
-        return false;
-    }
-    
-    /// <summary>
-    /// Check for diagonal 5-in-a-row (left-right).
-    /// </summary>
-    private bool CheckDiagonalWinLR(int[] cells)
-    {
-        if (Contains(cells, 0) && Contains(cells, 5) && Contains(cells, 10))
-            return true;
-        if (Contains(cells, 1) && Contains(cells, 6) && Contains(cells, 11))
-            return true;
-        return false;
+        foreach(int t in targets) {
+            bool found = false;
+            foreach(int s in source) {
+                if (s == t) { found = true; break; }
+            }
+            if (!found) return false;
+        }
+        return true;
     }
     
     /// <summary>
