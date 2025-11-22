@@ -100,7 +100,7 @@ public class Game3_PassTheChip : GameModeBase
             return false;
             
         // Center node is at (2,2) which is index 12 in a 5x5 grid
-        int centerIndex = 12;
+        // Center node is at (2,2) which is index 12 in a 5x5 grid
         
         // Check if center is #5 (it should be based on generation, but we assume it is)
         // We just check if the 8 neighbors are occupied.

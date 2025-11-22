@@ -54,6 +54,7 @@ public class GameStateManager : MonoBehaviour
     public Player GameWinner => gameWinner;
     public BoardModel Board => boardModel;
     public IGameMode CurrentGameMode => currentGameMode; // Added for UI support
+    public List<Player> Players => players;
     
     /// <summary>
     /// Return to the main menu scene.

@@ -45,7 +45,7 @@ public class Game4_AlternatingBumps : GameModeBase
         base.OnGameStart();
         
         // Start with first player having bump rights
-        if (gameStateManager != null && gameStateManager.Players != null && gameStateManager.Players.Length > 0)
+        if (gameStateManager != null && gameStateManager.Players != null && gameStateManager.Players.Count > 0)
         {
             bumpingPlayer = gameStateManager.Players[0];
             bumpTurnCounter = 0;
@@ -81,7 +81,7 @@ public class Game4_AlternatingBumps : GameModeBase
     public override bool IsValidMove(Player player, int cellIndex)
     {
         // Validate cell index
-        if (cellIndex < 0 || cellIndex > 11)
+        if (cellIndex < 0 || cellIndex >= BoardModel.BOARD_SIZE)
         {
             Debug.LogWarning($"[Game4_AlternatingBumps] Invalid cell index: {cellIndex}");
             return false;

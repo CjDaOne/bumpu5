@@ -60,7 +60,7 @@ public class Game2_RushToFive : GameModeBase
     public override bool IsValidMove(Player player, int cellIndex)
     {
         // Validate cell index
-        if (cellIndex < 0 || cellIndex > 11)
+        if (cellIndex < 0 || cellIndex >= BoardModel.BOARD_SIZE)
         {
             Debug.LogWarning($"[Game2_RushToFive] Invalid cell index: {cellIndex}");
             return false;
@@ -125,7 +125,7 @@ public class Game2_RushToFive : GameModeBase
     /// </summary>
     public override bool CheckWinCondition(Player player)
     {
-        if (gameState == null || gameState.Board == null)
+        if (gameStateManager == null || gameStateManager.Board == null)
             return false;
         
         int chipCount = GetChipCountForPlayer(player);

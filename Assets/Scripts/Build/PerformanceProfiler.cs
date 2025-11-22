@@ -145,7 +145,7 @@ public class PerformanceProfiler : MonoBehaviour
             avgFrameRate += metric.frameRate;
             maxFrameTime = Mathf.Max(maxFrameTime, metric.frameTime);
             maxMemory = Mathf.Max(maxMemory, metric.heapMemoryAllocated);
-            minFrameRate = Mathf.Min(minFrameRate, (int)metric.frameRate);
+            minFrameRate = Math.Min(minFrameRate, (int)metric.frameRate);
         }
         
         avgFrameRate /= metricsHistory.Count;
