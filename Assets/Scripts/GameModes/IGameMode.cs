@@ -165,4 +165,18 @@ public interface IGameMode
     /// </summary>
     /// <param name="winner">The player who won the game</param>
     void OnGameEnd(Player winner);
+    /// <summary>
+    /// Whether bumping is allowed in this mode.
+    /// </summary>
+    bool AllowBumping { get; }
+
+    /// <summary>
+    /// Maximum number of players supported by this mode.
+    /// </summary>
+    int MaxPlayers { get; }
+
+    /// <summary>
+    /// Whether rolling a single 6 causes the player to lose their turn.
+    /// </summary>
+    bool RollingASixLosesTurn { get; }
 }

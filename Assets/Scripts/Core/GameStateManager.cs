@@ -7,7 +7,7 @@ using UnityEngine;
 /// Orchestrates all game logic: dice rolling, chip placement, bumping, win detection.
 /// Single source of truth for game state.
 /// </summary>
-public class GameStateManager
+public class GameStateManager : MonoBehaviour
 {
     // Constants
     private const int MAX_CONSECUTIVE_DOUBLES = 3;

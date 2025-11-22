@@ -15,7 +15,7 @@ public class GameStateManagerTests
     [SetUp]
     public void Setup()
     {
-        stateManager = new GameStateManager();
+        stateManager = new GameObject("GameStateManager").AddComponent<GameStateManager>();
         player1 = new Player(1, "Player 1");
         player2 = new Player(2, "Player 2");
     }

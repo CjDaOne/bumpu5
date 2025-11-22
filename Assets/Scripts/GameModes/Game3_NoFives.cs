@@ -162,7 +162,7 @@ public class Game3_NoFives : GameModeBase
     /// </summary>
     public override bool CheckWinCondition(Player player)
     {
-        if (gameState == null || gameState.Board == null)
+        if (gameStateManager == null || gameStateManager.Board == null)
             return false;
         
         // Get the other player (opponent)
@@ -186,11 +186,11 @@ public class Game3_NoFives : GameModeBase
     /// </summary>
     private Player GetOpponentPlayer(Player player)
     {
-        if (gameState == null || gameState.Players == null)
+        if (gameStateManager == null || gameStateManager.Players == null)
             return null;
         
         // Assuming 2-player game, return the other player
-        foreach (Player p in gameState.Players)
+        foreach (Player p in gameStateManager.Players)
         {
             if (p != player)
                 return p;

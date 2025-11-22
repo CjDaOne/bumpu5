@@ -23,7 +23,7 @@ public class GameModeTests
         player1 = new Player { PlayerID = 1, PlayerName = "Player 1" };
         player2 = new Player { PlayerID = 2, PlayerName = "Player 2" };
         board = new BoardModel(player1, player2);
-        gameStateManager = new GameStateManager();
+        gameStateManager = new GameObject("GameStateManager").AddComponent<GameStateManager>();
     }
     
     [TearDown]

@@ -20,7 +20,7 @@ public class UITests
     {
         // Create game state
         gameStateGameObject = new GameObject("GameStateManager");
-        gameStateManager = new GameStateManager();
+        gameStateManager = new GameObject("GameStateManager").AddComponent<GameStateManager>();
         
         // Create HUD
         hudGameObject = new GameObject("HUDManager");

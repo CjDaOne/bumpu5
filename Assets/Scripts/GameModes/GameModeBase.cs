@@ -15,6 +15,11 @@ public abstract class GameModeBase : IGameMode
     public abstract string ModeName { get; }
     public abstract string ModeDescription { get; }
 
+    // Default properties (can be overridden)
+    public virtual bool AllowBumping => true;
+    public virtual int MaxPlayers => 2;
+    public virtual bool RollingASixLosesTurn => true;
+
     // Initialization
     public virtual void Initialize(GameStateManager gsm)
     {
